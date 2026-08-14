@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#090909" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="FRAME - BST" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>FRAME - BST</title>
+</head>
+<body>
+  <main id="app">
+    <section class="viewfinder">
+      <video id="video" autoplay playsinline muted></video>
+      <div id="cameraPlaceholder" class="camera-placeholder">
+        <div class="reticle-big"></div>
+        <strong>FRAME</strong>
+        <span>Director's Viewfinder</span>
+        <button id="startCameraBtn" class="primary">OUVRIR LA CAMÉRA</button>
+      </div>
+
+      <div id="simWarning" class="sim-warning hidden"></div>
+
+      <div class="topbar glass">
+        <div class="brand">
+          <span class="brand-main">FRAME</span>
+          <span class="brand-sub">BST</span>
+        </div>
+        <div class="top-actions">
+          <button id="cameraBtn" class="icon-btn" title="Caméra">CAM</button>
+          <button id="calBtn" class="icon-btn" title="Calibration">CAL</button>
+          <button id="settingsBtn" class="icon-btn" title="Réglages">•••</button>
+        </div>
+      </div>
+
+      <div id="frameMask" class="frame-mask">
+        <div id="mainFrame" class="main-frame">
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <div id="thirds" class="thirds hidden">
+            <i class="v v1"></i><i class="v v2"></i><i class="h h1"></i><i class="h h2"></i>
+          </div>
+          <div id="centerCross" class="center-cross"><i></i><b></b></div>
+          <div id="guideLayer"></div>
+        </div>
+      </div>
+
+      <div class="readout glass">
+        <div>
+          <span class="label">CAMÉRA</span>
+          <strong id="cameraReadout">ALEXA 35</strong>
+        </div>
+        <div>
+          <span class="label">FOCALE</span>
+          <strong id="focalReadout">35 mm</strong>
+        </div>
+        <div>
+          <span class="label">FORMAT</span>
+          <strong id="ratioReadout">2.39</strong>
+        </div>
+        <div>
+          <span class="label">HFOV</span>
+          <strong id="hfovReadout">43.6°</strong>
+        </div>
+      </div>
+
+      <div class="bottom-panel glass">
+        <div class="lens-strip" id="lensStrip"></div>
+        <div class="main-controls">
+          <button id="cameraPresetBtn" class="control-button">
+            <span>CAMÉRA CINÉMA</span><strong id="cameraPresetText">ARRI ALEXA 35</strong>
+          </button>
+          <button id="ratioBtn" class="control-button small">
+            <span>RATIO</span><strong id="ratioText">2.39:1</strong>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="cameraDialog" class="sheet">
+    <form method="dialog">
+      <header><h2>Caméra téléphone</h2><button value="cancel" class="close">×</button></header>
+      <p class="muted">FRAME mémorise une calibration séparée pour chaque caméra et orientation.</p>
+      <select id="deviceSelect"></select>
+      <button type="button" id="restartCameraBtn" class="primary full">UTILISER CETTE CAMÉRA</button>
+      <div class="info-card">
+        <span>Calibration</span>
+        <strong id="calStatus">Non calibrée</strong>
+        <small id="calDetails">Calibre cette caméra pour simuler les focales.</small>
+      </div>
+      <button type="button" id="openCalFromCamera" class="secondary full">CALIBRER</button>
+    </form>
+  </dialog>
+
+  <dialog id="calDialog" class="sheet calibration-sheet">
+    <form method="dialog">
+      <header><h2>Calibration</h2><button value="cancel" class="close">×</button></header>
+      <p class="muted">Place un objet de largeur connue au centre du cadre, mesure sa distance au téléphone, puis aligne les deux repères sur ses bords.</p>
+      <div class="cal-fields">
+        <label>Largeur objet
+          <div><input id="objectWidth" type="number" min="1" step="1" value="80"><span>cm</span></div>
+        </label>
+        <label>Distance
+          <div><input id="objectDistance" type="number" min="0.1" step="0.1" value="2"><span>m</span></div>
+        </label>
+      </div>
+      <div class="cal-preview" id="calPreview">
+        <video id="calVideo" autoplay playsinline muted></video>
+        <div class="cal-center"></div>
+        <div id="calLeft" class="cal-line left"><span></span></div>
+        <div id="calRight" class="cal-line right"><span></span></div>
+      </div>
+      <div class="cal-result">
+        <span>Champ horizontal calculé</span>
+        <strong id="calFov">—</strong>
+      </div>
+      <button type="button" id="saveCalibrationBtn" class="primary full">ENREGISTRER LA CALIBRATION</button>
+      <small class="footnote">Astuce : fais la calibration à environ 2–3 m avec un objet assez large et bien parallèle au téléphone.</small>
+    </form>
+  </dialog>
+
+  <dialog id="presetDialog" class="sheet">
+    <form method="dialog">
+      <header><h2>Caméra cinéma</h2><button value="cancel" class="close">×</button></header>
+      <div id="presetList" class="choice-list"></div>
+      <div class="custom-sensor">
+        <label>Largeur capteur personnalisée
+          <div><input id="sensorWidthInput" type="number" min="5" max="70" step="0.01"><span>mm</span></div>
+        </label>
+        <button type="button" id="applySensorBtn" class="secondary">APPLIQUER</button>
+      </div>
+      <small class="footnote">La largeur active peut varier selon le mode d'enregistrement. Le champ ci-dessus te permet de corriger précisément.</small>
+    </form>
+  </dialog>
+
+  <dialog id="ratioDialog" class="sheet">
+    <form method="dialog">
+      <header><h2>Ratio</h2><button value="cancel" class="close">×</button></header>
+      <div id="ratioList" class="choice-grid"></div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="sheet">
+    <form method="dialog">
+      <header><h2>Affichage</h2><button value="cancel" class="close">×</button></header>
+      <label class="toggle-row"><span>Grille des tiers</span><input id="thirdsToggle" type="checkbox"></label>
+      <label class="toggle-row"><span>Repère central</span><input id="centerToggle" type="checkbox" checked></label>
+      <hr>
+      <h3>Frame guides</h3>
+      <p class="muted">Superpose les formats de livraison dans ton cadre principal.</p>
+      <div id="guideChoices" class="guide-choices"></div>
+      <hr>
+      <button type="button" id="resetCalBtn" class="danger full">EFFACER LA CALIBRATION DE CETTE CAMÉRA</button>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
