@@ -1,31 +1,39 @@
-# FRAME - BST V1.2
+# FRAME - BST V1.3
 
-## Nouveau : CAL PRO
+## Deux correctifs importants
 
-FRAME peut maintenant apprendre directement le cadrage d'une vraie caméra.
+### 1. Grand-angle / 24 mm
+V1.2 affichait le flux téléphone en `cover`, ce qui pouvait couper une partie du champ du téléphone avant même le calcul de FRAME.
 
-### Procédure recommandée avec la Sony FX6
-1. Mets FRAME sur la caméra téléphone que tu veux utiliser.
-2. Dans l'écran principal choisis le ratio utilisé sur la FX6 (par exemple 16:9).
-3. CAL > CAL PRO.
-4. Choisis Sony FX6 comme caméra de référence.
-5. Mets la vraie FX6 à 24 mm.
-6. Place le téléphone au plus près de l'axe optique de la FX6.
-7. Avec le slider ZOOM FRAME, fais correspondre les limites gauche/droite de FRAME à l'image de la FX6.
-8. ENREGISTRER CE POINT.
-9. Recommence à 35 mm, 50 mm et 85 mm.
+V1.3 travaille sur l'IMAGE COMPLETE du téléphone (`contain`) puis place le cadre cinéma dedans.
+Le zoom CAL PRO peut maintenant descendre sous 1.0 jusqu'à la limite exacte où de vrais pixels téléphone couvrent encore tout le cadre.
 
-Avec 2 points ou plus, FRAME interpole automatiquement entre les références.
-24 / 35 / 50 / 85 mm sont conseillés.
+Si cette limite est atteinte et que la vraie caméra est encore plus large :
+- ce n'est plus un problème de calcul,
+- il faut passer sur la caméra ultra-grand-angle du téléphone dans CAM.
 
-## Pourquoi
-La V1 supposait qu'un seul champ de vision du téléphone suffisait pour toutes les focales.
-Certains téléphones appliquent des corrections/crops numériques qui rendent cette hypothèse insuffisante.
-CAL PRO apprend donc une courbe réelle à plusieurs points.
+Pour un Director's Viewfinder, il est recommandé de calibrer avec la caméra téléphone la plus large disponible, puis de zoomer numériquement pour les focales longues.
 
-## CAL RAPIDE
-La calibration objet + distance reste disponible comme méthode de secours.
+### 2. Décentrage selon la focale
+CAL PRO possède maintenant :
+- CENTRAGE HORIZONTAL
+- CENTRAGE VERTICAL
 
-## Installation / mise à jour
-Remplace l'ancien dossier FRAME sur ton hébergement par cette version.
-Ouvre ensuite FRAME une fois avec du réseau et recharge la page afin que le nouveau service worker prenne la V1.2.
+Chaque point 24 / 35 / 50 / 85 mm mémorise :
+- le zoom,
+- le centrage X,
+- le centrage Y.
+
+FRAME interpole les trois valeurs entre les points, ce qui évite un déplacement brutal du cadre entre deux focales.
+
+## IMPORTANT
+Les anciens points CAL PRO V1.2 sont invalidés à cause du changement de moteur d'affichage.
+La CAL RAPIDE est conservée si elle existait.
+
+Refaire CAL PRO :
+24 / 35 / 50 / 85 mm.
+
+## Mise à jour
+Remplacer le dossier FRAME sur l'hébergement.
+Ouvrir l'application une fois avec du réseau et recharger.
+Si l'ancienne interface reste affichée, fermer complètement l'application installée puis la rouvrir.

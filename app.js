@@ -35,6 +35,8 @@ const state = {
   proRefPreset:presets.find(p=>p.id==='fx6') || presets[0],
   proRefFocal:24,
   proScale:1,
+  proOffsetX:0,
+  proOffsetY:0,
   orientation: innerWidth >= innerHeight ? 'landscape' : 'portrait',
   calLeft:.30,
   calRight:.70
@@ -51,17 +53,23 @@ function calibrationStore(){
 }
 function loadCalibration(){
   const data=calibrationStore()[orientationKey()];
-  if(data?.version === 3){
+  if(data?.version === 4){
     state.sourceFov = data.quickHFov || null;
     state.proPoints = Array.isArray(data.proPoints) ? data.proPoints : [];
+  }else if(data?.version === 3){
+    // V1.3 changes the renderer from COVER to CONTAIN.
+    // Keep quick calibration, but old PRO points must be redone.
+    state.sourceFov = data.quickHFov || null;
+    state.proPoints = [];
   }else if(data?.version === 2){
-    // Keep V1.1 quick calibration as a fallback.
     state.sourceFov = data.hfov || null;
     state.proPoints = [];
   }else{
     state.sourceFov = null;
     state.proPoints = [];
   }
+  state.proOffsetX=0;
+  state.proOffsetY=0;
   updateCalibrationStatus();
   updateSimulation();
   renderProPoints();
@@ -69,7 +77,7 @@ function loadCalibration(){
 function writeCalibrationProfile(){
   const all=calibrationStore();
   all[orientationKey()]={
-    version:3,
+    version:4,
     quickHFov:state.sourceFov || null,
     proPoints:state.proPoints,
     savedAt:new Date().toISOString()
@@ -197,40 +205,79 @@ function updateReadout(){
   $('#ratioText').textContent=ratioLabel(state.ratio);
   $('#hfovReadout').textContent=hf.toFixed(1)+'°';
 }
-function visibleWidthFractionFor(video){
+function containedVideoMetrics(video){
   const sw=video.videoWidth, sh=video.videoHeight;
-  const cw=video.clientWidth, ch=video.clientHeight;
-  if(!sw || !sh || !cw || !ch) return 1;
+  const cw=video.clientWidth || 1, ch=video.clientHeight || 1;
+  if(!sw || !sh) return {imageW:cw,imageH:ch,left:0,top:0};
+
   const sourceAspect=sw/sh;
-  const containerAspect=cw/ch;
-  return sourceAspect > containerAspect ? containerAspect/sourceAspect : 1;
+  const boxAspect=cw/ch;
+  let imageW,imageH,left,top;
+
+  if(sourceAspect > boxAspect){
+    imageW=cw;
+    imageH=cw/sourceAspect;
+    left=0;
+    top=(ch-imageH)/2;
+  }else{
+    imageH=ch;
+    imageW=ch*sourceAspect;
+    top=0;
+    left=(cw-imageW)/2;
+  }
+  return {imageW,imageH,left,top};
 }
 
 function effectiveDisplayedHFov(){
-  const video=$('#video');
-  if(!state.sourceFov) return null;
-  const visibleWidthFraction=visibleWidthFractionFor(video);
-  return deg(2*Math.atan(
-    visibleWidthFraction * Math.tan(rad(state.sourceFov)/2)
-  ));
+  return state.sourceFov;
 }
 
-function interpolateProJ(targetX){
+function interpolateProCalibration(targetX){
   if(!state.proPoints.length) return null;
   const pts=[...state.proPoints].sort((a,b)=>a.x-b.x);
-  if(pts.length===1) return {j:pts[0].j, outside:true};
+  const value=p=>({
+    j:p.j,
+    ox:Number.isFinite(p.ox)?p.ox:0,
+    oy:Number.isFinite(p.oy)?p.oy:0
+  });
 
-  if(targetX<=pts[0].x) return {j:pts[0].j, outside:true};
-  if(targetX>=pts[pts.length-1].x) return {j:pts[pts.length-1].j, outside:true};
+  if(pts.length===1) return {...value(pts[0]),outside:true};
+
+  if(targetX<=pts[0].x) return {...value(pts[0]),outside:true};
+  if(targetX>=pts[pts.length-1].x) return {...value(pts[pts.length-1]),outside:true};
 
   for(let i=0;i<pts.length-1;i++){
     const a=pts[i], b=pts[i+1];
     if(targetX>=a.x && targetX<=b.x){
       const t=(targetX-a.x)/(b.x-a.x);
-      return {j:a.j+(b.j-a.j)*t, outside:false};
+      return {
+        j:a.j+(b.j-a.j)*t,
+        ox:(Number.isFinite(a.ox)?a.ox:0)+((Number.isFinite(b.ox)?b.ox:0)-(Number.isFinite(a.ox)?a.ox:0))*t,
+        oy:(Number.isFinite(a.oy)?a.oy:0)+((Number.isFinite(b.oy)?b.oy:0)-(Number.isFinite(a.oy)?a.oy:0))*t,
+        outside:false
+      };
     }
   }
-  return {j:pts[0].j, outside:true};
+  return {...value(pts[0]),outside:true};
+}
+
+function frameSafeMinScale(video,frame,ox=0,oy=0){
+  const m=containedVideoMetrics(video);
+  const fw=frame.clientWidth || 1;
+  const fh=frame.clientHeight || 1;
+
+  // Offset is normalized to frame dimensions.
+  // Add the displacement to the required half-extent so the frame remains
+  // completely covered by real camera pixels.
+  const reqW=fw*(1+2*Math.abs(ox));
+  const reqH=fh*(1+2*Math.abs(oy));
+  return Math.max(reqW/(m.imageW||1),reqH/(m.imageH||1),0.05);
+}
+
+function setVideoTransform(video,frame,scale,ox=0,oy=0){
+  const dx=ox*(frame.clientWidth||1);
+  const dy=oy*(frame.clientHeight||1);
+  video.style.transform=`translate3d(${dx.toFixed(2)}px,${dy.toFixed(2)}px,0) scale(${scale.toFixed(5)})`;
 }
 
 function updateSimulation(){
@@ -239,20 +286,24 @@ function updateSimulation(){
 
   const target=targetHFov();
   const targetX=Math.tan(rad(target)/2);
-  const videoW=video.clientWidth || 1;
-  const frameW=frame.clientWidth || videoW;
-  const frameFraction=Math.min(1,frameW/videoW);
-  const visibleFraction=visibleWidthFractionFor(video);
+  const metrics=containedVideoMetrics(video);
+  const frameFraction=(frame.clientWidth||1)/(metrics.imageW||1);
 
-  // CAL PRO has priority: each real-camera reference point teaches FRAME
-  // the actual phone crop response instead of assuming one perfect optical model.
+  // CAL PRO is now a continuous curve of scale + optical centering.
   if(state.proPoints.length){
-    const result=interpolateProJ(targetX);
-    let scale=frameFraction * visibleFraction * result.j / targetX;
-    scale=Math.max(1,Math.min(12,scale));
-    video.style.transform=`scale(${scale.toFixed(5)})`;
+    const result=interpolateProCalibration(targetX);
+    let scale=frameFraction*result.j/targetX;
+    const safeMin=frameSafeMinScale(video,frame,result.ox,result.oy);
 
-    if(result.outside && state.proPoints.length>=2){
+    if(scale<safeMin){
+      scale=safeMin;
+      warning.textContent='LIMITE GRAND-ANGLE DU TÉLÉPHONE · ESSAIE LA CAMÉRA ULTRA-GRAND-ANGLE';
+      warning.classList.remove('hidden');
+    }
+    scale=Math.min(12,scale);
+    setVideoTransform(video,frame,scale,result.ox,result.oy);
+
+    if(result.outside && state.proPoints.length>=2 && warning.classList.contains('hidden')){
       const focals=state.proPoints.map(p=>p.focal).filter(Number.isFinite);
       if(focals.length){
         warning.textContent=`CAL PRO · HORS PLAGE ÉTALONNÉE ${Math.min(...focals)}–${Math.max(...focals)} mm`;
@@ -262,9 +313,9 @@ function updateSimulation(){
     return;
   }
 
-  // Fallback: quick physical calibration.
+  // CAL RAPIDE fallback.
   if(!state.sourceFov){
-    video.style.transform='scale(1)';
+    setVideoTransform(video,frame,1,0,0);
     if(state.stream){
       warning.textContent='CALIBRATION REQUISE';
       warning.classList.remove('hidden');
@@ -272,20 +323,16 @@ function updateSimulation(){
     return;
   }
 
-  const displayed=effectiveDisplayedHFov();
-  const availableTan=frameFraction*Math.tan(rad(displayed)/2);
-  const neededScale=availableTan/targetX;
+  const sourceTan=Math.tan(rad(state.sourceFov)/2);
+  let scale=frameFraction*sourceTan/targetX;
+  const safeMin=frameSafeMinScale(video,frame,0,0);
 
-  if(neededScale<1){
-    video.style.transform='scale(1)';
-    const availableHFov=deg(2*Math.atan(availableTan));
-    if(target>availableHFov+.5){
-      warning.textContent=`CAMÉRA TÉLÉPHONE PAS ASSEZ LARGE · ${availableHFov.toFixed(1)}° dispo / ${target.toFixed(1)}° demandé`;
-      warning.classList.remove('hidden');
-    }
-    return;
+  if(scale<safeMin){
+    scale=safeMin;
+    warning.textContent='LIMITE GRAND-ANGLE DU TÉLÉPHONE · ESSAIE LA CAMÉRA ULTRA-GRAND-ANGLE';
+    warning.classList.remove('hidden');
   }
-  video.style.transform=`scale(${neededScale.toFixed(5)})`;
+  setVideoTransform(video,frame,Math.min(12,scale),0,0);
 }
 
 function updateAll(){
@@ -467,6 +514,8 @@ function updateProHUD(){
   $('#proTargetFov').textContent=hf.toFixed(1)+'°';
   $('#proFrameLabel').textContent=ratioLabel(state.ratio);
   $('#proScaleReadout').textContent=state.proScale.toFixed(3)+'×';
+  if($('#proOffsetXReadout')) $('#proOffsetXReadout').textContent=(state.proOffsetX*100).toFixed(1)+'%';
+  if($('#proOffsetYReadout')) $('#proOffsetYReadout').textContent=(state.proOffsetY*100).toFixed(1)+'%';
 }
 function updateProFrame(){
   const stage=$('#proStage'), f=$('#proFrame');
@@ -479,11 +528,30 @@ function updateProFrame(){
   updateProHUD();
 }
 function applyProScale(){
-  const v=$('#proVideo');
-  state.proScale=Math.max(1,Math.min(8,Number(state.proScale)||1));
+  const v=$('#proVideo'), frame=$('#proFrame');
+  state.proScale=Math.max(.35,Math.min(8,Number(state.proScale)||1));
+  state.proOffsetX=Math.max(-.35,Math.min(.35,Number(state.proOffsetX)||0));
+  state.proOffsetY=Math.max(-.35,Math.min(.35,Number(state.proOffsetY)||0));
+
+  const safeMin=frameSafeMinScale(v,frame,state.proOffsetX,state.proOffsetY);
+  const warn=$('#proWideWarning');
+  if(state.proScale<=safeMin+.004){
+    warn.classList.remove('hidden');
+  }else{
+    warn.classList.add('hidden');
+  }
+
+  $('#proScaleSlider').min=Math.max(.35,Math.min(2,safeMin)).toFixed(3);
+  if(state.proScale<safeMin) state.proScale=safeMin;
+
   $('#proScaleSlider').value=state.proScale;
+  $('#proOffsetXSlider').value=state.proOffsetX;
+  $('#proOffsetYSlider').value=state.proOffsetY;
   $('#proScaleReadout').textContent=state.proScale.toFixed(3)+'×';
-  v.style.transform=`scale(${state.proScale.toFixed(5)})`;
+  $('#proOffsetXReadout').textContent=(state.proOffsetX*100).toFixed(1)+'%';
+  $('#proOffsetYReadout').textContent=(state.proOffsetY*100).toFixed(1)+'%';
+
+  setVideoTransform(v,frame,state.proScale,state.proOffsetX,state.proOffsetY);
 }
 function findExistingProPoint(){
   return state.proPoints.find(p=>
@@ -494,34 +562,38 @@ function findExistingProPoint(){
 function scaleFromProPoint(point){
   const video=$('#proVideo'), frame=$('#proFrame');
   const targetX=Math.tan(rad(proReferenceHFov())/2);
-  const frameFraction=Math.min(1,(frame.clientWidth||video.clientWidth||1)/(video.clientWidth||1));
-  const visibleFraction=visibleWidthFractionFor(video);
-  if(!frameFraction || !visibleFraction) return 1;
-  return frameFraction*visibleFraction*point.j/targetX;
+  const metrics=containedVideoMetrics(video);
+  const frameFraction=(frame.clientWidth||1)/(metrics.imageW||1);
+  return frameFraction*point.j/targetX;
 }
 function quickEstimateForPro(){
-  if(!state.sourceFov) return 1;
   const video=$('#proVideo'), frame=$('#proFrame');
-  const sourceVisible=deg(2*Math.atan(
-    visibleWidthFractionFor(video)*Math.tan(rad(state.sourceFov)/2)
-  ));
-  const target=proReferenceHFov();
-  const targetX=Math.tan(rad(target)/2);
-  const frameFraction=Math.min(1,(frame.clientWidth||video.clientWidth||1)/(video.clientWidth||1));
-  return Math.max(1,frameFraction*Math.tan(rad(sourceVisible)/2)/targetX);
+  const metrics=containedVideoMetrics(video);
+  const frameFraction=(frame.clientWidth||1)/(metrics.imageW||1);
+  if(!state.sourceFov) return Math.max(frameSafeMinScale(video,frame,0,0),1);
+  const targetX=Math.tan(rad(proReferenceHFov())/2);
+  const sourceTan=Math.tan(rad(state.sourceFov)/2);
+  return Math.max(frameSafeMinScale(video,frame,0,0),frameFraction*sourceTan/targetX);
 }
 function prepareProScale(){
   updateProFrame();
   const existing=findExistingProPoint();
+
   if(existing){
     state.proScale=scaleFromProPoint(existing);
+    state.proOffsetX=Number.isFinite(existing.ox)?existing.ox:0;
+    state.proOffsetY=Number.isFinite(existing.oy)?existing.oy:0;
   }else if(state.proPoints.length){
     const targetX=Math.tan(rad(proReferenceHFov())/2);
-    const res=interpolateProJ(targetX);
+    const res=interpolateProCalibration(targetX);
     const pseudo={j:res.j};
     state.proScale=scaleFromProPoint(pseudo);
+    state.proOffsetX=res.ox;
+    state.proOffsetY=res.oy;
   }else{
     state.proScale=quickEstimateForPro();
+    state.proOffsetX=0;
+    state.proOffsetY=0;
   }
   applyProScale();
   updateProHUD();
@@ -531,15 +603,17 @@ function saveCurrentProPoint(){
   if(!video.videoWidth || !frame.clientWidth) return;
   const hfov=proReferenceHFov();
   const x=Math.tan(rad(hfov)/2);
-  const frameFraction=Math.min(1,frame.clientWidth/(video.clientWidth||1));
-  const visibleFraction=visibleWidthFractionFor(video);
+  const metrics=containedVideoMetrics(video);
+  const frameFraction=(frame.clientWidth||1)/(metrics.imageW||1);
 
-  // Normalize the hand-matched scale so the learned point survives
-  // small UI size/ratio changes while keeping the phone camera behavior.
-  const j=state.proScale*x/(frameFraction*visibleFraction);
+  // Normalize zoom against the COMPLETE phone image.
+  // Center offsets are stored as a fraction of the cinema frame.
+  const j=state.proScale*x/frameFraction;
 
   saveProPoint({
     x,j,hfov,
+    ox:state.proOffsetX,
+    oy:state.proOffsetY,
     focal:state.proRefFocal,
     presetId:state.proRefPreset.id,
     presetName:state.proRefPreset.name,
@@ -563,7 +637,8 @@ function renderProPoints(){
     const actualIndex=state.proPoints.indexOf(p);
     const row=document.createElement('div');
     row.className='pro-point';
-    row.innerHTML=`<div><strong>${p.focal} mm</strong><span>${p.presetName} · ${p.hfov.toFixed(1)}°</span></div><button type="button">×</button>`;
+    const cent=(Math.abs(p.ox||0)>.002 || Math.abs(p.oy||0)>.002) ? ` · centre ${(p.ox*100).toFixed(0)}/${(p.oy*100).toFixed(0)}` : '';
+    row.innerHTML=`<div><strong>${p.focal} mm</strong><span>${p.presetName} · ${p.hfov.toFixed(1)}°${cent}</span></div><button type="button">×</button>`;
     row.querySelector('button').onclick=()=>{deleteProPoint(actualIndex);renderProLenses()};
     el.appendChild(row);
   });
@@ -602,6 +677,9 @@ function registerEvents(){
   $('#proScaleSlider').oninput=e=>{state.proScale=parseFloat(e.target.value);applyProScale()};
   $('#proMinusBtn').onclick=()=>{state.proScale-=.01;applyProScale()};
   $('#proPlusBtn').onclick=()=>{state.proScale+=.01;applyProScale()};
+  $('#proOffsetXSlider').oninput=e=>{state.proOffsetX=parseFloat(e.target.value);applyProScale()};
+  $('#proOffsetYSlider').oninput=e=>{state.proOffsetY=parseFloat(e.target.value);applyProScale()};
+  $('#resetProCenterBtn').onclick=()=>{state.proOffsetX=0;state.proOffsetY=0;applyProScale()};
   $('#saveProPointBtn').onclick=()=>saveCurrentProPoint();
 
   $('#settingsBtn').onclick=()=>$('#settingsDialog').showModal();

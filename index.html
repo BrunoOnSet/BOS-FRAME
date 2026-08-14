@@ -193,8 +193,28 @@
         </div>
         <div class="pro-slider-row">
           <button type="button" id="proMinusBtn" class="fine-btn">−</button>
-          <input id="proScaleSlider" type="range" min="1" max="8" step="0.002" value="1">
+          <input id="proScaleSlider" type="range" min="0.35" max="8" step="0.002" value="1">
           <button type="button" id="proPlusBtn" class="fine-btn">+</button>
+        </div>
+
+        <div id="proWideWarning" class="pro-wide-warning hidden">
+          LIMITE GRAND-ANGLE · si le cadre reste trop serré, sélectionne la caméra ultra-grand-angle du téléphone via CAM.
+        </div>
+
+        <div class="pro-center-block">
+          <div class="pro-zoom-head">
+            <span>CENTRAGE HORIZONTAL</span>
+            <strong id="proOffsetXReadout">0</strong>
+          </div>
+          <input id="proOffsetXSlider" class="center-slider" type="range" min="-0.35" max="0.35" step="0.002" value="0">
+
+          <div class="pro-zoom-head compact">
+            <span>CENTRAGE VERTICAL</span>
+            <strong id="proOffsetYReadout">0</strong>
+          </div>
+          <input id="proOffsetYSlider" class="center-slider" type="range" min="-0.35" max="0.35" step="0.002" value="0">
+
+          <button type="button" id="resetProCenterBtn" class="center-reset">RECENTRER</button>
         </div>
 
         <button type="button" id="saveProPointBtn" class="primary full">ENREGISTRER CE POINT</button>
