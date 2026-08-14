@@ -13,7 +13,7 @@ const presets = [
   {id:'mft', name:'Micro 4/3', width:17.30}
 ];
 
-const lenses = [14,18,21,24,25,28,32,35,40,50,65,75,85,100,135];
+const lenses = [14,18,21,24,25,28,32,35,40,50,65,70,75,85,100,105,135];
 const ratios = [
   {label:'2.39:1', value:2.39},{label:'2.00:1', value:2.0},
   {label:'1.85:1', value:1.85},{label:'16:9', value:16/9},
@@ -28,7 +28,7 @@ const state = {
   preset:presets[0],
   sensorWidth:presets[0].width,
   focal:35,
-  ratio:2.39,
+  ratio:16/9,
   guides:new Set(),
   sourceFov:null,
   proPoints:[],
