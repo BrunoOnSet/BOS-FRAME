@@ -2,15 +2,23 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
 const presets = [
-  {id:'alexa35', name:'ARRI ALEXA 35', width:27.99},
-  {id:'miniLF', name:'ARRI ALEXA Mini LF', width:36.70},
-  {id:'venice2', name:'Sony VENICE 2', width:35.90},
-  {id:'fx6', name:'Sony FX6', width:35.60},
-  {id:'vraptor', name:'RED V-RAPTOR VV', width:40.96},
-  {id:'ff', name:'Full Frame 36 mm', width:36.00},
-  {id:'s35', name:'Super 35 générique', width:24.89},
-  {id:'apsc', name:'APS-C générique', width:23.50},
-  {id:'mft', name:'Micro 4/3', width:17.30}
+  // SONY — ordre volontaire demandé
+  {id:'fx30', name:'Sony FX30', width:23.30, group:'SONY'},
+  {id:'fx3', name:'Sony FX3', width:35.60, group:'SONY'},
+  {id:'fx5', name:'Sony FX5', width:35.90, group:'SONY'},
+  {id:'fx6', name:'Sony FX6', width:35.60, group:'SONY'},
+
+  // ARRI / RED — du plus grand capteur au plus petit
+  {id:'vraptor', name:'RED V-RAPTOR VV', width:40.96, group:'ARRI / RED'},
+  {id:'miniLF', name:'ARRI ALEXA Mini LF', width:36.70, group:'ARRI / RED'},
+  {id:'alexa35', name:'ARRI ALEXA 35', width:27.99, group:'ARRI / RED'},
+
+  // GÉNÉRIQUE
+  {id:'ff', name:'Full Frame 36 mm', width:36.00, group:'GÉNÉRIQUE'},
+  {id:'s35', name:'Super 35', width:24.89, group:'GÉNÉRIQUE'},
+  {id:'apsc', name:'APS-C', width:23.50, group:'GÉNÉRIQUE'},
+  {id:'mft', name:'Micro 4/3', width:17.30, group:'GÉNÉRIQUE'},
+  {id:'oneinch', name:'1 pouce', width:13.20, group:'GÉNÉRIQUE'}
 ];
 
 const lenses = [14,18,21,24,25,28,32,35,40,50,65,70,75,85,100,105,135];
@@ -25,8 +33,8 @@ const state = {
   stream:null,
   devices:[],
   deviceId:null,
-  preset:presets[0],
-  sensorWidth:presets[0].width,
+  preset:presets.find(p=>p.id==='alexa35') || presets[0],
+  sensorWidth:(presets.find(p=>p.id==='alexa35') || presets[0]).width,
   focal:35,
   ratio:16/9,
   guides:new Set(),
@@ -177,10 +185,21 @@ function centerActiveLens(){
 }
 function renderPresets(){
   const el=$('#presetList'); el.innerHTML='';
+  let currentGroup=null;
+
   presets.forEach(p=>{
+    if(p.group!==currentGroup){
+      currentGroup=p.group;
+      const h=document.createElement('div');
+      h.className='preset-group-title';
+      h.textContent=currentGroup;
+      el.appendChild(h);
+    }
+
     const b=document.createElement('button');
-    b.type='button'; b.className='choice'+(state.preset.id===p.id?' active':'');
-    b.innerHTML=`<strong>${p.name}</strong><small>largeur active de référence : ${p.width.toFixed(2)} mm</small>`;
+    b.type='button';
+    b.className='choice'+(state.preset.id===p.id?' active':'');
+    b.innerHTML=`<strong>${p.name}</strong><small>largeur capteur de référence : ${p.width.toFixed(2)} mm</small>`;
     b.onclick=()=>{
       state.preset=p; state.sensorWidth=p.width;
       $('#sensorWidthInput').value=p.width.toFixed(2);
@@ -528,11 +547,23 @@ function renderProPresetSelect(){
   const sel=$('#proPresetSelect');
   if(!sel) return;
   sel.innerHTML='';
+
+  const groups=[];
   presets.forEach(p=>{
-    const o=document.createElement('option');
-    o.value=p.id; o.textContent=p.name;
-    o.selected=p.id===state.proRefPreset.id;
-    sel.appendChild(o);
+    if(!groups.includes(p.group)) groups.push(p.group);
+  });
+
+  groups.forEach(groupName=>{
+    const g=document.createElement('optgroup');
+    g.label=groupName;
+    presets.filter(p=>p.group===groupName).forEach(p=>{
+      const o=document.createElement('option');
+      o.value=p.id;
+      o.textContent=p.name;
+      o.selected=p.id===state.proRefPreset.id;
+      g.appendChild(o);
+    });
+    sel.appendChild(g);
   });
 }
 function renderProLenses(){

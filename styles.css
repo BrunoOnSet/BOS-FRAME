@@ -317,3 +317,20 @@ html,body,#app{
 .pro-limit-actions .subtle{
   opacity:.75;
 }
+
+
+/* ---------- V1.8 : groupes caméra ---------- */
+.preset-group-title{
+  margin:12px 3px 4px;
+  padding-top:8px;
+  border-top:1px solid #292929;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.15em;
+  color:#8c8c8c;
+}
+.preset-group-title:first-child{
+  margin-top:0;
+  padding-top:0;
+  border-top:0;
+}
