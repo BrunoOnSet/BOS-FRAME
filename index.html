@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
-  <meta name="theme-color" content="#090909" />
+  <meta name="theme-color" content="#f3f5f7" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="FRAME - BST" />
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="styles.css" />
   <title>FRAME - BST</title>
 </head>
-<body>
+<body data-theme="light">
   <main id="app">
     <section class="viewfinder">
       <video id="video" autoplay playsinline muted></video>
@@ -26,13 +26,15 @@
       <div id="simWarning" class="sim-warning hidden"></div>
 
       <div class="topbar glass">
-        <div class="brand">
+        <div class="brand" aria-label="FRAME — Bruno Set Tools">
+          <span class="brand-accent" aria-hidden="true"></span>
           <span class="brand-main">FRAME</span>
           <span class="brand-sub">BST</span>
         </div>
         <div class="top-actions">
           <button id="cameraBtn" class="icon-btn" title="Caméra">CAM</button>
           <button id="calBtn" class="icon-btn" title="Calibration">CAL</button>
+          <button id="themeBtn" class="icon-btn theme-btn" title="Passer en mode sombre" aria-label="Changer le thème">☾</button>
           <button id="settingsBtn" class="icon-btn" title="Réglages">•••</button>
         </div>
       </div>
@@ -60,7 +62,7 @@
         </div>
         <div>
           <span class="label">FORMAT</span>
-          <strong id="ratioReadout">2.39</strong>
+          <strong id="ratioReadout">16:9</strong>
         </div>
         <div>
           <span class="label">HFOV</span>
@@ -75,7 +77,7 @@
             <span>CAMÉRA CINÉMA</span><strong id="cameraPresetText">Sony FX6</strong>
           </button>
           <button id="ratioBtn" class="control-button small">
-            <span>RATIO</span><strong id="ratioText">2.39:1</strong>
+            <span>RATIO</span><strong id="ratioText">16:9</strong>
           </button>
         </div>
       </div>
@@ -278,6 +280,12 @@
   <dialog id="settingsDialog" class="sheet">
     <form method="dialog">
       <header><h2>Affichage</h2><button value="cancel" class="close">×</button></header>
+      <h3>APPARENCE</h3>
+      <div class="theme-segment" role="group" aria-label="Thème">
+        <button type="button" id="lightThemeBtn" class="theme-choice active">LIGHT</button>
+        <button type="button" id="darkThemeBtn" class="theme-choice">DARK</button>
+      </div>
+      <hr>
       <label class="toggle-row"><span>Grille des tiers</span><input id="thirdsToggle" type="checkbox"></label>
       <label class="toggle-row"><span>Repère central</span><input id="centerToggle" type="checkbox" checked></label>
       <hr>

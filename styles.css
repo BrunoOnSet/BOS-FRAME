@@ -334,3 +334,392 @@ html,body,#app{
   padding-top:0;
   border-top:0;
 }
+
+
+/* =========================================================
+   FRAME V2.0 — BRUNO SET TOOLS VISUAL SYSTEM
+   Light / Dark + shared BST blue accent
+   ========================================================= */
+
+:root{
+  --bst-blue:#2f80ed;
+  --bst-blue-strong:#1769d2;
+  --bst-blue-soft:rgba(47,128,237,.12);
+  --bst-radius:16px;
+  --bst-radius-small:11px;
+  --bst-shadow:0 14px 40px rgba(20,35,50,.10);
+}
+
+/* LIGHT is the default BST appearance */
+body[data-theme="light"]{
+  --bg:#f3f5f7;
+  --fg:#171b20;
+  --muted:#68727d;
+  --surface:rgba(255,255,255,.92);
+  --surface-solid:#ffffff;
+  --surface-2:#f7f9fb;
+  --surface-3:#edf1f5;
+  --border:#d9e0e7;
+  --border-strong:#c6d0da;
+  --glass:rgba(255,255,255,.88);
+  --control:rgba(245,248,251,.94);
+  --control-hover:#eef3f8;
+  --frame-line:rgba(255,255,255,.94);
+  --sheet-shadow:0 -24px 70px rgba(31,45,60,.18);
+  --backdrop:rgba(32,42,52,.24);
+  --danger:#d74b47;
+  --danger-soft:#fff0ef;
+}
+
+/* DARK uses exactly the same hierarchy, not a separate black UI */
+body[data-theme="dark"]{
+  --bg:#101419;
+  --fg:#f4f6f8;
+  --muted:#96a0aa;
+  --surface:rgba(24,30,36,.91);
+  --surface-solid:#181e24;
+  --surface-2:#1e252c;
+  --surface-3:#252e37;
+  --border:#303a44;
+  --border-strong:#414d59;
+  --glass:rgba(22,28,34,.88);
+  --control:rgba(31,38,45,.94);
+  --control-hover:#28313a;
+  --frame-line:rgba(255,255,255,.92);
+  --sheet-shadow:0 -24px 70px rgba(0,0,0,.52);
+  --backdrop:rgba(0,0,0,.46);
+  --danger:#ff706b;
+  --danger-soft:rgba(255,112,107,.12);
+}
+
+html,body,#app{
+  background:var(--bg) !important;
+  color:var(--fg) !important;
+}
+body{
+  transition:background-color .18s ease,color .18s ease;
+}
+
+/* The camera image naturally stays photographic; all UI chrome follows theme. */
+.viewfinder{
+  background:var(--bg) !important;
+}
+.camera-placeholder{
+  background:
+    radial-gradient(circle at 50% 42%,var(--surface-solid) 0%,var(--surface-2) 42%,var(--bg) 100%) !important;
+  color:var(--fg);
+}
+#video,#proVideo,.cal-preview,.cal-preview video{
+  background:#090b0d !important;
+}
+.reticle-big{
+  border-color:var(--bst-blue) !important;
+  box-shadow:0 0 0 8px var(--bst-blue-soft);
+}
+.reticle-big:before,.reticle-big:after{
+  background:var(--bst-blue) !important;
+}
+
+/* Shared BST cards / bubbles */
+.glass{
+  background:var(--glass) !important;
+  border-color:var(--border) !important;
+  box-shadow:var(--bst-shadow);
+  color:var(--fg);
+}
+.topbar{
+  height:54px !important;
+  border-radius:18px !important;
+  padding:0 7px 0 9px !important;
+}
+.brand{
+  position:relative;
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+  min-height:36px;
+  padding:0 11px 0 15px;
+  border-radius:12px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  overflow:hidden;
+}
+.brand-accent{
+  position:absolute;
+  left:0;
+  top:7px;
+  bottom:7px;
+  width:3px;
+  border-radius:999px;
+  background:var(--bst-blue);
+}
+.brand-main{
+  color:var(--fg);
+  font-size:14px !important;
+  letter-spacing:.11em !important;
+}
+.brand-sub{
+  color:var(--bst-blue) !important;
+  font-size:8px !important;
+  font-weight:800 !important;
+}
+.top-actions{
+  gap:5px !important;
+}
+.icon-btn{
+  min-width:38px !important;
+  height:36px !important;
+  border:1px solid var(--border) !important;
+  background:var(--control) !important;
+  color:var(--fg) !important;
+  border-radius:11px !important;
+}
+.icon-btn:active{
+  background:var(--bst-blue-soft) !important;
+  border-color:rgba(47,128,237,.42) !important;
+}
+.theme-btn{
+  font-size:17px !important;
+  line-height:1;
+  color:var(--bst-blue) !important;
+}
+
+/* Readout follows the same card language */
+.readout{
+  border-radius:14px !important;
+  padding:9px 12px !important;
+}
+.readout>div{
+  min-width:54px;
+}
+.label,.control-button span,.control-label,
+.pro-reference-row label>span,.pro-zoom-head span,.pro-points-head>span{
+  color:var(--muted) !important;
+}
+.readout strong{
+  color:var(--fg);
+}
+.readout>div:first-child strong{
+  color:var(--bst-blue);
+}
+
+/* Frame = neutral white line + BST blue corners, readable on all footage */
+.main-frame,.pro-frame{
+  border-color:rgba(255,255,255,.76) !important;
+}
+.corner.tl,.corner.tr,.corner.bl,.corner.br{
+  border-color:var(--bst-blue) !important;
+}
+.center-cross i,.center-cross b{
+  background:var(--bst-blue) !important;
+}
+.guide-frame{
+  border-color:rgba(47,128,237,.76) !important;
+}
+.guide-frame span{
+  background:rgba(20,25,31,.74) !important;
+  color:#fff !important;
+}
+.sim-warning{
+  background:rgba(20,25,31,.86) !important;
+  border-color:rgba(255,255,255,.16) !important;
+  color:#fff !important;
+}
+
+/* Main control dock */
+.bottom-panel{
+  border-radius:20px !important;
+  padding:10px !important;
+}
+.lens-pill{
+  background:var(--control) !important;
+  color:var(--fg) !important;
+  border-color:var(--border) !important;
+  border-radius:11px !important;
+}
+.lens-pill.active{
+  background:var(--bst-blue) !important;
+  color:#fff !important;
+  border-color:var(--bst-blue) !important;
+  box-shadow:0 5px 16px rgba(47,128,237,.28);
+}
+.lens-pill.unavailable{
+  background:var(--surface-3) !important;
+  color:var(--muted) !important;
+  opacity:.48 !important;
+}
+.control-button{
+  background:var(--control) !important;
+  color:var(--fg) !important;
+  border-color:var(--border) !important;
+}
+.control-button:active{
+  border-color:var(--bst-blue) !important;
+}
+
+/* Buttons */
+.primary{
+  background:var(--bst-blue) !important;
+  color:#fff !important;
+  box-shadow:0 6px 18px rgba(47,128,237,.22);
+}
+.primary:active{
+  background:var(--bst-blue-strong) !important;
+}
+.secondary{
+  background:var(--control) !important;
+  color:var(--fg) !important;
+  border-color:var(--border) !important;
+}
+.danger{
+  background:var(--danger-soft) !important;
+  color:var(--danger) !important;
+  border-color:color-mix(in srgb,var(--danger) 35%, transparent) !important;
+}
+
+/* Bottom sheets */
+.sheet{
+  background:var(--surface-solid) !important;
+  color:var(--fg) !important;
+  box-shadow:var(--sheet-shadow) !important;
+  border:1px solid var(--border) !important;
+}
+.sheet::backdrop{
+  background:var(--backdrop) !important;
+}
+.sheet h2,.sheet h3{
+  color:var(--fg);
+}
+.close{
+  background:var(--surface-3) !important;
+  color:var(--fg) !important;
+}
+.muted,.footnote{
+  color:var(--muted) !important;
+}
+select{
+  background:var(--surface-2) !important;
+  color:var(--fg) !important;
+  border-color:var(--border) !important;
+}
+.info-card,.cal-result,.choice,.cal-mode-card,.pro-ref-info,
+.pro-point,.pro-limit-card,.pro-center-block{
+  background:var(--surface-2) !important;
+  color:var(--fg) !important;
+  border-color:var(--border) !important;
+}
+.info-card span,.info-card small,.choice small,.cal-mode-card small,
+.pro-ref-info span,.pro-point span,.pro-limit-card small,.pro-limit-card span{
+  color:var(--muted) !important;
+}
+.cal-fields label,.custom-sensor label{
+  color:var(--muted) !important;
+}
+.cal-fields label>div,.custom-sensor label>div{
+  background:var(--surface-2) !important;
+  border-color:var(--border) !important;
+}
+.cal-fields input,.custom-sensor input{
+  color:var(--fg) !important;
+}
+.choice.active,.cal-mode-card.recommended{
+  border-color:var(--bst-blue) !important;
+  background:var(--bst-blue-soft) !important;
+}
+.cal-mode-card.recommended .cal-mode-tag{
+  color:var(--bst-blue) !important;
+}
+.ratio-choice,.guide-chip,.pro-lens,.fine-btn,.pro-advanced-toggle{
+  background:var(--surface-2) !important;
+  color:var(--fg) !important;
+  border-color:var(--border) !important;
+}
+.ratio-choice.active,.guide-chip.active,.pro-lens.active{
+  background:var(--bst-blue) !important;
+  color:#fff !important;
+  border-color:var(--bst-blue) !important;
+}
+.sheet hr,.pro-advanced-panel,.custom-sensor{
+  border-color:var(--border) !important;
+}
+input[type="range"],.center-slider{
+  accent-color:var(--bst-blue) !important;
+}
+
+/* Explicit LIGHT / DARK segmented control like the other BST utilities */
+.theme-segment{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  padding:4px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:var(--surface-2);
+  margin:7px 0 13px;
+}
+.theme-choice{
+  min-height:36px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.11em;
+}
+.theme-choice.active{
+  background:var(--bst-blue);
+  color:#fff;
+  box-shadow:0 4px 12px rgba(47,128,237,.22);
+}
+
+/* CAL PRO keeps its photographic stage but inherits the exact UI family */
+.pro-dialog,.pro-stage{
+  background:var(--bg) !important;
+  color:var(--fg) !important;
+}
+.pro-kicker{
+  color:var(--bst-blue) !important;
+}
+.pro-instructions span,.pro-points-head small{
+  color:var(--muted) !important;
+}
+.pro-wide-warning{
+  border-color:rgba(47,128,237,.35) !important;
+  background:rgba(17,29,43,.88) !important;
+  color:#dcecff !important;
+}
+.pro-show-controls{
+  color:var(--fg) !important;
+}
+
+/* Camera placeholder / empty state gets a recognizable BST badge */
+.camera-placeholder strong{
+  display:inline-flex;
+  padding:8px 14px;
+  border-radius:12px;
+  background:var(--surface-solid);
+  border:1px solid var(--border);
+  color:var(--fg);
+  box-shadow:var(--bst-shadow);
+}
+.camera-placeholder span{
+  color:var(--muted) !important;
+}
+
+/* Light mode must visibly be LIGHT even before camera permission. */
+body[data-theme="light"] .viewfinder:has(.camera-placeholder:not(.hidden)){
+  background:#f3f5f7 !important;
+}
+body[data-theme="dark"] .viewfinder:has(.camera-placeholder:not(.hidden)){
+  background:#101419 !important;
+}
+
+@media (orientation:landscape){
+  .topbar{
+    width:280px !important;
+  }
+  .brand-sub{
+    display:inline !important;
+  }
+}

@@ -809,6 +809,33 @@ function clearWideLimit(){
   updateSimulation();
 }
 
+
+function preferredTheme(){
+  const saved=localStorage.getItem('bst-theme');
+  if(saved==='light' || saved==='dark') return saved;
+  return 'light';
+}
+function applyTheme(theme,persist=true){
+  const value=theme==='dark'?'dark':'light';
+  document.body.dataset.theme=value;
+  if(persist) localStorage.setItem('bst-theme',value);
+
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content',value==='dark'?'#101419':'#f3f5f7');
+
+  const themeBtn=$('#themeBtn');
+  if(themeBtn){
+    themeBtn.textContent=value==='dark'?'☀':'☾';
+    themeBtn.title=value==='dark'?'Passer en mode clair':'Passer en mode sombre';
+  }
+  const light=$('#lightThemeBtn'), dark=$('#darkThemeBtn');
+  if(light) light.classList.toggle('active',value==='light');
+  if(dark) dark.classList.toggle('active',value==='dark');
+}
+function toggleTheme(){
+  applyTheme(document.body.dataset.theme==='dark'?'light':'dark');
+}
+
 function registerEvents(){
   $('#startCameraBtn').onclick=()=>startCamera();
   $('#cameraBtn').onclick=()=>{$('#cameraDialog').showModal();updateCalibrationStatus()};
@@ -838,6 +865,9 @@ function registerEvents(){
   $('#saveProPointBtn').onclick=()=>saveCurrentProPoint();
 
   $('#settingsBtn').onclick=()=>$('#settingsDialog').showModal();
+  $('#themeBtn').onclick=()=>toggleTheme();
+  $('#lightThemeBtn').onclick=()=>applyTheme('light');
+  $('#darkThemeBtn').onclick=()=>applyTheme('dark');
   $('#cameraPresetBtn').onclick=()=>{$('#sensorWidthInput').value=state.sensorWidth.toFixed(2);$('#presetDialog').showModal()};
   $('#ratioBtn').onclick=()=>$('#ratioDialog').showModal();
   $('#applySensorBtn').onclick=()=>{
@@ -874,6 +904,7 @@ function openCalibrationChooser(){
 }
 
 function init(){
+  applyTheme(preferredTheme(),false);
   renderLenses(); renderPresets(); renderRatios(); renderGuideChoices();
   renderProPresetSelect(); renderProLenses(); renderProPoints();
   setupCalibrationDrag(); registerEvents(); updateAll();
