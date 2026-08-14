@@ -97,9 +97,33 @@
     </form>
   </dialog>
 
-  <dialog id="calDialog" class="sheet calibration-sheet">
+  <dialog id="calChooserDialog" class="sheet">
     <form method="dialog">
       <header><h2>Calibration</h2><button value="cancel" class="close">×</button></header>
+      <p class="muted">Deux méthodes. CAL PRO est recommandée si tu as une vraie caméra sous la main.</p>
+      <div class="cal-mode-grid">
+        <button type="button" id="openQuickCalBtn" class="cal-mode-card">
+          <span class="cal-mode-tag">RAPIDE</span>
+          <strong>Objet + distance</strong>
+          <small>Calcule le champ du téléphone à partir d'une mesure physique.</small>
+        </button>
+        <button type="button" id="openProCalBtn" class="cal-mode-card recommended">
+          <span class="cal-mode-tag">RECOMMANDÉ</span>
+          <strong>CAL PRO</strong>
+          <small>Apprend directement le cadre d'une vraie caméra à plusieurs focales.</small>
+        </button>
+      </div>
+      <div class="info-card">
+        <span>Profil actuel</span>
+        <strong id="chooserCalStatus">Non calibré</strong>
+        <small id="chooserCalDetails">Aucun point enregistré.</small>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="calDialog" class="sheet calibration-sheet">
+    <form method="dialog">
+      <header><h2>CAL RAPIDE</h2><button value="cancel" class="close">×</button></header>
       <p class="muted">Place un objet de largeur connue au centre du cadre, mesure sa distance au téléphone, puis aligne les deux repères sur ses bords.</p>
       <div class="cal-fields">
         <label>Largeur objet
@@ -122,6 +146,66 @@
       <button type="button" id="saveCalibrationBtn" class="primary full">ENREGISTRER LA CALIBRATION</button>
       <small class="footnote">Astuce : fais la calibration à environ 2–3 m avec un objet assez large et bien parallèle au téléphone.</small>
     </form>
+  </dialog>
+
+  <dialog id="proCalDialog" class="pro-dialog">
+    <div class="pro-stage" id="proStage">
+      <video id="proVideo" autoplay playsinline muted></video>
+
+      <div class="pro-top glass">
+        <div>
+          <span class="pro-kicker">FRAME · CAL PRO</span>
+          <strong id="proTopReference">Sony FX6 · 24 mm</strong>
+        </div>
+        <button id="closeProCalBtn" type="button" class="close">×</button>
+      </div>
+
+      <div id="proFrame" class="pro-frame">
+        <div class="corner tl"></div><div class="corner tr"></div>
+        <div class="corner bl"></div><div class="corner br"></div>
+        <div class="center-cross"><i></i><b></b></div>
+        <span id="proFrameLabel">16:9</span>
+      </div>
+
+      <div class="pro-instructions glass">
+        <strong>Fais coïncider ce cadre avec la vraie caméra</strong>
+        <span>Place le téléphone au plus près de l'axe optique, puis règle le zoom ci-dessous.</span>
+      </div>
+
+      <div class="pro-controls glass">
+        <div class="pro-reference-row">
+          <label>
+            <span>CAMÉRA DE RÉFÉRENCE</span>
+            <select id="proPresetSelect"></select>
+          </label>
+          <div class="pro-ref-info">
+            <span>HFOV</span>
+            <strong id="proTargetFov">—</strong>
+          </div>
+        </div>
+
+        <span class="control-label">FOCALE DE RÉFÉRENCE</span>
+        <div id="proLensStrip" class="pro-lens-strip"></div>
+
+        <div class="pro-zoom-head">
+          <span>ZOOM FRAME</span>
+          <strong id="proScaleReadout">1.000×</strong>
+        </div>
+        <div class="pro-slider-row">
+          <button type="button" id="proMinusBtn" class="fine-btn">−</button>
+          <input id="proScaleSlider" type="range" min="1" max="8" step="0.002" value="1">
+          <button type="button" id="proPlusBtn" class="fine-btn">+</button>
+        </div>
+
+        <button type="button" id="saveProPointBtn" class="primary full">ENREGISTRER CE POINT</button>
+
+        <div class="pro-points-head">
+          <span>POINTS ENREGISTRÉS</span>
+          <small>2 minimum · 24 / 35 / 50 / 85 conseillés</small>
+        </div>
+        <div id="proPointsList" class="pro-points-list"></div>
+      </div>
+    </div>
   </dialog>
 
   <dialog id="presetDialog" class="sheet">
