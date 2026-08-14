@@ -723,3 +723,201 @@ body[data-theme="dark"] .viewfinder:has(.camera-placeholder:not(.hidden)){
     display:inline !important;
   }
 }
+
+
+/* =========================================================
+   FRAME V2.1 — DA alignment with other BST apps
+   ========================================================= */
+
+.viewfinder{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:
+    max(12px,env(safe-area-inset-top))
+    max(12px,env(safe-area-inset-right))
+    max(12px,env(safe-area-inset-bottom))
+    max(12px,env(safe-area-inset-left));
+  min-height:100dvh;
+  overflow:hidden;
+}
+
+.top-shell{
+  flex:0 0 auto;
+}
+
+.title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+
+.brand-title{
+  min-height:42px !important;
+  padding:0 14px 0 15px !important;
+  border-radius:14px !important;
+  background:var(--surface-solid) !important;
+  box-shadow:var(--bst-shadow);
+}
+.brand-title .brand-sub{
+  margin-left:3px;
+}
+.brand-frame-icon{
+  width:18px;
+  height:14px;
+  border:2px solid var(--bst-blue);
+  border-radius:4px;
+  position:relative;
+  display:inline-block;
+  flex:0 0 auto;
+}
+.brand-frame-icon:before,
+.brand-frame-icon:after{
+  content:"";
+  position:absolute;
+  background:var(--bst-blue);
+}
+.brand-frame-icon:before{
+  width:2px;
+  height:22px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+}
+.brand-frame-icon:after{
+  width:26px;
+  height:2px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+}
+
+/* Dedicated camera block — no more full-screen image reaching the title */
+.stage-wrap{
+  position:relative;
+  flex:0 0 auto;
+  width:100%;
+  max-width:720px;
+  margin:0 auto;
+  padding:8px;
+  border-radius:24px !important;
+  overflow:hidden;
+}
+.stage-inner{
+  position:relative;
+  width:100%;
+  aspect-ratio:9 / 16;
+  max-height:58dvh; /* barely exceeds a portrait 9:16 presence */
+  min-height:360px;
+  border-radius:20px;
+  overflow:hidden;
+  background:#090b0d;
+}
+#video{
+  position:absolute !important;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#090b0d !important;
+}
+#frameMask,
+.camera-placeholder{
+  position:absolute !important;
+  inset:0;
+}
+.camera-placeholder{
+  z-index:1;
+}
+.frame-mask{
+  z-index:3;
+}
+.readout{
+  position:absolute !important;
+  left:50% !important;
+  top:14px !important;
+  transform:translateX(-50%) !important;
+  z-index:10;
+  max-width:calc(100% - 24px);
+}
+.sim-warning{
+  top:auto !important;
+  left:50% !important;
+  bottom:84px !important;
+  transform:translateX(-50%) !important;
+  z-index:11;
+}
+
+/* Main controls block recognisable as a BST footer card */
+.bottom-panel{
+  position:relative !important;
+  left:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+  width:100%;
+  max-width:720px;
+  margin:0 auto;
+  border-radius:24px !important;
+  padding:10px 10px 12px !important;
+}
+.lens-strip{
+  padding-bottom:10px !important;
+}
+.main-controls{
+  margin-top:2px;
+}
+.bottom-mention{
+  margin-top:10px;
+  padding-top:9px;
+  border-top:1px solid var(--border);
+  text-align:center;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.15em;
+  color:var(--muted);
+}
+
+/* Keep CAL PRO etc. unaffected, but make main page instantly recognisable */
+body[data-theme="light"] .stage-wrap{
+  background:rgba(255,255,255,.88) !important;
+}
+body[data-theme="dark"] .stage-wrap{
+  background:rgba(22,28,34,.88) !important;
+}
+body[data-theme="light"] .stage-inner{
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+}
+body[data-theme="dark"] .stage-inner{
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+}
+
+/* Do not let old topbar rules affect the new structure */
+.topbar{
+  display:none !important;
+}
+
+@media (orientation:landscape){
+  .viewfinder{
+    justify-content:flex-start;
+  }
+  .stage-wrap{
+    max-width:860px;
+  }
+  .stage-inner{
+    aspect-ratio:16 / 9;
+    max-height:56dvh;
+    min-height:320px;
+  }
+  .bottom-panel{
+    max-width:860px;
+  }
+}
+
+@media (max-height:760px){
+  .stage-inner{
+    max-height:54dvh;
+    min-height:300px;
+  }
+}
