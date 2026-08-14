@@ -38,6 +38,8 @@ const state = {
   proOffsetX:0,
   proOffsetY:0,
   proAdvancedOpen:false,
+  maxUsableHFov:null,
+  maxUsableLimitLabel:null,
   orientation: innerWidth >= innerHeight ? 'landscape' : 'portrait',
   calLeft:.30,
   calRight:.70
@@ -54,33 +56,48 @@ function calibrationStore(){
 }
 function loadCalibration(){
   const data=calibrationStore()[orientationKey()];
-  if(data?.version === 4){
+  if(data?.version === 5){
     state.sourceFov = data.quickHFov || null;
     state.proPoints = Array.isArray(data.proPoints) ? data.proPoints : [];
+    state.maxUsableHFov = Number.isFinite(data.maxUsableHFov) ? data.maxUsableHFov : null;
+    state.maxUsableLimitLabel = data.maxUsableLimitLabel || null;
+  }else if(data?.version === 4){
+    state.sourceFov = data.quickHFov || null;
+    state.proPoints = Array.isArray(data.proPoints) ? data.proPoints : [];
+    state.maxUsableHFov = null;
+    state.maxUsableLimitLabel = null;
   }else if(data?.version === 3){
-    // V1.3 changes the renderer from COVER to CONTAIN.
-    // Keep quick calibration, but old PRO points must be redone.
     state.sourceFov = data.quickHFov || null;
     state.proPoints = [];
+    state.maxUsableHFov = null;
+    state.maxUsableLimitLabel = null;
   }else if(data?.version === 2){
     state.sourceFov = data.hfov || null;
     state.proPoints = [];
+    state.maxUsableHFov = null;
+    state.maxUsableLimitLabel = null;
   }else{
     state.sourceFov = null;
     state.proPoints = [];
+    state.maxUsableHFov = null;
+    state.maxUsableLimitLabel = null;
   }
   state.proOffsetX=0;
   state.proOffsetY=0;
   updateCalibrationStatus();
+  updateWideLimitUI();
   updateSimulation();
   renderProPoints();
+  renderLenses();
 }
 function writeCalibrationProfile(){
   const all=calibrationStore();
   all[orientationKey()]={
-    version:4,
+    version:5,
     quickHFov:state.sourceFov || null,
     proPoints:state.proPoints,
+    maxUsableHFov:state.maxUsableHFov,
+    maxUsableLimitLabel:state.maxUsableLimitLabel,
     savedAt:new Date().toISOString()
   };
   localStorage.setItem('frame-calibrations',JSON.stringify(all));
@@ -115,18 +132,32 @@ function resetCalibration(){
   localStorage.setItem('frame-calibrations',JSON.stringify(all));
   state.sourceFov=null;
   state.proPoints=[];
+  state.maxUsableHFov=null;
+  state.maxUsableLimitLabel=null;
   updateCalibrationStatus();
+  updateWideLimitUI();
   updateSimulation();
   renderProPoints();
 }
 
+function isTargetUnavailable(sensorWidth,focal){
+  if(!Number.isFinite(state.maxUsableHFov)) return false;
+  const hf=targetHFovFor(sensorWidth,focal);
+  return hf > state.maxUsableHFov + 0.05;
+}
 function renderLenses(){
   const el=$('#lensStrip'); el.innerHTML='';
   lenses.forEach(mm=>{
+    const unavailable=isTargetUnavailable(state.sensorWidth,mm);
     const b=document.createElement('button');
-    b.className='lens-pill'+(mm===state.focal?' active':'');
+    b.className='lens-pill'+(mm===state.focal?' active':'')+(unavailable?' unavailable':'');
     b.textContent=mm;
-    b.onclick=()=>{state.focal=mm; renderLenses(); updateAll(); centerActiveLens();};
+    if(unavailable){
+      b.disabled=true;
+      b.title='Champ trop large pour la caméra téléphone calibrée';
+    }else{
+      b.onclick=()=>{state.focal=mm; renderLenses(); updateAll(); centerActiveLens();};
+    }
     el.appendChild(b);
   });
   setTimeout(centerActiveLens,0);
@@ -153,7 +184,11 @@ function renderPresets(){
     b.onclick=()=>{
       state.preset=p; state.sensorWidth=p.width;
       $('#sensorWidthInput').value=p.width.toFixed(2);
-      renderPresets(); updateAll(); $('#presetDialog').close();
+      if(isTargetUnavailable(state.sensorWidth,state.focal)){
+        const first=lenses.find(mm=>!isTargetUnavailable(state.sensorWidth,mm));
+        if(first) state.focal=first;
+      }
+      renderPresets(); renderLenses(); updateAll(); $('#presetDialog').close();
     };
     el.appendChild(b);
   });
@@ -297,6 +332,13 @@ function updateSimulation(){
 
   const target=targetHFov();
   const targetX=Math.tan(rad(target)/2);
+
+  if(Number.isFinite(state.maxUsableHFov) && target>state.maxUsableHFov+.05){
+    setVideoTransform(video,frame,1,0,0);
+    warning.textContent=`FOCALE NON DISPONIBLE · LIMITE ${state.maxUsableLimitLabel || state.maxUsableHFov.toFixed(1)+'°'}`;
+    warning.classList.remove('hidden');
+    return;
+  }
   const metrics=containedVideoMetrics(video);
   const frameFraction=(frame.clientWidth||1)/(metrics.imageW||1);
 
@@ -664,6 +706,7 @@ function openProCalibration(){
     renderProPresetSelect();
     renderProLenses();
     renderProPoints();
+    updateWideLimitUI();
     $('#proCalDialog').showModal();
     state.proAdvancedOpen=false;
     $('#proControls').classList.remove('hidden');
@@ -700,6 +743,41 @@ function showProControls(){
   requestAnimationFrame(()=>updateProFrame());
 }
 
+
+function updateWideLimitUI(){
+  const status=$('#proLimitStatus');
+  const details=$('#proLimitDetails');
+  const clear=$('#clearWideLimitBtn');
+  if(!status || !details || !clear) return;
+
+  if(Number.isFinite(state.maxUsableHFov)){
+    status.textContent=state.maxUsableLimitLabel || `${state.maxUsableHFov.toFixed(1)}° max`;
+    details.textContent=`Tout cadrage demandant plus de ${state.maxUsableHFov.toFixed(1)}° horizontal sera désactivé.`;
+    clear.classList.remove('hidden');
+  }else{
+    status.textContent='Aucune limite définie';
+    details.textContent='Définis la focale la plus large que le téléphone arrive réellement à reproduire.';
+    clear.classList.add('hidden');
+  }
+}
+function setCurrentAsWideLimit(){
+  const hf=proReferenceHFov();
+  state.maxUsableHFov=hf;
+  state.maxUsableLimitLabel=`${state.proRefPreset.name} · ${state.proRefFocal} mm`;
+  writeCalibrationProfile();
+  updateWideLimitUI();
+  renderLenses();
+  updateSimulation();
+}
+function clearWideLimit(){
+  state.maxUsableHFov=null;
+  state.maxUsableLimitLabel=null;
+  writeCalibrationProfile();
+  updateWideLimitUI();
+  renderLenses();
+  updateSimulation();
+}
+
 function registerEvents(){
   $('#startCameraBtn').onclick=()=>startCamera();
   $('#cameraBtn').onclick=()=>{$('#cameraDialog').showModal();updateCalibrationStatus()};
@@ -724,6 +802,8 @@ function registerEvents(){
   $('#proOffsetXSlider').oninput=e=>{state.proOffsetX=parseFloat(e.target.value);applyProScale()};
   $('#proOffsetYSlider').oninput=e=>{state.proOffsetY=parseFloat(e.target.value);applyProScale()};
   $('#resetProCenterBtn').onclick=()=>{state.proOffsetX=0;state.proOffsetY=0;applyProScale()};
+  $('#setWideLimitBtn').onclick=()=>setCurrentAsWideLimit();
+  $('#clearWideLimitBtn').onclick=()=>clearWideLimit();
   $('#saveProPointBtn').onclick=()=>saveCurrentProPoint();
 
   $('#settingsBtn').onclick=()=>$('#settingsDialog').showModal();
@@ -731,7 +811,15 @@ function registerEvents(){
   $('#ratioBtn').onclick=()=>$('#ratioDialog').showModal();
   $('#applySensorBtn').onclick=()=>{
     const w=parseFloat($('#sensorWidthInput').value);
-    if(w>5&&w<70){state.sensorWidth=w;state.preset={id:'custom',name:`Capteur ${w.toFixed(2)} mm`,width:w};updateAll();renderPresets();$('#presetDialog').close()}
+    if(w>5&&w<70){
+      state.sensorWidth=w;
+      state.preset={id:'custom',name:`Capteur ${w.toFixed(2)} mm`,width:w};
+      if(isTargetUnavailable(state.sensorWidth,state.focal)){
+        const first=lenses.find(mm=>!isTargetUnavailable(state.sensorWidth,mm));
+        if(first) state.focal=first;
+      }
+      renderLenses(); updateAll(); renderPresets(); $('#presetDialog').close()
+    }
   };
   $('#objectWidth').oninput=calculateCalibration;
   $('#objectDistance').oninput=calculateCalibration;

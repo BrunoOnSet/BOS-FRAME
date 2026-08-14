@@ -259,3 +259,61 @@ html,body,#app{
   max-width:100%;
   overscroll-behavior-x:contain;
 }
+
+
+/* ---------- V1.7 : limite grand-angle ---------- */
+.lens-pill.unavailable{
+  opacity:.28;
+  text-decoration:line-through;
+  cursor:not-allowed;
+}
+.lens-pill.unavailable.active{
+  background:rgba(255,255,255,.08);
+  color:#888;
+  border-color:rgba(255,255,255,.12);
+}
+.pro-limit-card{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+  margin:8px 0;
+  padding:9px 10px;
+  border:1px solid #303030;
+  border-radius:11px;
+  background:#181818;
+}
+.pro-limit-card>div:first-child{
+  min-width:0;
+}
+.pro-limit-card span{
+  display:block;
+  font-size:7px;
+  letter-spacing:.12em;
+  color:#888;
+  margin-bottom:3px;
+}
+.pro-limit-card strong{
+  display:block;
+  font-size:10px;
+}
+.pro-limit-card small{
+  display:block;
+  color:#777;
+  font-size:7px;
+  line-height:1.3;
+  margin-top:2px;
+}
+.pro-limit-actions{
+  flex:0 0 150px;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.pro-limit-actions button{
+  padding:7px 8px;
+  font-size:7px;
+}
+.pro-limit-actions .subtle{
+  opacity:.75;
+}
