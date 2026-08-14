@@ -131,8 +131,18 @@ function renderLenses(){
   });
   setTimeout(centerActiveLens,0);
 }
+function centerElementInsideStrip(strip,el,smooth=true){
+  if(!strip || !el) return;
+  const target=el.offsetLeft - (strip.clientWidth-el.offsetWidth)/2;
+  strip.scrollTo({
+    left:Math.max(0,target),
+    behavior:smooth?'smooth':'auto'
+  });
+}
 function centerActiveLens(){
-  const a=$('.lens-pill.active'); if(a) a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  const strip=$('#lensStrip');
+  const a=$('#lensStrip .lens-pill.active');
+  centerElementInsideStrip(strip,a,true);
 }
 function renderPresets(){
   const el=$('#presetList'); el.innerHTML='';
@@ -495,6 +505,7 @@ function renderProLenses(){
     b.innerHTML=`${mm}${saved?'<i>✓</i>':''}`;
     b.onclick=()=>{
       state.proRefFocal=mm;
+      if(window.scrollX) window.scrollTo(0,window.scrollY);
       renderProLenses();
       prepareProScale();
       updateProHUD();
@@ -502,8 +513,9 @@ function renderProLenses(){
     el.appendChild(b);
   });
   setTimeout(()=>{
+    const strip=$('#proLensStrip');
     const a=$('#proLensStrip .pro-lens.active');
-    if(a) a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+    centerElementInsideStrip(strip,a,true);
   },0);
 }
 function proReferenceHFov(){
@@ -647,6 +659,7 @@ function renderProPoints(){
 }
 function openProCalibration(){
   const go=()=>{
+    window.scrollTo(0,0);
     $('#proVideo').srcObject=state.stream;
     renderProPresetSelect();
     renderProLenses();

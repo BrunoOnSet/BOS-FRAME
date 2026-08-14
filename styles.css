@@ -233,3 +233,29 @@ select{width:100%;background:#1d1d1d;color:#fff;border:1px solid #333;border-rad
     top:80px;
   }
 }
+
+
+/* ---------- V1.5 : verrouillage horizontal ---------- */
+html,body,#app{
+  width:100%;
+  max-width:100vw;
+  overflow-x:hidden !important;
+  overscroll-behavior-x:none;
+}
+.pro-dialog,
+.pro-stage{
+  width:100vw !important;
+  max-width:100vw !important;
+  overflow-x:hidden !important;
+}
+.pro-top,
+.pro-instructions,
+.pro-controls{
+  box-sizing:border-box;
+  max-width:calc(100vw - 20px);
+}
+#proLensStrip,
+#lensStrip{
+  max-width:100%;
+  overscroll-behavior-x:contain;
+}
