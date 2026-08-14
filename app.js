@@ -37,6 +37,7 @@ const state = {
   proScale:1,
   proOffsetX:0,
   proOffsetY:0,
+  proAdvancedOpen:false,
   orientation: innerWidth >= innerHeight ? 'landscape' : 'portrait',
   calLeft:.30,
   calRight:.70
@@ -511,6 +512,7 @@ function proReferenceHFov(){
 function updateProHUD(){
   const hf=proReferenceHFov();
   $('#proTopReference').textContent=`${state.proRefPreset.name} · ${state.proRefFocal} mm`;
+  if($('#proCompactRef')) $('#proCompactRef').textContent=`${state.proRefPreset.name} · ${state.proRefFocal} mm`;
   $('#proTargetFov').textContent=hf.toFixed(1)+'°';
   $('#proFrameLabel').textContent=ratioLabel(state.ratio);
   $('#proScaleReadout').textContent=state.proScale.toFixed(3)+'×';
@@ -650,6 +652,10 @@ function openProCalibration(){
     renderProLenses();
     renderProPoints();
     $('#proCalDialog').showModal();
+    state.proAdvancedOpen=false;
+    $('#proControls').classList.remove('hidden');
+    $('#showProControlsBtn').classList.add('hidden');
+    setProAdvanced(false);
     requestAnimationFrame(()=>{updateProFrame();prepareProScale()});
   };
   if(!state.stream) startCamera().then(go); else go();
@@ -657,6 +663,28 @@ function openProCalibration(){
 function openQuickCalibration(){
   const go=()=>{$('#calDialog').showModal();updateCalLines()};
   if(!state.stream) startCamera().then(go); else go();
+}
+
+
+function setProAdvanced(open){
+  state.proAdvancedOpen=!!open;
+  const panel=$('#proAdvancedPanel');
+  const controls=$('#proControls');
+  const btn=$('#toggleProAdvancedBtn');
+  panel.classList.toggle('hidden',!state.proAdvancedOpen);
+  controls.classList.toggle('expanded',state.proAdvancedOpen);
+  btn.textContent=state.proAdvancedOpen?'FERMER':'RÉGLAGES';
+  requestAnimationFrame(()=>updateProFrame());
+}
+function hideProControls(){
+  $('#proControls').classList.add('hidden');
+  $('#showProControlsBtn').classList.remove('hidden');
+  requestAnimationFrame(()=>updateProFrame());
+}
+function showProControls(){
+  $('#proControls').classList.remove('hidden');
+  $('#showProControlsBtn').classList.add('hidden');
+  requestAnimationFrame(()=>updateProFrame());
 }
 
 function registerEvents(){
@@ -677,6 +705,9 @@ function registerEvents(){
   $('#proScaleSlider').oninput=e=>{state.proScale=parseFloat(e.target.value);applyProScale()};
   $('#proMinusBtn').onclick=()=>{state.proScale-=.01;applyProScale()};
   $('#proPlusBtn').onclick=()=>{state.proScale+=.01;applyProScale()};
+  $('#toggleProAdvancedBtn').onclick=()=>setProAdvanced(!state.proAdvancedOpen);
+  $('#hideProControlsBtn').onclick=()=>hideProControls();
+  $('#showProControlsBtn').onclick=()=>showProControls();
   $('#proOffsetXSlider').oninput=e=>{state.proOffsetX=parseFloat(e.target.value);applyProScale()};
   $('#proOffsetYSlider').oninput=e=>{state.proOffsetY=parseFloat(e.target.value);applyProScale()};
   $('#resetProCenterBtn').onclick=()=>{state.proOffsetX=0;state.proOffsetY=0;applyProScale()};

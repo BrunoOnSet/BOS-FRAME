@@ -1,39 +1,26 @@
-# FRAME - BST V1.3
+# FRAME - BST V1.4
 
-## Deux correctifs importants
+## CAL PRO : interface compacte
 
-### 1. Grand-angle / 24 mm
-V1.2 affichait le flux téléphone en `cover`, ce qui pouvait couper une partie du champ du téléphone avant même le calcul de FRAME.
+Le panneau de calibration ne masque plus la majorité de l'image.
 
-V1.3 travaille sur l'IMAGE COMPLETE du téléphone (`contain`) puis place le cadre cinéma dedans.
-Le zoom CAL PRO peut maintenant descendre sous 1.0 jusqu'à la limite exacte où de vrais pixels téléphone couvrent encore tout le cadre.
+### Vue par défaut
+En bas de l'écran :
+- focale,
+- zoom,
+- bouton ENREGISTRER CE POINT.
 
-Si cette limite est atteinte et que la vraie caméra est encore plus large :
-- ce n'est plus un problème de calcul,
-- il faut passer sur la caméra ultra-grand-angle du téléphone dans CAM.
+### RÉGLAGES
+Le bouton RÉGLAGES ouvre seulement quand nécessaire :
+- caméra de référence,
+- HFOV,
+- centrage horizontal / vertical,
+- points enregistrés.
 
-Pour un Director's Viewfinder, il est recommandé de calibrer avec la caméra téléphone la plus large disponible, puis de zoomer numériquement pour les focales longues.
-
-### 2. Décentrage selon la focale
-CAL PRO possède maintenant :
-- CENTRAGE HORIZONTAL
-- CENTRAGE VERTICAL
-
-Chaque point 24 / 35 / 50 / 85 mm mémorise :
-- le zoom,
-- le centrage X,
-- le centrage Y.
-
-FRAME interpole les trois valeurs entre les points, ce qui évite un déplacement brutal du cadre entre deux focales.
-
-## IMPORTANT
-Les anciens points CAL PRO V1.2 sont invalidés à cause du changement de moteur d'affichage.
-La CAL RAPIDE est conservée si elle existait.
-
-Refaire CAL PRO :
-24 / 35 / 50 / 85 mm.
+### MASQUER
+Le bouton MASQUER fait disparaître entièrement les contrôles pour vérifier le cadrage en plein écran.
+Un petit bouton AFFICHER LES CONTRÔLES permet de les faire revenir.
 
 ## Mise à jour
-Remplacer le dossier FRAME sur l'hébergement.
-Ouvrir l'application une fois avec du réseau et recharger.
-Si l'ancienne interface reste affichée, fermer complètement l'application installée puis la rouvrir.
+Remplace le dossier FRAME sur l'hébergement par cette version.
+Ouvre FRAME une fois avec du réseau puis recharge la page.
