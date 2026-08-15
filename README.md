@@ -1,26 +1,42 @@
-# FRAME - BST V1.4
+# FRAME - BOS V2.7
 
-## CAL PRO : interface compacte
+## Nouveau : RESET CALIBRATION
 
-Le panneau de calibration ne masque plus la majorité de l'image.
+Dans CAL, FRAME affiche maintenant un bloc explicite :
 
-### Vue par défaut
-En bas de l'écran :
-- focale,
-- zoom,
-- bouton ENREGISTRER CE POINT.
+RESET CALIBRATION PORTRAIT
+ou
+RESET CALIBRATION PAYSAGE
 
-### RÉGLAGES
-Le bouton RÉGLAGES ouvre seulement quand nécessaire :
-- caméra de référence,
-- HFOV,
-- centrage horizontal / vertical,
-- points enregistrés.
+selon l’orientation actuelle du téléphone.
 
-### MASQUER
-Le bouton MASQUER fait disparaître entièrement les contrôles pour vérifier le cadrage en plein écran.
-Un petit bouton AFFICHER LES CONTRÔLES permet de les faire revenir.
+### Sécurité
+Le reset efface uniquement :
+- la CAL RAPIDE de l’orientation actuelle ;
+- les points CAL PRO de l’orientation actuelle ;
+- la limite grand-angle de l’orientation actuelle ;
+- les corrections de centrage liées à cette calibration.
 
-## Mise à jour
-Remplace le dossier FRAME sur l'hébergement par cette version.
-Ouvre FRAME une fois avec du réseau puis recharge la page.
+La calibration de l’autre orientation reste intacte.
+
+### Confirmation
+Une confirmation est demandée avant l’effacement.
+
+### Si aucune calibration n’existe
+Le bouton est désactivé et affiche :
+AUCUNE CALIBRATION PORTRAIT / PAYSAGE.
+
+### Où le trouver
+CAL → bas de l’écran de choix.
+
+Le bouton déjà présent dans RÉGLAGES a également été renommé clairement :
+RESET CALIBRATION · ORIENTATION ACTUELLE.
+
+## Inchangé
+- DA EXPO V3.19
+- calibration portrait / paysage séparée
+- CAL PRO paysage compact
+- FX6 par défaut au premier lancement
+- dernière caméra cinéma mémorisée
+- 16:9
+- limite grand-angle

@@ -337,8 +337,8 @@ html,body,#app{
 
 
 /* =========================================================
-   FRAME V2.0 — BRUNO SET TOOLS VISUAL SYSTEM
-   Light / Dark + shared BST blue accent
+   FRAME V2.0 — BRUNO ONSET VISUAL SYSTEM
+   Light / Dark + shared BOS blue accent
    ========================================================= */
 
 :root{
@@ -350,7 +350,7 @@ html,body,#app{
   --bst-shadow:0 14px 40px rgba(20,35,50,.10);
 }
 
-/* LIGHT is the default BST appearance */
+/* LIGHT is the default BOS appearance */
 body[data-theme="light"]{
   --bg:#f3f5f7;
   --fg:#171b20;
@@ -420,7 +420,7 @@ body{
   background:var(--bst-blue) !important;
 }
 
-/* Shared BST cards / bubbles */
+/* Shared BOS cards / bubbles */
 .glass{
   background:var(--glass) !important;
   border-color:var(--border) !important;
@@ -503,7 +503,7 @@ body{
   color:var(--bst-blue);
 }
 
-/* Frame = neutral white line + BST blue corners, readable on all footage */
+/* Frame = neutral white line + BOS blue corners, readable on all footage */
 .main-frame,.pro-frame{
   border-color:rgba(255,255,255,.76) !important;
 }
@@ -646,7 +646,7 @@ input[type="range"],.center-slider{
   accent-color:var(--bst-blue) !important;
 }
 
-/* Explicit LIGHT / DARK segmented control like the other BST utilities */
+/* Explicit LIGHT / DARK segmented control like the other BOS utilities */
 .theme-segment{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -693,7 +693,7 @@ input[type="range"],.center-slider{
   color:var(--fg) !important;
 }
 
-/* Camera placeholder / empty state gets a recognizable BST badge */
+/* Camera placeholder / empty state gets a recognizable BOS badge */
 .camera-placeholder strong{
   display:inline-flex;
   padding:8px 14px;
@@ -726,7 +726,7 @@ body[data-theme="dark"] .viewfinder:has(.camera-placeholder:not(.hidden)){
 
 
 /* =========================================================
-   FRAME V2.1 — DA alignment with other BST apps
+   FRAME V2.1 — DA alignment with other BOS apps
    ========================================================= */
 
 .viewfinder{
@@ -849,7 +849,7 @@ body[data-theme="dark"] .viewfinder:has(.camera-placeholder:not(.hidden)){
   z-index:11;
 }
 
-/* Main controls block recognisable as a BST footer card */
+/* Main controls block recognisable as a BOS footer card */
 .bottom-panel{
   position:relative !important;
   left:auto !important;
@@ -1007,33 +1007,44 @@ button{cursor:pointer;color:var(--text)}
   justify-content:space-between;
   gap:14px;
 }
-.eyebrow-row{display:block}
-.eyebrow{
+.top-title{min-width:0}
+.tool-eyebrow{
   display:flex;
   align-items:center;
   gap:7px;
   font-size:11px;
   letter-spacing:.12em;
   font-weight:850;
+  white-space:nowrap;
+  text-decoration:none;
+  color:inherit;
 }
-.eyebrow-link{text-decoration:none;color:inherit}
-.eyebrow-link:active{opacity:.7}
-.eyebrow-mark{
-  width:18px;
-  height:2px;
-  background:var(--accent);
-  display:inline-block;
-  border-radius:2px;
+.eyebrow-logo{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:40px;
+  height:24px;
+  padding:0 9px;
+  border-radius:999px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  color:#2E7F8E;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.04em;
+  line-height:1;
+  flex:0 0 auto;
 }
-.eyebrow-brand{color:#252A2F;font-weight:900}
-.eyebrow-tool{color:var(--muted);font-weight:800}
-body.dark .eyebrow-brand{color:#D7DADF}
-h1{
+.eyebrow-brand{font-weight:900;color:var(--text)}
+.bos-letter{color:#2E7F8E}
+.top h1{
   font-size:27px !important;
   line-height:1.05 !important;
   margin:10px 0 0 !important;
   letter-spacing:-.03em !important;
   color:var(--text) !important;
+  font-weight:900 !important;
 }
 .theme-toggle,.utility-link{
   border:1px solid var(--line) !important;

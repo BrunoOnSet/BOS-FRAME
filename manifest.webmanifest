@@ -1,6 +1,6 @@
 {
-  "name": "FRAME · BRUNO SET TOOLS",
-  "short_name": "FRAME - BST",
+  "name": "BRUNO ONSET / FRAME",
+  "short_name": "FRAME - BOS",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#F3F1EC",
@@ -18,5 +18,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "version": "2.7"
 }
