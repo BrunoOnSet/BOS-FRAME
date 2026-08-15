@@ -242,9 +242,9 @@ function frameDimensions(ratio, maxW, maxH){
   return {w,h};
 }
 function updateFrame(){
-  const vf=$('.viewfinder');
-  const maxW=vf.clientWidth*.90;
-  const maxH=vf.clientHeight*.62;
+  const vf=$('#cameraStage') || $('.viewfinder');
+  const maxW=vf.clientWidth*.92;
+  const maxH=vf.clientHeight*.82;
   const {w,h}=frameDimensions(state.ratio,maxW,maxH);
   const f=$('#mainFrame'); f.style.width=w+'px'; f.style.height=h+'px';
   renderGuides();
@@ -811,29 +811,22 @@ function clearWideLimit(){
 
 
 function preferredTheme(){
-  const saved=localStorage.getItem('bst-theme');
-  if(saved==='light' || saved==='dark') return saved;
-  return 'light';
+  return localStorage.getItem("bruno-set-tools-theme") || "light";
 }
 function applyTheme(theme,persist=true){
-  const value=theme==='dark'?'dark':'light';
-  document.body.dataset.theme=value;
-  if(persist) localStorage.setItem('bst-theme',value);
+  const dark=theme==="dark";
+  document.body.classList.toggle("dark",dark);
+  document.body.dataset.theme=dark?"dark":"light";
 
-  const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute('content',value==='dark'?'#101419':'#f3f5f7');
+  const themeToggle=$('#themeBtn');
+  const themeColor=document.getElementById("themeColor") || document.querySelector('meta[name="theme-color"]');
+  if(themeToggle) themeToggle.textContent=dark?"LIGHT":"DARK";
+  if(themeColor) themeColor.setAttribute("content",dark?"#0B0C0E":"#F3F1EC");
 
-  const themeBtn=$('#themeBtn');
-  if(themeBtn){
-    themeBtn.textContent=value==='dark'?'☀':'☾';
-    themeBtn.title=value==='dark'?'Passer en mode clair':'Passer en mode sombre';
-  }
-  const light=$('#lightThemeBtn'), dark=$('#darkThemeBtn');
-  if(light) light.classList.toggle('active',value==='light');
-  if(dark) dark.classList.toggle('active',value==='dark');
+  if(persist) localStorage.setItem("bruno-set-tools-theme",dark?"dark":"light");
 }
 function toggleTheme(){
-  applyTheme(document.body.dataset.theme==='dark'?'light':'dark');
+  applyTheme(document.body.classList.contains("dark")?"light":"dark");
 }
 
 function registerEvents(){
@@ -866,8 +859,6 @@ function registerEvents(){
 
   $('#settingsBtn').onclick=()=>$('#settingsDialog').showModal();
   $('#themeBtn').onclick=()=>toggleTheme();
-  $('#lightThemeBtn').onclick=()=>applyTheme('light');
-  $('#darkThemeBtn').onclick=()=>applyTheme('dark');
   $('#cameraPresetBtn').onclick=()=>{$('#sensorWidthInput').value=state.sensorWidth.toFixed(2);$('#presetDialog').showModal()};
   $('#ratioBtn').onclick=()=>$('#ratioDialog').showModal();
   $('#applySensorBtn').onclick=()=>{

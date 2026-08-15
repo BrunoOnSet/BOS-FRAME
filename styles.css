@@ -921,3 +921,448 @@ body[data-theme="dark"] .stage-inner{
     min-height:300px;
   }
 }
+
+
+/* ============================================================
+   FRAME V2.2 — DA STRICTEMENT ALIGNÉE SUR EXPO V3.19
+   Source de vérité : BRUNO_SET_TOOLS_EXPO_V3_19
+   ============================================================ */
+
+/* Exact EXPO tokens */
+:root{
+  --bg:#F3F1EC !important;
+  --panel:#FFFFFF !important;
+  --panel2:#ECEBE7 !important;
+  --text:#17191C !important;
+  --muted:#6E737A !important;
+  --line:#D3D4D1 !important;
+  --accent:#2F5B66 !important;
+  --accent-soft:rgba(47,91,102,.14) !important;
+  --header-bg:#E7E9E7 !important;
+  --header-border:#D0D3D1 !important;
+  --field-bg:#FAFAF8 !important;
+  --card-border:#D7D9D6 !important;
+  --chip-text:#586068 !important;
+  --chip-active-bg:#92B8C0 !important;
+  --chip-active-text:#182126 !important;
+  --chip-bg:#E7E7E3 !important;
+}
+body.dark{
+  --bg:#0B0C0E !important;
+  --panel:#15171A !important;
+  --panel2:#1C1F23 !important;
+  --text:#F3F3F0 !important;
+  --muted:#94989F !important;
+  --line:#30343A !important;
+  --accent:#2F5B66 !important;
+  --accent-soft:rgba(47,91,102,.22) !important;
+  --header-bg:#111418 !important;
+  --header-border:#25292E !important;
+  --field-bg:#0F1113 !important;
+  --card-border:#25292E !important;
+  --chip-text:#D4D6D8 !important;
+  --chip-active-bg:#2F5B66 !important;
+  --chip-active-text:#F3F3F0 !important;
+  --chip-bg:#1C1F23 !important;
+}
+
+html,body,#app{
+  margin:0 !important;
+  background:var(--bg) !important;
+  color:var(--text) !important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Roboto","Segoe UI",sans-serif !important;
+}
+body{min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer;color:var(--text)}
+
+.app{
+  width:100% !important;
+  max-width:620px !important;
+  min-height:100vh;
+  margin:0 auto !important;
+  padding:calc(22px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) !important;
+  overflow:visible !important;
+}
+
+/* Exact EXPO header language */
+.top{
+  position:relative !important;
+  inset:auto !important;
+  width:auto !important;
+  height:auto !important;
+  transform:none !important;
+  display:block !important;
+  background:var(--header-bg) !important;
+  border:1px solid var(--header-border) !important;
+  border-radius:22px !important;
+  padding:14px 16px 15px !important;
+  margin:0 0 18px !important;
+  box-shadow:none !important;
+}
+.top-inner{
+  width:100%;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.eyebrow-row{display:block}
+.eyebrow{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:11px;
+  letter-spacing:.12em;
+  font-weight:850;
+}
+.eyebrow-link{text-decoration:none;color:inherit}
+.eyebrow-link:active{opacity:.7}
+.eyebrow-mark{
+  width:18px;
+  height:2px;
+  background:var(--accent);
+  display:inline-block;
+  border-radius:2px;
+}
+.eyebrow-brand{color:#252A2F;font-weight:900}
+.eyebrow-tool{color:var(--muted);font-weight:800}
+body.dark .eyebrow-brand{color:#D7DADF}
+h1{
+  font-size:27px !important;
+  line-height:1.05 !important;
+  margin:10px 0 0 !important;
+  letter-spacing:-.03em !important;
+  color:var(--text) !important;
+}
+.theme-toggle,.utility-link{
+  border:1px solid var(--line) !important;
+  background:var(--panel) !important;
+  color:var(--text) !important;
+  border-radius:999px !important;
+  padding:7px 10px !important;
+  font-size:9px !important;
+  letter-spacing:.12em !important;
+  font-weight:900 !important;
+  min-width:auto !important;
+  height:auto !important;
+  box-shadow:none !important;
+}
+.utility-row{
+  display:flex !important;
+  gap:7px;
+  margin:-4px 0 14px !important;
+  padding:0 2px !important;
+}
+
+/* Exact EXPO panel language */
+.panel{
+  position:relative;
+  background:var(--panel) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:22px !important;
+  padding:18px !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+.camera-panel{margin-bottom:12px}
+.frame-controls-panel{margin-top:0}
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+}
+.panel-kicker{
+  font-size:10px;
+  letter-spacing:.16em;
+  color:var(--accent);
+  font-weight:900;
+}
+.camera-live-label{
+  font-size:9px;
+  color:var(--muted);
+  font-weight:800;
+  letter-spacing:.10em;
+}
+
+/* Camera is contained below the title and kept near 9/16 of viewport height */
+.camera-stage{
+  position:relative;
+  width:100%;
+  height:min(56dvh,520px);
+  min-height:340px;
+  overflow:hidden;
+  border-radius:18px;
+  background:#08090A;
+  border:1px solid var(--line);
+}
+#video{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  background:#08090A !important;
+  transform-origin:center center;
+}
+.frame-mask,.camera-placeholder{
+  position:absolute !important;
+  inset:0 !important;
+}
+.camera-placeholder{
+  z-index:2 !important;
+  background:#0B0C0E !important;
+  color:#F3F3F0 !important;
+}
+.camera-placeholder strong{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  color:#F3F3F0 !important;
+  padding:0 !important;
+}
+.camera-placeholder span{color:#94989F !important}
+.reticle-big{border-color:var(--accent) !important;box-shadow:none !important}
+.reticle-big:before,.reticle-big:after{background:var(--accent) !important}
+
+.frame-mask{z-index:3 !important}
+.main-frame{
+  border-color:rgba(255,255,255,.76) !important;
+}
+.corner.tl,.corner.tr,.corner.bl,.corner.br{
+  border-color:var(--accent) !important;
+}
+.center-cross i,.center-cross b{background:var(--accent) !important}
+.guide-frame{border-color:rgba(143,184,194,.82) !important}
+
+/* Readout: neutral overlay, not a separate blue visual language */
+.readout{
+  position:absolute !important;
+  z-index:10 !important;
+  left:50% !important;
+  top:12px !important;
+  transform:translateX(-50%) !important;
+  width:auto !important;
+  max-width:calc(100% - 20px) !important;
+  padding:8px 10px !important;
+  display:flex !important;
+  gap:13px !important;
+  border-radius:14px !important;
+  background:rgba(11,12,14,.72) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  box-shadow:none !important;
+  color:#F3F3F0 !important;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.readout .label{color:#A9ADB3 !important}
+.readout strong{color:#F3F3F0 !important}
+.readout>div:first-child strong{color:#F3F3F0 !important}
+.sim-warning{
+  position:absolute !important;
+  z-index:12 !important;
+  left:50% !important;
+  top:auto !important;
+  bottom:12px !important;
+  transform:translateX(-50%) !important;
+  background:rgba(11,12,14,.84) !important;
+  color:#fff !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+}
+
+/* Exact EXPO chip behavior for focal lengths */
+.lens-strip{
+  height:auto !important;
+  display:flex !important;
+  gap:7px !important;
+  overflow-x:auto !important;
+  padding:0 0 10px !important;
+  scrollbar-width:none;
+}
+.lens-strip::-webkit-scrollbar{display:none}
+.lens-pill{
+  flex:0 0 auto !important;
+  min-width:0 !important;
+  height:auto !important;
+  border:1px solid var(--line) !important;
+  background:var(--chip-bg) !important;
+  color:var(--chip-text) !important;
+  border-radius:999px !important;
+  padding:7px 11px !important;
+  font-size:12px !important;
+  font-weight:780 !important;
+  box-shadow:none !important;
+}
+.lens-pill.active{
+  background:var(--chip-active-bg) !important;
+  color:var(--chip-active-text) !important;
+  border-color:var(--chip-active-bg) !important;
+}
+body.dark .lens-pill.active{
+  background:var(--accent) !important;
+  color:#F3F3F0 !important;
+  border-color:var(--accent) !important;
+}
+body:not(.dark) .lens-pill:not(.active){border-color:#C5C8C5 !important}
+.lens-pill.unavailable{
+  opacity:.34 !important;
+  text-decoration:line-through;
+}
+
+/* Main controls use EXPO field/card language */
+.main-controls{display:grid !important;grid-template-columns:minmax(0,1fr) 120px;gap:10px}
+.control-button{
+  min-width:0;
+  border:1px solid var(--line) !important;
+  background:var(--field-bg) !important;
+  color:var(--text) !important;
+  border-radius:14px !important;
+  padding:10px 12px !important;
+  text-align:left;
+  box-shadow:none !important;
+}
+.control-button span{
+  display:block;
+  color:var(--muted) !important;
+  font-size:9px !important;
+  letter-spacing:.10em !important;
+  font-weight:800;
+  margin-bottom:4px;
+}
+.control-button strong{
+  display:block;
+  color:var(--text) !important;
+  font-size:13px !important;
+}
+
+/* Shared buttons / sheets remapped to the exact EXPO palette */
+.primary{
+  background:var(--accent) !important;
+  color:#fff !important;
+  border:1px solid var(--accent) !important;
+  border-radius:14px !important;
+  box-shadow:none !important;
+}
+.secondary{
+  background:var(--panel2) !important;
+  color:var(--text) !important;
+  border:1px solid var(--line) !important;
+  box-shadow:none !important;
+}
+.sheet{
+  background:var(--panel) !important;
+  color:var(--text) !important;
+  border:1px solid var(--card-border) !important;
+  box-shadow:0 20px 80px rgba(0,0,0,.32) !important;
+}
+.sheet::backdrop{background:rgba(0,0,0,.55) !important}
+.close,.info{
+  border:1px solid var(--line) !important;
+  background:var(--panel2) !important;
+  color:var(--text) !important;
+}
+select,.choice,.info-card,.cal-result,.cal-mode-card,.pro-limit-card,.pro-center-block,.pro-point,.pro-ref-info{
+  background:var(--field-bg) !important;
+  color:var(--text) !important;
+  border-color:var(--line) !important;
+}
+.choice.active,.cal-mode-card.recommended{
+  border-color:var(--accent) !important;
+  box-shadow:inset 0 0 0 1px var(--accent-soft) !important;
+  background:var(--panel) !important;
+}
+.ratio-choice,.guide-chip,.pro-lens,.fine-btn,.pro-advanced-toggle{
+  background:var(--chip-bg) !important;
+  color:var(--chip-text) !important;
+  border-color:var(--line) !important;
+}
+.ratio-choice.active,.guide-chip.active,.pro-lens.active{
+  background:var(--chip-active-bg) !important;
+  color:var(--chip-active-text) !important;
+  border-color:var(--chip-active-bg) !important;
+}
+body.dark .ratio-choice.active,
+body.dark .guide-chip.active,
+body.dark .pro-lens.active{
+  background:var(--accent) !important;
+  color:#F3F3F0 !important;
+  border-color:var(--accent) !important;
+}
+input[type="range"],.center-slider{accent-color:var(--accent) !important}
+
+/* Exact EXPO footer/signature */
+footer{margin:22px 8px 0 !important}
+.technical-footer{
+  text-align:center;
+  color:var(--muted);
+  font-size:10px;
+}
+.signature{
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  color:var(--muted);
+  font-size:10px;
+}
+.footer-brand-link{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:inherit;
+  text-decoration:none;
+}
+.footer-logo{
+  width:18px;
+  height:18px;
+  object-fit:contain;
+  padding:2px;
+  border:1px solid var(--line);
+  border-radius:5px;
+}
+body:not(.dark) .footer-logo{filter:invert(1)}
+.app-version{opacity:.55;font-size:9px}
+
+/* CAL PRO is still camera-first but uses the same palette */
+.pro-dialog,.pro-stage{background:var(--bg) !important;color:var(--text) !important}
+.pro-kicker{color:var(--accent) !important}
+.pro-top,.pro-controls,.pro-instructions{
+  background:var(--panel) !important;
+  border-color:var(--card-border) !important;
+  color:var(--text) !important;
+}
+#proVideo{background:#08090A !important}
+.pro-frame .corner{border-color:var(--accent) !important}
+
+/* Disable visual remnants from the abandoned V2.0/V2.1 DA */
+.brand,.brand-title,.topbar,.top-shell,.title-row,.bottom-mention{
+  display:none !important;
+}
+.theme-segment{display:none !important}
+
+/* Responsive: preserve EXPO's compact centered app */
+@media(max-width:500px){
+  .app{padding-left:16px !important;padding-right:16px !important}
+  .camera-stage{
+    height:min(55dvh,490px);
+    min-height:330px;
+  }
+  .readout{gap:10px !important;padding:7px 8px !important}
+  .readout strong{font-size:10px !important}
+  .main-controls{grid-template-columns:minmax(0,1fr) 98px}
+}
+@media(max-width:380px){
+  .app{padding-left:12px !important;padding-right:12px !important}
+  h1{font-size:24px !important}
+  .camera-stage{min-height:310px}
+}
+@media(orientation:landscape){
+  .app{max-width:720px !important}
+  .camera-stage{
+    height:min(58dvh,430px);
+    min-height:280px;
+  }
+}

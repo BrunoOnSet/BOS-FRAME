@@ -1,5 +1,5 @@
-const CACHE='frame-bst-v2-1';
-const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png'];
+const CACHE='frame-bst-v2-2';
+const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','./logo-bruno-guillard.png'];
 
 self.addEventListener('install',e=>{
   self.skipWaiting();
