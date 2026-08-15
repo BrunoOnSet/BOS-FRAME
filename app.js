@@ -92,13 +92,10 @@ function deg(r){ return r*180/Math.PI }
 function rad(d){ return d*Math.PI/180 }
 function targetHFov(){ return deg(2*Math.atan(state.sensorWidth/(2*state.focal))); }
 function orientationKey(){
-  // V2.4: one calibration profile per physical phone camera.
-  // Orientation is handled dynamically from the actual video geometry.
-  return `${state.deviceId || 'default'}`;
+  return `${state.deviceId || 'default'}:${state.orientation}`;
 }
-function legacyOrientationKeys(){
-  const device=state.deviceId || 'default';
-  return [`${device}:portrait`,`${device}:landscape`];
+function sharedV24Key(){
+  return `${state.deviceId || 'default'}`;
 }
 function calibrationStore(){
   try{return JSON.parse(localStorage.getItem('frame-calibrations')||'{}')}catch{return {}}
@@ -107,16 +104,16 @@ function loadCalibration(){
   const store=calibrationStore();
   let data=store[orientationKey()];
 
-  // Automatic migration from the old per-orientation profiles.
-  // Prefer the profile matching the current orientation; otherwise use the other one.
+  // V2.5: migrate V2.4 shared calibration only into the orientation
+  // currently open, then remove the shared profile. The other orientation
+  // will therefore require its own calibration.
   if(!data){
-    const legacy=legacyOrientationKeys();
-    const preferred=`${state.deviceId || 'default'}:${state.orientation}`;
-    const fallback=legacy.find(k=>k!==preferred);
-    data=store[preferred] || store[fallback] || null;
-
-    if(data){
-      store[orientationKey()]=data;
+    const sharedKey=sharedV24Key();
+    const shared=store[sharedKey];
+    if(shared){
+      data=shared;
+      store[orientationKey()]=shared;
+      delete store[sharedKey];
       try{localStorage.setItem('frame-calibrations',JSON.stringify(store))}catch{}
     }
   }
@@ -164,7 +161,7 @@ function loadCalibration(){
 function writeCalibrationProfile(){
   const all=calibrationStore();
   all[orientationKey()]={
-    version:6,
+    version:7,
     quickHFov:state.sourceFov || null,
     quickAspect:state.sourceFovAspect,
     proPoints:state.proPoints,
@@ -362,35 +359,7 @@ function containedVideoMetrics(video){
 }
 
 function effectiveDisplayedHFov(){
-  if(!state.sourceFov) return null;
-
-  const video=$('#video');
-  if(!state.sourceFovAspect || !video?.videoWidth || !video?.videoHeight){
-    return state.sourceFov;
-  }
-
-  const currentAspect=video.videoWidth/video.videoHeight;
-  const calibratedAspect=state.sourceFovAspect;
-
-  // Same orientation/aspect: use the measured horizontal FOV directly.
-  if(Math.abs(currentAspect-calibratedAspect) < 0.08){
-    return state.sourceFov;
-  }
-
-  // Rotated stream: calibrated horizontal becomes the orthogonal field.
-  // Rectilinear conversion: tan(V/2) = tan(H/2) / aspect.
-  const calibratedVertical=2*Math.atan(
-    Math.tan(rad(state.sourceFov)/2)/calibratedAspect
-  );
-
-  // If the stream rotated ~90°, its horizontal FOV is the previous vertical FOV.
-  if(Math.abs(currentAspect-(1/calibratedAspect)) < 0.12){
-    return deg(calibratedVertical);
-  }
-
-  // Generic fallback if browser reports an unusual stream crop.
-  const sensorTanVertical=Math.tan(calibratedVertical/2);
-  return deg(2*Math.atan(sensorTanVertical*currentAspect));
+  return state.sourceFov;
 }
 
 function interpolateProCalibration(targetX){
@@ -551,9 +520,9 @@ function updateCalibrationStatus(){
 
   if(n>=2){
     s.textContent=`CAL PRO ✓ · ${n} pts`;
-    d.textContent='Courbe réelle active · portrait / paysage';
+    d.textContent=`Courbe réelle active · ${state.orientation}`;
     if(cs) cs.textContent=`CAL PRO · ${n} points`;
-    if(cd) cd.textContent='FRAME utilise ces références en portrait comme en paysage.';
+    if(cd) cd.textContent=`Profil ${state.orientation} · FRAME interpole entre tes références.`;
   }else if(n===1){
     s.textContent='CAL PRO · 1 pt';
     d.textContent='Ajoute au moins un second point pour interpoler.';
@@ -561,12 +530,12 @@ function updateCalibrationStatus(){
     if(cd) cd.textContent='Ajoute 35 / 50 / 85 mm pour fiabiliser la courbe.';
   }else if(state.sourceFov){
     s.textContent='CAL RAPIDE ✓';
-    d.textContent=`Calibration rapide active · portrait / paysage`;
+    d.textContent=`Calibration rapide active · ${state.orientation}`;
     if(cs) cs.textContent='CAL RAPIDE';
     if(cd) cd.textContent='Calibration physique active. CAL PRO donnera plus de précision.';
   }else{
     s.textContent='Non calibrée';
-    d.textContent='Calibration nécessaire pour cette caméra téléphone.';
+    d.textContent=`Calibration nécessaire en ${state.orientation}.`;
     if(cs) cs.textContent='Non calibré';
     if(cd) cd.textContent='Aucun point enregistré.';
   }
@@ -693,8 +662,8 @@ function proReferenceHFov(){
 }
 function updateProHUD(){
   const hf=proReferenceHFov();
-  $('#proTopReference').textContent=`${state.proRefPreset.name} · ${state.proRefFocal} mm`;
-  if($('#proCompactRef')) $('#proCompactRef').textContent=`${state.proRefPreset.name} · ${state.proRefFocal} mm`;
+  $('#proTopReference').textContent=`${state.proRefPreset.name} · ${state.proRefFocal} mm · ${state.orientation.toUpperCase()}`;
+  if($('#proCompactRef')) $('#proCompactRef').textContent=`${state.proRefPreset.name} · ${state.proRefFocal} mm · ${state.orientation.toUpperCase()}`;
   $('#proTargetFov').textContent=hf.toFixed(1)+'°';
   $('#proFrameLabel').textContent=ratioLabel(state.ratio);
   $('#proScaleReadout').textContent=state.proScale.toFixed(3)+'×';
@@ -985,9 +954,7 @@ function registerEvents(){
     const next=innerWidth>=innerHeight?'landscape':'portrait';
     if(next!==state.orientation){
       state.orientation=next;
-      // Same physical-camera calibration; only geometry changes.
-      updateCalibrationStatus();
-      updateWideLimitUI();
+      loadCalibration();
     }
     requestAnimationFrame(()=>{
       updateFrame();

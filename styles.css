@@ -1366,3 +1366,250 @@ body:not(.dark) .footer-logo{filter:invert(1)}
     min-height:280px;
   }
 }
+
+
+/* ============================================================
+   FRAME V2.5 — CAL PRO paysage : viseur d'abord
+   ============================================================ */
+
+/* In landscape, CAL PRO uses almost the entire screen for the image. */
+@media (orientation:landscape){
+  .pro-dialog{
+    width:100vw !important;
+    height:100dvh !important;
+    max-width:none !important;
+    max-height:none !important;
+    border-radius:0 !important;
+    overflow:hidden !important;
+  }
+
+  .pro-stage{
+    width:100vw !important;
+    height:100dvh !important;
+    overflow:hidden !important;
+    background:#08090A !important;
+  }
+
+  #proVideo{
+    position:absolute !important;
+    inset:0 !important;
+    width:100% !important;
+    height:100% !important;
+    object-fit:contain !important;
+    background:#08090A !important;
+  }
+
+  /* Very small top status only. */
+  .pro-top{
+    left:12px !important;
+    right:12px !important;
+    top:calc(8px + env(safe-area-inset-top)) !important;
+    width:auto !important;
+    min-height:38px !important;
+    padding:6px 8px !important;
+    border-radius:12px !important;
+    background:rgba(21,23,26,.74) !important;
+    border:1px solid rgba(255,255,255,.14) !important;
+    color:#F3F3F0 !important;
+    box-shadow:none !important;
+    backdrop-filter:blur(9px) !important;
+    -webkit-backdrop-filter:blur(9px) !important;
+  }
+  .pro-top strong{
+    color:#F3F3F0 !important;
+    font-size:10px !important;
+  }
+  .pro-kicker{
+    color:#92B8C0 !important;
+    font-size:7px !important;
+  }
+  .pro-top .close{
+    width:30px !important;
+    height:30px !important;
+    background:rgba(255,255,255,.12) !important;
+    border:1px solid rgba(255,255,255,.16) !important;
+    color:#fff !important;
+  }
+
+  /* Instructions disappear in landscape; they obscure the comparison. */
+  .pro-instructions{
+    display:none !important;
+  }
+
+  /* Frame stays in the center of the actual viewfinder. */
+  .pro-frame{
+    top:50% !important;
+    max-height:calc(100dvh - 128px) !important;
+  }
+
+  /* Compact bar: focal row + zoom + save.
+     No camera selector / centering / point list unless RÉGLAGES is opened. */
+  .pro-controls{
+    position:absolute !important;
+    left:50% !important;
+    right:auto !important;
+    bottom:calc(8px + env(safe-area-inset-bottom)) !important;
+    transform:translateX(-50%) !important;
+    width:min(760px,calc(100vw - 24px)) !important;
+    max-width:calc(100vw - 24px) !important;
+    max-height:none !important;
+    overflow:visible !important;
+    padding:7px 9px !important;
+    border-radius:14px !important;
+    background:rgba(21,23,26,.82) !important;
+    border:1px solid rgba(255,255,255,.15) !important;
+    color:#F3F3F0 !important;
+    box-shadow:none !important;
+    backdrop-filter:blur(10px) !important;
+    -webkit-backdrop-filter:blur(10px) !important;
+  }
+
+  .pro-controls .pro-compact-head{
+    margin:0 0 4px !important;
+  }
+  .pro-controls .pro-compact-head strong{
+    color:#F3F3F0 !important;
+    font-size:9px !important;
+  }
+  .pro-controls .control-label{
+    color:#A9ADB3 !important;
+    font-size:6px !important;
+  }
+  .pro-advanced-toggle{
+    height:25px !important;
+    padding:0 8px !important;
+    font-size:6px !important;
+    background:rgba(255,255,255,.10) !important;
+    color:#F3F3F0 !important;
+    border:1px solid rgba(255,255,255,.14) !important;
+  }
+
+  .pro-lens-strip{
+    height:29px !important;
+    margin:0 !important;
+    padding:0 0 3px !important;
+    gap:4px !important;
+  }
+  .pro-lens{
+    flex:0 0 37px !important;
+    height:26px !important;
+    border-radius:999px !important;
+    font-size:8px !important;
+    background:rgba(255,255,255,.10) !important;
+    color:#D7DADF !important;
+    border-color:rgba(255,255,255,.14) !important;
+  }
+  .pro-lens.active{
+    background:#2F5B66 !important;
+    color:#fff !important;
+    border-color:#2F5B66 !important;
+  }
+
+  .pro-zoom-head{
+    margin:2px 0 0 !important;
+  }
+  .pro-zoom-head span{
+    color:#A9ADB3 !important;
+    font-size:6px !important;
+  }
+  .pro-zoom-head strong{
+    color:#F3F3F0 !important;
+    font-size:10px !important;
+  }
+
+  .pro-slider-row{
+    grid-template-columns:28px minmax(120px,1fr) 28px !important;
+    gap:5px !important;
+    margin:1px 0 4px !important;
+  }
+  .fine-btn{
+    width:28px !important;
+    height:27px !important;
+    min-height:27px !important;
+    padding:0 !important;
+    border-radius:8px !important;
+    background:rgba(255,255,255,.10) !important;
+    color:#fff !important;
+    border-color:rgba(255,255,255,.14) !important;
+  }
+
+  .pro-actions-row{
+    display:grid !important;
+    grid-template-columns:74px minmax(160px,1fr) !important;
+    gap:6px !important;
+    margin-top:3px !important;
+  }
+  .pro-hide-btn,.pro-save-btn{
+    min-height:30px !important;
+    height:30px !important;
+    padding:0 9px !important;
+    font-size:7px !important;
+    border-radius:9px !important;
+  }
+  .pro-save-btn{
+    background:#2F5B66 !important;
+    border-color:#2F5B66 !important;
+    color:#fff !important;
+  }
+  .pro-hide-btn{
+    background:rgba(255,255,255,.10) !important;
+    border-color:rgba(255,255,255,.14) !important;
+    color:#fff !important;
+  }
+
+  .pro-wide-warning{
+    margin:2px 0 3px !important;
+    padding:4px 7px !important;
+    font-size:6px !important;
+  }
+
+  /* Advanced settings open as a side drawer instead of making the bottom
+     panel cover half of the image. */
+  .pro-controls.expanded{
+    left:auto !important;
+    right:12px !important;
+    top:54px !important;
+    bottom:12px !important;
+    transform:none !important;
+    width:min(310px,42vw) !important;
+    max-width:310px !important;
+    max-height:calc(100dvh - 66px) !important;
+    overflow:auto !important;
+    padding:10px !important;
+  }
+  .pro-controls.expanded .pro-advanced-panel{
+    display:block !important;
+  }
+  .pro-controls.expanded .pro-lens-strip,
+  .pro-controls.expanded > .pro-zoom-head,
+  .pro-controls.expanded > .pro-slider-row,
+  .pro-controls.expanded > .pro-wide-warning,
+  .pro-controls.expanded > .pro-actions-row{
+    /* keep useful primary controls visible, but much smaller */
+  }
+
+  .pro-advanced-panel{
+    margin-top:7px !important;
+    padding-top:7px !important;
+    border-top:1px solid rgba(255,255,255,.12) !important;
+  }
+  .pro-reference-row select,
+  .pro-ref-info,
+  .pro-center-block,
+  .pro-limit-card,
+  .pro-point{
+    background:rgba(255,255,255,.08) !important;
+    color:#F3F3F0 !important;
+    border-color:rgba(255,255,255,.14) !important;
+  }
+
+  /* Fully hide all controls for pixel-to-pixel comparison. */
+  .pro-show-controls{
+    bottom:calc(10px + env(safe-area-inset-bottom)) !important;
+    background:rgba(21,23,26,.76) !important;
+    color:#fff !important;
+    border-color:rgba(255,255,255,.15) !important;
+    font-size:7px !important;
+    padding:8px 12px !important;
+  }
+}
