@@ -19,5 +19,8 @@
       "purpose": "any maskable"
     }
   ],
-  "version": "2.7"
+  "version": "2.9",
+  "id": "./",
+  "scope": "./",
+  "prefer_related_applications": false
 }

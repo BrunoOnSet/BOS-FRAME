@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BOS" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=2.7" />
+  <link rel="stylesheet" href="styles.css?v=2.9" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -31,6 +31,7 @@
       <button class="utility-link" id="cameraBtn" type="button">CAM</button>
       <button class="utility-link" id="calBtn" type="button">CAL</button>
       <button class="utility-link" id="settingsBtn" type="button">RÉGLAGES</button>
+      <button class="utility-link install-link hidden" id="installBtn" type="button">INSTALL</button>
     </div>
 
     <section class="panel camera-panel">
@@ -91,6 +92,14 @@
 
       <div class="lens-strip" id="lensStrip"></div>
 
+      <div class="custom-focal-row">
+        <label for="customFocalInput">FOCALE LIBRE</label>
+        <div class="custom-focal-input-wrap">
+          <input id="customFocalInput" type="number" inputmode="decimal" min="1" max="1000" step="0.1" value="35" aria-label="Focale personnalisée en millimètres" />
+          <span>mm</span>
+        </div>
+      </div>
+
       <div class="main-controls">
         <button id="cameraPresetBtn" class="control-button">
           <span>CAMÉRA CINÉMA</span>
@@ -110,7 +119,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>Made for the set · Bruno Guillard</span>
         </a>
-        <span class="app-version">v2.7</span>
+        <span class="app-version">v2.9</span>
       </div>
     </footer>
   </main>
@@ -331,6 +340,19 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=2.6"></script>
+
+  <dialog id="installDialog" class="sheet install-sheet">
+    <form method="dialog">
+      <header><h2>Installer FRAME</h2><button value="cancel" class="close">×</button></header>
+      <div id="installInstructions" class="install-instructions">
+        <p class="muted">Installe FRAME sur l’écran d’accueil pour l’utiliser comme une app, y compris hors connexion après le premier chargement.</p>
+        <div class="install-step"><strong>iPhone / iPad</strong><span>Ouvre la page dans Safari → touche Partager → <b>Sur l’écran d’accueil</b>.</span></div>
+        <div class="install-step"><strong>Android</strong><span>Ouvre la page dans Chrome → menu ⋮ → <b>Installer l’application</b> ou <b>Ajouter à l’écran d’accueil</b>.</span></div>
+        <p class="install-note">Si tu as ouvert le lien depuis WhatsApp, Gmail ou une autre app, ouvre d’abord la page dans Safari ou Chrome.</p>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js?v=2.9"></script>
 </body>
 </html>

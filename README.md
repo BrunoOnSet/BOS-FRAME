@@ -1,4 +1,4 @@
-# FRAME - BOS V2.7
+# FRAME - BOS V2.8
 
 ## Nouveau : RESET CALIBRATION
 
@@ -40,3 +40,17 @@ RESET CALIBRATION · ORIENTATION ACTUELLE.
 - dernière caméra cinéma mémorisée
 - 16:9
 - limite grand-angle
+
+
+## V2.8
+- Ajout d’un bouton INSTALL dans l’app pour faciliter l’installation PWA.
+- Android/Chrome : utilise le prompt natif lorsqu’il est disponible.
+- iPhone/iPad : affiche directement les instructions Safari → Partager → Sur l’écran d’accueil.
+- Manifest renforcé avec id/scope et cache PWA v2.8.
+
+
+## V2.9
+- Ajout d’un champ **FOCALE LIBRE** dans la section CADRAGE.
+- Accepte toute focale de 1 à 1000 mm, avec décimales au dixième.
+- Les focales prédéfinies restent disponibles comme raccourcis.
+- Si la valeur libre correspond à un preset, celui-ci redevient actif.

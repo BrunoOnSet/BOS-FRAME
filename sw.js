@@ -1,5 +1,5 @@
-const CACHE='bruno-onset-frame-v2-7';
-const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','./logo-bruno-guillard.png'];
+const CACHE='bruno-onset-frame-v2-9';
+const ASSETS=['./','./index.html','./styles.css?v=2.9','./app.js?v=2.9','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','./logo-bruno-guillard.png'];
 
 self.addEventListener('install',e=>{
   self.skipWaiting();

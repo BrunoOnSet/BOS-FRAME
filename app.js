@@ -268,7 +268,7 @@ function renderLenses(){
   lenses.forEach(mm=>{
     const unavailable=isTargetUnavailable(state.sensorWidth,mm);
     const b=document.createElement('button');
-    b.className='lens-pill'+(mm===state.focal?' active':'')+(unavailable?' unavailable':'');
+    b.className='lens-pill'+(Math.abs(mm-state.focal)<0.001?' active':'')+(unavailable?' unavailable':'');
     b.textContent=mm;
     if(unavailable){
       b.disabled=true;
@@ -376,7 +376,11 @@ function updateReadout(){
   const hf=targetHFov();
   $('#cameraReadout').textContent=state.preset.name.replace('ARRI ','').replace('Sony ','').replace('RED ','');
   $('#cameraPresetText').textContent=state.preset.name;
-  $('#focalReadout').textContent=state.focal+' mm';
+  $('#focalReadout').textContent=(Number.isInteger(state.focal)?state.focal:Number(state.focal.toFixed(1)))+' mm';
+  const focalInput=$('#customFocalInput');
+  if(focalInput && document.activeElement!==focalInput){
+    focalInput.value=Number.isInteger(state.focal)?String(state.focal):String(Number(state.focal.toFixed(1)));
+  }
   $('#ratioReadout').textContent=ratioLabel(state.ratio).replace(':1','');
   $('#ratioText').textContent=ratioLabel(state.ratio);
   $('#hfovReadout').textContent=hf.toFixed(1)+'°';
@@ -942,6 +946,52 @@ function toggleTheme(){
   applyTheme(document.body.classList.contains("dark")?"light":"dark");
 }
 
+
+let deferredInstallPrompt=null;
+
+function isStandaloneApp(){
+  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isIOSDevice(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function updateInstallButton(){
+  const btn=$('#installBtn');
+  if(!btn) return;
+  if(isStandaloneApp()){
+    btn.classList.add('hidden');
+    return;
+  }
+  // On iOS, always offer our clear installation instructions.
+  // On other platforms, show when the native prompt is available; fallback after load if needed.
+  if(isIOSDevice() || deferredInstallPrompt){
+    btn.classList.remove('hidden');
+  }
+}
+async function handleInstall(){
+  if(isStandaloneApp()) return;
+  if(deferredInstallPrompt){
+    const promptEvent=deferredInstallPrompt;
+    deferredInstallPrompt=null;
+    try{
+      promptEvent.prompt();
+      await promptEvent.userChoice;
+    }catch(_){ }
+    updateInstallButton();
+    return;
+  }
+  $('#installDialog')?.showModal();
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  updateInstallButton();
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  updateInstallButton();
+});
+
 function registerEvents(){
   $('#startCameraBtn').onclick=()=>startCamera();
   $('#cameraBtn').onclick=()=>{$('#cameraDialog').showModal();updateCalibrationStatus()};
@@ -970,7 +1020,21 @@ function registerEvents(){
   $('#clearWideLimitBtn').onclick=()=>clearWideLimit();
   $('#saveProPointBtn').onclick=()=>saveCurrentProPoint();
 
+  const customFocalInput=$('#customFocalInput');
+  const applyCustomFocal=()=>{
+    if(!customFocalInput) return;
+    const raw=String(customFocalInput.value).replace(',','.');
+    const value=Number.parseFloat(raw);
+    if(!Number.isFinite(value) || value<=0 || value>1000) return;
+    state.focal=Math.round(value*10)/10;
+    renderLenses();
+    updateAll();
+  };
+  customFocalInput?.addEventListener('input',applyCustomFocal);
+  customFocalInput?.addEventListener('change',applyCustomFocal);
+
   $('#settingsBtn').onclick=()=>$('#settingsDialog').showModal();
+  $('#installBtn').onclick=()=>handleInstall();
   $('#themeBtn').onclick=()=>toggleTheme();
   $('#cameraPresetBtn').onclick=()=>{$('#sensorWidthInput').value=state.sensorWidth.toFixed(2);$('#presetDialog').showModal()};
   $('#ratioBtn').onclick=()=>$('#ratioDialog').showModal();
@@ -1033,6 +1097,8 @@ function init(){
   renderLenses(); renderPresets(); renderRatios(); renderGuideChoices();
   renderProPresetSelect(); renderProLenses(); renderProPoints();
   setupCalibrationDrag(); registerEvents(); updateAll();
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  updateInstallButton();
+  setTimeout(()=>{ if(!isStandaloneApp() && !deferredInstallPrompt) $('#installBtn')?.classList.remove('hidden'); },900);
+  if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 init();
