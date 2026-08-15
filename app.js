@@ -33,12 +33,13 @@ const state = {
   stream:null,
   devices:[],
   deviceId:null,
-  preset:presets.find(p=>p.id==='alexa35') || presets[0],
-  sensorWidth:(presets.find(p=>p.id==='alexa35') || presets[0]).width,
+  preset:presets.find(p=>p.id==='fx6') || presets[0],
+  sensorWidth:(presets.find(p=>p.id==='fx6') || presets[0]).width,
   focal:35,
   ratio:16/9,
   guides:new Set(),
   sourceFov:null,
+  sourceFovAspect:null,
   proPoints:[],
   proRefPreset:presets.find(p=>p.id==='fx6') || presets[0],
   proRefFocal:24,
@@ -53,43 +54,105 @@ const state = {
   calRight:.70
 };
 
+const MAIN_SETTINGS_KEY='frame-main-settings-v1';
+
+function loadMainCameraSetting(){
+  let saved=null;
+  try{
+    saved=JSON.parse(localStorage.getItem(MAIN_SETTINGS_KEY)||'null');
+  }catch{}
+
+  if(saved?.presetId==='custom' && Number.isFinite(saved.sensorWidth)){
+    state.preset={
+      id:'custom',
+      name:saved.name || `Capteur ${saved.sensorWidth.toFixed(2)} mm`,
+      width:saved.sensorWidth
+    };
+    state.sensorWidth=saved.sensorWidth;
+    return;
+  }
+
+  const presetId=saved?.presetId || 'fx6';
+  const preset=presets.find(p=>p.id===presetId) || presets.find(p=>p.id==='fx6') || presets[0];
+  state.preset=preset;
+  state.sensorWidth=preset.width;
+}
+
+function saveMainCameraSetting(){
+  try{
+    localStorage.setItem(MAIN_SETTINGS_KEY,JSON.stringify({
+      presetId:state.preset.id,
+      name:state.preset.name,
+      sensorWidth:state.sensorWidth
+    }));
+  }catch{}
+}
+
 function deg(r){ return r*180/Math.PI }
 function rad(d){ return d*Math.PI/180 }
 function targetHFov(){ return deg(2*Math.atan(state.sensorWidth/(2*state.focal))); }
 function orientationKey(){
-  return `${state.deviceId || 'default'}:${state.orientation}`;
+  // V2.4: one calibration profile per physical phone camera.
+  // Orientation is handled dynamically from the actual video geometry.
+  return `${state.deviceId || 'default'}`;
+}
+function legacyOrientationKeys(){
+  const device=state.deviceId || 'default';
+  return [`${device}:portrait`,`${device}:landscape`];
 }
 function calibrationStore(){
   try{return JSON.parse(localStorage.getItem('frame-calibrations')||'{}')}catch{return {}}
 }
 function loadCalibration(){
-  const data=calibrationStore()[orientationKey()];
-  if(data?.version === 5){
+  const store=calibrationStore();
+  let data=store[orientationKey()];
+
+  // Automatic migration from the old per-orientation profiles.
+  // Prefer the profile matching the current orientation; otherwise use the other one.
+  if(!data){
+    const legacy=legacyOrientationKeys();
+    const preferred=`${state.deviceId || 'default'}:${state.orientation}`;
+    const fallback=legacy.find(k=>k!==preferred);
+    data=store[preferred] || store[fallback] || null;
+
+    if(data){
+      store[orientationKey()]=data;
+      try{localStorage.setItem('frame-calibrations',JSON.stringify(store))}catch{}
+    }
+  }
+
+  if(data?.version >= 5){
     state.sourceFov = data.quickHFov || null;
+    state.sourceFovAspect = Number.isFinite(data.quickAspect) ? data.quickAspect : null;
     state.proPoints = Array.isArray(data.proPoints) ? data.proPoints : [];
     state.maxUsableHFov = Number.isFinite(data.maxUsableHFov) ? data.maxUsableHFov : null;
     state.maxUsableLimitLabel = data.maxUsableLimitLabel || null;
   }else if(data?.version === 4){
     state.sourceFov = data.quickHFov || null;
+    state.sourceFovAspect = null;
     state.proPoints = Array.isArray(data.proPoints) ? data.proPoints : [];
     state.maxUsableHFov = null;
     state.maxUsableLimitLabel = null;
   }else if(data?.version === 3){
     state.sourceFov = data.quickHFov || null;
+    state.sourceFovAspect = null;
     state.proPoints = [];
     state.maxUsableHFov = null;
     state.maxUsableLimitLabel = null;
   }else if(data?.version === 2){
     state.sourceFov = data.hfov || null;
+    state.sourceFovAspect = null;
     state.proPoints = [];
     state.maxUsableHFov = null;
     state.maxUsableLimitLabel = null;
   }else{
     state.sourceFov = null;
+    state.sourceFovAspect = null;
     state.proPoints = [];
     state.maxUsableHFov = null;
     state.maxUsableLimitLabel = null;
   }
+
   state.proOffsetX=0;
   state.proOffsetY=0;
   updateCalibrationStatus();
@@ -101,8 +164,9 @@ function loadCalibration(){
 function writeCalibrationProfile(){
   const all=calibrationStore();
   all[orientationKey()]={
-    version:5,
+    version:6,
     quickHFov:state.sourceFov || null,
+    quickAspect:state.sourceFovAspect,
     proPoints:state.proPoints,
     maxUsableHFov:state.maxUsableHFov,
     maxUsableLimitLabel:state.maxUsableLimitLabel,
@@ -112,6 +176,8 @@ function writeCalibrationProfile(){
 }
 function saveCalibration(hfov){
   state.sourceFov=hfov;
+  const v=$('#calVideo') || $('#video');
+  state.sourceFovAspect=(v?.videoWidth && v?.videoHeight) ? (v.videoWidth/v.videoHeight) : null;
   writeCalibrationProfile();
   updateCalibrationStatus();
   updateSimulation();
@@ -139,6 +205,7 @@ function resetCalibration(){
   delete all[orientationKey()];
   localStorage.setItem('frame-calibrations',JSON.stringify(all));
   state.sourceFov=null;
+  state.sourceFovAspect=null;
   state.proPoints=[];
   state.maxUsableHFov=null;
   state.maxUsableLimitLabel=null;
@@ -202,6 +269,7 @@ function renderPresets(){
     b.innerHTML=`<strong>${p.name}</strong><small>largeur capteur de référence : ${p.width.toFixed(2)} mm</small>`;
     b.onclick=()=>{
       state.preset=p; state.sensorWidth=p.width;
+      saveMainCameraSetting();
       $('#sensorWidthInput').value=p.width.toFixed(2);
       if(isTargetUnavailable(state.sensorWidth,state.focal)){
         const first=lenses.find(mm=>!isTargetUnavailable(state.sensorWidth,mm));
@@ -294,7 +362,35 @@ function containedVideoMetrics(video){
 }
 
 function effectiveDisplayedHFov(){
-  return state.sourceFov;
+  if(!state.sourceFov) return null;
+
+  const video=$('#video');
+  if(!state.sourceFovAspect || !video?.videoWidth || !video?.videoHeight){
+    return state.sourceFov;
+  }
+
+  const currentAspect=video.videoWidth/video.videoHeight;
+  const calibratedAspect=state.sourceFovAspect;
+
+  // Same orientation/aspect: use the measured horizontal FOV directly.
+  if(Math.abs(currentAspect-calibratedAspect) < 0.08){
+    return state.sourceFov;
+  }
+
+  // Rotated stream: calibrated horizontal becomes the orthogonal field.
+  // Rectilinear conversion: tan(V/2) = tan(H/2) / aspect.
+  const calibratedVertical=2*Math.atan(
+    Math.tan(rad(state.sourceFov)/2)/calibratedAspect
+  );
+
+  // If the stream rotated ~90°, its horizontal FOV is the previous vertical FOV.
+  if(Math.abs(currentAspect-(1/calibratedAspect)) < 0.12){
+    return deg(calibratedVertical);
+  }
+
+  // Generic fallback if browser reports an unusual stream crop.
+  const sensorTanVertical=Math.tan(calibratedVertical/2);
+  return deg(2*Math.atan(sensorTanVertical*currentAspect));
 }
 
 function interpolateProCalibration(targetX){
@@ -395,7 +491,8 @@ function updateSimulation(){
     return;
   }
 
-  const sourceTan=Math.tan(rad(state.sourceFov)/2);
+  const currentSourceFov=effectiveDisplayedHFov() || state.sourceFov;
+  const sourceTan=Math.tan(rad(currentSourceFov)/2);
   let scale=frameFraction*sourceTan/targetX;
   const safeMin=frameSafeMinScale(video,frame,0,0);
 
@@ -454,9 +551,9 @@ function updateCalibrationStatus(){
 
   if(n>=2){
     s.textContent=`CAL PRO ✓ · ${n} pts`;
-    d.textContent=`Courbe réelle active · ${state.orientation}`;
+    d.textContent='Courbe réelle active · portrait / paysage';
     if(cs) cs.textContent=`CAL PRO · ${n} points`;
-    if(cd) cd.textContent='FRAME interpole automatiquement entre tes références.';
+    if(cd) cd.textContent='FRAME utilise ces références en portrait comme en paysage.';
   }else if(n===1){
     s.textContent='CAL PRO · 1 pt';
     d.textContent='Ajoute au moins un second point pour interpoler.';
@@ -464,12 +561,12 @@ function updateCalibrationStatus(){
     if(cd) cd.textContent='Ajoute 35 / 50 / 85 mm pour fiabiliser la courbe.';
   }else if(state.sourceFov){
     s.textContent='CAL RAPIDE ✓';
-    d.textContent=`Champ horizontal : ${state.sourceFov.toFixed(2)}° · ${state.orientation}`;
+    d.textContent=`Calibration rapide active · portrait / paysage`;
     if(cs) cs.textContent='CAL RAPIDE';
     if(cd) cd.textContent='Calibration physique active. CAL PRO donnera plus de précision.';
   }else{
     s.textContent='Non calibrée';
-    d.textContent=`Calibration nécessaire en orientation ${state.orientation}.`;
+    d.textContent='Calibration nécessaire pour cette caméra téléphone.';
     if(cs) cs.textContent='Non calibré';
     if(cd) cd.textContent='Aucun point enregistré.';
   }
@@ -659,7 +756,8 @@ function quickEstimateForPro(){
   const frameFraction=(frame.clientWidth||1)/(metrics.imageW||1);
   if(!state.sourceFov) return Math.max(frameSafeMinScale(video,frame,0,0),1);
   const targetX=Math.tan(rad(proReferenceHFov())/2);
-  const sourceTan=Math.tan(rad(state.sourceFov)/2);
+  const currentSourceFov=effectiveDisplayedHFov() || state.sourceFov;
+  const sourceTan=Math.tan(rad(currentSourceFov)/2);
   return Math.max(frameSafeMinScale(video,frame,0,0),frameFraction*sourceTan/targetX);
 }
 function prepareProScale(){
@@ -866,6 +964,7 @@ function registerEvents(){
     if(w>5&&w<70){
       state.sensorWidth=w;
       state.preset={id:'custom',name:`Capteur ${w.toFixed(2)} mm`,width:w};
+      saveMainCameraSetting();
       if(isTargetUnavailable(state.sensorWidth,state.focal)){
         const first=lenses.find(mm=>!isTargetUnavailable(state.sensorWidth,mm));
         if(first) state.focal=first;
@@ -884,9 +983,19 @@ function registerEvents(){
 
   addEventListener('resize',()=>{
     const next=innerWidth>=innerHeight?'landscape':'portrait';
-    if(next!==state.orientation){state.orientation=next;loadCalibration()}
-    updateFrame();
-    updateProFrame();
+    if(next!==state.orientation){
+      state.orientation=next;
+      // Same physical-camera calibration; only geometry changes.
+      updateCalibrationStatus();
+      updateWideLimitUI();
+    }
+    requestAnimationFrame(()=>{
+      updateFrame();
+      updateProFrame();
+      updateSimulation();
+      if($('#proCalDialog')?.open) prepareProScale();
+      if($('#calDialog')?.open) updateCalLines();
+    });
   });
 }
 function openCalibrationChooser(){
@@ -896,6 +1005,7 @@ function openCalibrationChooser(){
 
 function init(){
   applyTheme(preferredTheme(),false);
+  loadMainCameraSetting();
   renderLenses(); renderPresets(); renderRatios(); renderGuideChoices();
   renderProPresetSelect(); renderProLenses(); renderProPoints();
   setupCalibrationDrag(); registerEvents(); updateAll();
