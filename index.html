@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BST" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=2.5" />
+  <link rel="stylesheet" href="styles.css?v=2.6" />
   <title>FRAME - BST</title>
 </head>
 <body>
@@ -113,7 +113,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>Made for the set · Bruno Guillard</span>
         </a>
-        <span class="app-version">v2.5</span>
+        <span class="app-version">v2.6</span>
       </div>
     </footer>
   </main>
@@ -153,6 +153,15 @@
         <span>Profil actuel</span>
         <strong id="chooserCalStatus">Non calibré</strong>
         <small id="chooserCalDetails">Aucun point enregistré.</small>
+      </div>
+
+      <div class="cal-reset-card">
+        <div>
+          <span>REPARTIR DE ZÉRO</span>
+          <strong id="resetOrientationLabel">Calibration actuelle</strong>
+          <small>Efface uniquement le profil de l’orientation en cours. L’autre orientation reste intacte.</small>
+        </div>
+        <button type="button" id="resetCurrentCalibrationBtn" class="danger full">RESET CALIBRATION</button>
       </div>
     </form>
   </dialog>
@@ -321,10 +330,10 @@
       <p class="muted">Superpose les formats de livraison dans ton cadre principal.</p>
       <div id="guideChoices" class="guide-choices"></div>
       <hr>
-      <button type="button" id="resetCalBtn" class="danger full">EFFACER LA CALIBRATION DE CETTE CAMÉRA</button>
+      <button type="button" id="resetCalBtn" class="danger full">RESET CALIBRATION · ORIENTATION ACTUELLE</button>
     </form>
   </dialog>
 
-  <script src="app.js?v=2.5"></script>
+  <script src="app.js?v=2.6"></script>
 </body>
 </html>

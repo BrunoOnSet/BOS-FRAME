@@ -157,6 +157,7 @@ function loadCalibration(){
   updateSimulation();
   renderProPoints();
   renderLenses();
+  updateResetCalibrationUI();
 }
 function writeCalibrationProfile(){
   const all=calibrationStore();
@@ -201,15 +202,60 @@ function resetCalibration(){
   const all=calibrationStore();
   delete all[orientationKey()];
   localStorage.setItem('frame-calibrations',JSON.stringify(all));
+
   state.sourceFov=null;
   state.sourceFovAspect=null;
   state.proPoints=[];
   state.maxUsableHFov=null;
   state.maxUsableLimitLabel=null;
+  state.proOffsetX=0;
+  state.proOffsetY=0;
+
   updateCalibrationStatus();
   updateWideLimitUI();
   updateSimulation();
   renderProPoints();
+  renderProLenses();
+  renderLenses();
+  updateResetCalibrationUI();
+}
+
+function updateResetCalibrationUI(){
+  const label=$('#resetOrientationLabel');
+  const button=$('#resetCurrentCalibrationBtn');
+  if(label){
+    label.textContent=`Calibration ${state.orientation==='landscape'?'PAYSAGE':'PORTRAIT'}`;
+  }
+
+  const hasProfile=Boolean(
+    state.sourceFov ||
+    state.proPoints.length ||
+    Number.isFinite(state.maxUsableHFov)
+  );
+
+  if(button){
+    button.disabled=!hasProfile;
+    button.textContent=hasProfile
+      ? `RESET CALIBRATION ${state.orientation==='landscape'?'PAYSAGE':'PORTRAIT'}`
+      : `AUCUNE CALIBRATION ${state.orientation==='landscape'?'PAYSAGE':'PORTRAIT'}`;
+  }
+}
+
+function confirmResetCurrentCalibration(){
+  const orientationName=state.orientation==='landscape'?'paysage':'portrait';
+  const hasProfile=Boolean(
+    state.sourceFov ||
+    state.proPoints.length ||
+    Number.isFinite(state.maxUsableHFov)
+  );
+  if(!hasProfile) return;
+
+  const ok=window.confirm(
+    `Effacer complètement la calibration ${orientationName} pour cette caméra téléphone ?\n\nLa calibration de l’autre orientation sera conservée.`
+  );
+  if(!ok) return;
+
+  resetCalibration();
 }
 
 function isTargetUnavailable(sensorWidth,focal){
@@ -948,7 +994,17 @@ function registerEvents(){
   };
   $('#thirdsToggle').onchange=e=>$('#thirds').classList.toggle('hidden',!e.target.checked);
   $('#centerToggle').onchange=e=>$('#centerCross').classList.toggle('hidden',!e.target.checked);
-  $('#resetCalBtn').onclick=()=>{resetCalibration();$('#settingsDialog').close()};
+  $('#resetCalBtn').onclick=()=>{
+    const orientationName=state.orientation==='landscape'?'paysage':'portrait';
+    const ok=window.confirm(
+      `Effacer complètement la calibration ${orientationName} pour cette caméra téléphone ?\n\nLa calibration de l’autre orientation sera conservée.`
+    );
+    if(ok){
+      resetCalibration();
+      $('#settingsDialog').close();
+    }
+  };
+  $('#resetCurrentCalibrationBtn').onclick=()=>confirmResetCurrentCalibration();
 
   addEventListener('resize',()=>{
     const next=innerWidth>=innerHeight?'landscape':'portrait';
@@ -967,6 +1023,7 @@ function registerEvents(){
 }
 function openCalibrationChooser(){
   updateCalibrationStatus();
+  updateResetCalibrationUI();
   $('#calChooserDialog').showModal();
 }
 
