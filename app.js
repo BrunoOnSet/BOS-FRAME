@@ -40,6 +40,68 @@ const previewTargets = [
 ];
 const PREVIEW_SETTINGS_KEY='frame-preview-settings-v1';
 
+const subjectAppearances = [
+  {
+    skin:['#F2D0B7','#DFA984','#C17E63'],
+    shirt:['#ECE8E2','#DAD5CF','#C2BCB4'],
+    pants:['#31373C','#23282D','#171C21'],
+    hairMain:'#4A3428',
+    hairAccent:'#34241D'
+  },
+  {
+    skin:['#8E5D43','#6C432D','#4F2F1F'],
+    shirt:['#C9D5DE','#A9BFCD','#7F9AAD'],
+    pants:['#2A3137','#1D2328','#12171B'],
+    hairMain:'#1E1715',
+    hairAccent:'#120D0B'
+  },
+  {
+    skin:['#D6A77E','#B67D56','#905F41'],
+    shirt:['#DFD8C6','#CDBFA5','#AC9D86'],
+    pants:['#4C4F45','#373A31','#262821'],
+    hairMain:'#2F241E',
+    hairAccent:'#221913'
+  },
+  {
+    skin:['#6B4333','#4E2D22','#392018'],
+    shirt:['#D9D4D0','#B8B8B7','#8F9291'],
+    pants:['#263340','#19222C','#111821'],
+    hairMain:'#161110',
+    hairAccent:'#0E0A09'
+  }
+];
+
+function applyGradientStops(svg, id, colors){
+  const grad = svg.querySelector(`linearGradient#${id}`);
+  if(!grad) return;
+  const stops = grad.querySelectorAll('stop');
+  stops.forEach((stop, i) => {
+    if(colors[i]) stop.setAttribute('stop-color', colors[i]);
+  });
+}
+
+function applySubjectAppearance(subjectEl, variantIndex){
+  if(!subjectEl) return;
+  const svg = subjectEl.querySelector('svg');
+  if(!svg) return;
+
+  const variant = subjectAppearances[variantIndex % subjectAppearances.length];
+  applyGradientStops(svg, 'skinGrad', variant.skin);
+  applyGradientStops(svg, 'shirtGrad', variant.shirt);
+  applyGradientStops(svg, 'pantsGrad', variant.pants);
+
+  const hairMain = svg.querySelector('ellipse[fill="#2d2724"]');
+  const hairAccent = svg.querySelector('path[fill="#332a27"]');
+  if(hairMain) hairMain.setAttribute('fill', variant.hairMain);
+  if(hairAccent) hairAccent.setAttribute('fill', variant.hairAccent);
+
+  const eyes = svg.querySelectorAll('ellipse[fill="#29211f"]');
+  eyes.forEach(el => el.setAttribute('fill', '#201917'));
+
+  // Optional subtle identity cue on clothing only, never on skin.
+  subjectEl.dataset.appearance = String(variantIndex + 1);
+}
+
 
 const state = {
   stream:null,
@@ -550,6 +612,7 @@ function preparePreviewSubjectClones(){
       badge.textContent=`S${i+1}`;
       el.appendChild(badge);
     }
+    applySubjectAppearance(el, i);
   });
 }
 

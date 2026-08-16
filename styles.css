@@ -2347,3 +2347,34 @@ body.dark .preview-eye-guide{
     grid-template-columns:1fr 108px;
   }
 }
+
+
+/* ============================================================
+   FRAME BOS V3.5 TEST — Diversity / natural skin tones
+   ============================================================ */
+
+/* No more global hue-rotate on whole characters. */
+.preview-subject .preview-person,
+.preview-subject-2 .preview-person,
+.preview-subject-3 .preview-person,
+.preview-subject-4 .preview-person{
+  filter:drop-shadow(0 8px 8px rgba(0,0,0,.12)) !important;
+}
+
+/* Small clothing/readability cues only, never skin recoloring. */
+.preview-subject[data-appearance="1"] .preview-person-badge{
+  background:rgba(46,127,142,.86);
+}
+.preview-subject[data-appearance="2"] .preview-person-badge{
+  background:rgba(90,103,126,.88);
+}
+.preview-subject[data-appearance="3"] .preview-person-badge{
+  background:rgba(138,112,79,.88);
+}
+.preview-subject[data-appearance="4"] .preview-person-badge{
+  background:rgba(74,88,80,.90);
+}
+.preview-person-badge{
+  color:#fff !important;
+  border-color:rgba(255,255,255,.18) !important;
+}
