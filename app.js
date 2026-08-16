@@ -80,25 +80,52 @@ function applyGradientStops(svg, id, colors){
   });
 }
 
+function uniquifySubjectSvgGradients(svg, subjectIndex){
+  if(!svg) return;
+
+  const ids=['skinGrad','shirtGrad','pantsGrad','softShadow'];
+  ids.forEach(baseId=>{
+    const node=svg.querySelector(`#${baseId}`);
+    if(!node) return;
+
+    const uniqueId=`${baseId}-p${subjectIndex+1}`;
+    node.setAttribute('id',uniqueId);
+
+    svg.querySelectorAll(`[fill="url(#${baseId})"]`).forEach(el=>{
+      el.setAttribute('fill',`url(#${uniqueId})`);
+    });
+    svg.querySelectorAll(`[filter="url(#${baseId})"]`).forEach(el=>{
+      el.setAttribute('filter',`url(#${uniqueId})`);
+    });
+  });
+}
+
 function applySubjectAppearance(subjectEl, variantIndex){
   if(!subjectEl) return;
   const svg = subjectEl.querySelector('svg');
   if(!svg) return;
 
   const variant = subjectAppearances[variantIndex % subjectAppearances.length];
-  applyGradientStops(svg, 'skinGrad', variant.skin);
-  applyGradientStops(svg, 'shirtGrad', variant.shirt);
-  applyGradientStops(svg, 'pantsGrad', variant.pants);
+  const suffix=`-p${variantIndex+1}`;
 
-  const hairMain = svg.querySelector('ellipse[fill="#2d2724"]');
-  const hairAccent = svg.querySelector('path[fill="#332a27"]');
-  if(hairMain) hairMain.setAttribute('fill', variant.hairMain);
-  if(hairAccent) hairAccent.setAttribute('fill', variant.hairAccent);
+  applyGradientStops(svg, `skinGrad${suffix}`, variant.skin);
+  applyGradientStops(svg, `shirtGrad${suffix}`, variant.shirt);
+  applyGradientStops(svg, `pantsGrad${suffix}`, variant.pants);
+
+  const hairMain = svg.querySelector('ellipse[data-hair-main="1"]') || svg.querySelector('ellipse[fill="#2d2724"]');
+  const hairAccent = svg.querySelector('path[data-hair-accent="1"]') || svg.querySelector('path[fill="#332a27"]');
+  if(hairMain){
+    hairMain.setAttribute('data-hair-main','1');
+    hairMain.setAttribute('fill', variant.hairMain);
+  }
+  if(hairAccent){
+    hairAccent.setAttribute('data-hair-accent','1');
+    hairAccent.setAttribute('fill', variant.hairAccent);
+  }
 
   const eyes = svg.querySelectorAll('ellipse[fill="#29211f"]');
   eyes.forEach(el => el.setAttribute('fill', '#201917'));
 
-  // Optional subtle identity cue on clothing only, never on skin.
   subjectEl.dataset.appearance = String(variantIndex + 1);
 }
 
@@ -593,23 +620,45 @@ function syncPreviewInputs(){
 function preparePreviewSubjectClones(){
   const source=$('#previewSubject');
   if(!source) return;
-  const svg=source.querySelector('svg');
+
+  let sourceSvg=source.querySelector('svg');
+  if(sourceSvg && !sourceSvg.dataset.uniqueGradients){
+    uniquifySubjectSvgGradients(sourceSvg,0);
+    sourceSvg.dataset.uniqueGradients='1';
+  }
+
   [2,3,4].forEach(i=>{
     const el=$(`#previewSubject${i}`);
-    if(el && !el.querySelector('svg') && svg){
-      const clone=svg.cloneNode(true);
+    if(el && !el.querySelector('svg') && sourceSvg){
+      const clone=sourceSvg.cloneNode(true);
       clone.removeAttribute('role');
       clone.setAttribute('aria-hidden','true');
+
+      // The source already has P1 IDs after uniquifying.
+      // Convert them back conceptually to person-specific IDs for this clone.
+      ['skinGrad','shirtGrad','pantsGrad','softShadow'].forEach(baseId=>{
+        const sourceId=`${baseId}-p1`;
+        const node=clone.querySelector(`#${sourceId}`);
+        if(node){
+          const uniqueId=`${baseId}-p${i}`;
+          node.setAttribute('id',uniqueId);
+          clone.querySelectorAll(`[fill="url(#${sourceId})"]`).forEach(x=>x.setAttribute('fill',`url(#${uniqueId})`));
+          clone.querySelectorAll(`[filter="url(#${sourceId})"]`).forEach(x=>x.setAttribute('filter',`url(#${uniqueId})`));
+        }
+      });
+
+      clone.dataset.uniqueGradients='1';
       el.appendChild(clone);
     }
   });
+
   [source,$('#previewSubject2'),$('#previewSubject3'),$('#previewSubject4')].forEach((el,i)=>{
     if(!el) return;
     let badge=el.querySelector('.preview-person-badge');
     if(!badge){
       badge=document.createElement('span');
       badge.className='preview-person-badge';
-      badge.textContent=`S${i+1}`;
+      badge.textContent=`P${i+1}`;
       el.appendChild(badge);
     }
     applySubjectAppearance(el, i);
