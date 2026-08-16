@@ -29,6 +29,18 @@ const ratios = [
   {label:'4:5', value:4/5},{label:'9:16', value:9/16}
 ];
 
+// PREVIEW: body scale = full standing person's height / visible frame height.
+// Values assume normal headroom and a recomposed camera angle.
+const previewTargets = [
+  {id:'full', label:'PIED', scale:0.86},
+  {id:'american', label:'AMÉRICAIN', scale:1.26},
+  {id:'waist', label:'TAILLE', scale:1.95},
+  {id:'chest', label:'POITRINE', scale:2.86},
+  {id:'close', label:'GROS PLAN', scale:4.75}
+];
+const PREVIEW_SETTINGS_KEY='frame-preview-settings-v1';
+
+
 const state = {
   stream:null,
   devices:[],
@@ -51,7 +63,10 @@ const state = {
   maxUsableLimitLabel:null,
   orientation: innerWidth >= innerHeight ? 'landscape' : 'portrait',
   calLeft:.30,
-  calRight:.70
+  calRight:.70,
+  mode:'real',
+  subjectHeight:1.75,
+  subjectDistance:3.00
 };
 
 const MAIN_SETTINGS_KEY='frame-main-settings-v1';
@@ -84,6 +99,26 @@ function saveMainCameraSetting(){
       presetId:state.preset.id,
       name:state.preset.name,
       sensorWidth:state.sensorWidth
+    }));
+  }catch{}
+}
+
+
+function loadPreviewSettings(){
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem(PREVIEW_SETTINGS_KEY)||'null')}catch{}
+  if(saved){
+    if(saved.mode==='real' || saved.mode==='preview') state.mode=saved.mode;
+    if(Number.isFinite(saved.subjectHeight)) state.subjectHeight=Math.max(1.2,Math.min(2.2,saved.subjectHeight));
+    if(Number.isFinite(saved.subjectDistance)) state.subjectDistance=Math.max(.4,Math.min(30,saved.subjectDistance));
+  }
+}
+function savePreviewSettings(){
+  try{
+    localStorage.setItem(PREVIEW_SETTINGS_KEY,JSON.stringify({
+      mode:state.mode,
+      subjectHeight:state.subjectHeight,
+      subjectDistance:state.subjectDistance
     }));
   }catch{}
 }
@@ -263,12 +298,172 @@ function isTargetUnavailable(sensorWidth,focal){
   const hf=targetHFovFor(sensorWidth,focal);
   return hf > state.maxUsableHFov + 0.05;
 }
+
+function previewFrameMetrics(distance=state.subjectDistance){
+  const d=Math.max(.01,Number(distance)||.01);
+  const hfov=targetHFov();
+  const frameWidth=2*d*Math.tan(rad(hfov)/2);
+  const frameHeight=frameWidth/state.ratio;
+  const bodyScale=state.subjectHeight/frameHeight;
+  return {hfov,frameWidth,frameHeight,bodyScale};
+}
+
+function closestPreviewPlan(scale){
+  if(scale < .64) return {label:'PLAN LARGE', id:'wide'};
+  if(scale > 6.2) return {label:'TRÈS GROS PLAN', id:'veryclose'};
+  let best=previewTargets[0];
+  let score=Infinity;
+  previewTargets.forEach(t=>{
+    const s=Math.abs(Math.log(Math.max(.001,scale)/t.scale));
+    if(s<score){score=s;best=t}
+  });
+  return {label:`PLAN ${best.label}`,id:best.id};
+}
+
+function distanceForPreviewTarget(target){
+  const hfov=targetHFov();
+  const tanHalf=Math.tan(rad(hfov)/2);
+  if(!tanHalf || !target?.scale) return state.subjectDistance;
+  // frameHeight = 2*d*tan(H/2)/ratio
+  // target.scale = subjectHeight/frameHeight
+  return state.subjectHeight*state.ratio/(2*tanHalf*target.scale);
+}
+
+function renderPreviewTargets(){
+  const el=$('#previewTargetButtons');
+  if(!el) return;
+  el.innerHTML='';
+  previewTargets.forEach(target=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='preview-target';
+    b.textContent=target.label;
+    b.onclick=()=>{
+      const d=distanceForPreviewTarget(target);
+      state.subjectDistance=Math.max(.4,Math.min(30,d));
+      syncPreviewInputs();
+      savePreviewSettings();
+      updatePreview();
+    };
+    el.appendChild(b);
+  });
+}
+
+function syncPreviewInputs(){
+  const h=$('#subjectHeightInput');
+  const d=$('#subjectDistanceInput');
+  const slider=$('#subjectDistanceSlider');
+  const readout=$('#subjectDistanceReadout');
+  if(h) h.value=state.subjectHeight.toFixed(2);
+  if(d) d.value=state.subjectDistance.toFixed(2);
+  if(slider){
+    // Extend the visual slider if a target requires more than 15 m.
+    slider.max=Math.max(15,Math.ceil(state.subjectDistance+1));
+    slider.value=state.subjectDistance;
+  }
+  if(readout) readout.textContent=state.subjectDistance.toFixed(2).replace('.',',')+' m';
+}
+
+function setFrameMode(mode,persist=true){
+  state.mode=mode==='preview'?'preview':'real';
+
+  const preview=state.mode==='preview';
+  $('#realModeBtn')?.classList.toggle('active',!preview);
+  $('#previewModeBtn')?.classList.toggle('active',preview);
+  $('#previewScene')?.classList.toggle('hidden',!preview);
+  $('#previewControls')?.classList.toggle('hidden',!preview);
+  $('#video')?.classList.toggle('mode-hidden',preview);
+  $('#cameraPlaceholder')?.classList.toggle('mode-hidden',preview);
+
+  // Phone-camera and calibration buttons only concern the real view.
+  $('#cameraBtn')?.classList.toggle('hidden',preview);
+  $('#calBtn')?.classList.toggle('hidden',preview);
+
+  const kicker=$('#viewPanelKicker');
+  const label=$('#viewModeLabel');
+  if(kicker) kicker.textContent=preview?'PREVIEW':'VISEUR';
+  if(label) label.textContent=preview?'SIMULATION · BST':'VUE RÉELLE · BST';
+
+  if(persist) savePreviewSettings();
+  requestAnimationFrame(()=>{
+    updateFrame();
+    updatePreview();
+    if(!preview) updateSimulation();
+  });
+}
+
+function updatePreview(){
+  if(state.mode!=='preview') return;
+
+  const scene=$('#previewScene');
+  const subject=$('#previewSubject');
+  const measure=$('#previewMeasure');
+  const ground=$('#previewGroundLine');
+  const frame=$('#mainFrame');
+  const stage=$('#cameraStage');
+  if(!scene || !subject || !frame || !stage) return;
+
+  const stageRect=stage.getBoundingClientRect();
+  const frameRect=frame.getBoundingClientRect();
+  if(!frameRect.width || !frameRect.height) return;
+
+  const metrics=previewFrameMetrics();
+  const plan=closestPreviewPlan(metrics.bodyScale);
+
+  const frameLeft=frameRect.left-stageRect.left;
+  const frameTop=frameRect.top-stageRect.top;
+  const headroom=.07*frameRect.height;
+  const personHeightPx=metrics.bodyScale*frameRect.height;
+  const personWidthPx=personHeightPx*(240/900);
+
+  subject.style.left=(frameLeft+frameRect.width/2)+'px';
+  subject.style.top=(frameTop+headroom)+'px';
+  subject.style.width=personWidthPx+'px';
+  subject.style.height=personHeightPx+'px';
+
+  // Height ruler tracks the complete theoretical body even if feet are cropped.
+  if(measure){
+    const rulerX=frameLeft+frameRect.width/2+personWidthPx*.78;
+    measure.style.left=rulerX+'px';
+    measure.style.top=(frameTop+headroom)+'px';
+    measure.style.height=personHeightPx+'px';
+  }
+
+  if(ground){
+    const footY=frameTop+headroom+personHeightPx;
+    ground.style.top=Math.max(0,Math.min(stageRect.height,footY))+'px';
+    ground.classList.toggle('hidden',footY<0 || footY>stageRect.height);
+  }
+
+  const measureText=$('#previewMeasureText');
+  if(measureText) measureText.textContent=state.subjectHeight.toFixed(2).replace('.',',')+' m';
+
+  const overlayPlan=$('#previewPlanOverlay');
+  const overlayMetrics=$('#previewMetricsOverlay');
+  if(overlayPlan) overlayPlan.textContent=plan.label;
+  if(overlayMetrics){
+    overlayMetrics.textContent=`${metrics.frameWidth.toFixed(2).replace('.',',')} × ${metrics.frameHeight.toFixed(2).replace('.',',')} m · recul ${state.subjectDistance.toFixed(2).replace('.',',')} m`;
+  }
+
+  const resultPlan=$('#previewPlanResult');
+  const resultSize=$('#previewFrameSizeResult');
+  if(resultPlan) resultPlan.textContent=plan.label.replace('PLAN ','');
+  if(resultSize) resultSize.textContent=`${metrics.frameWidth.toFixed(2).replace('.',',')} × ${metrics.frameHeight.toFixed(2).replace('.',',')} m`;
+
+  syncPreviewInputs();
+
+  // Highlight the closest target, when applicable.
+  $$('.preview-target').forEach((b,i)=>{
+    b.classList.toggle('active',previewTargets[i]?.id===plan.id);
+  });
+}
+
 function renderLenses(){
   const el=$('#lensStrip'); el.innerHTML='';
   lenses.forEach(mm=>{
     const unavailable=isTargetUnavailable(state.sensorWidth,mm);
     const b=document.createElement('button');
-    b.className='lens-pill'+(Math.abs(mm-state.focal)<0.001?' active':'')+(unavailable?' unavailable':'');
+    b.className='lens-pill'+(mm===state.focal?' active':'')+(unavailable?' unavailable':'');
     b.textContent=mm;
     if(unavailable){
       b.disabled=true;
@@ -376,11 +571,7 @@ function updateReadout(){
   const hf=targetHFov();
   $('#cameraReadout').textContent=state.preset.name.replace('ARRI ','').replace('Sony ','').replace('RED ','');
   $('#cameraPresetText').textContent=state.preset.name;
-  $('#focalReadout').textContent=(Number.isInteger(state.focal)?state.focal:Number(state.focal.toFixed(1)))+' mm';
-  const focalInput=$('#customFocalInput');
-  if(focalInput && document.activeElement!==focalInput){
-    focalInput.value=Number.isInteger(state.focal)?String(state.focal):String(Number(state.focal.toFixed(1)));
-  }
+  $('#focalReadout').textContent=state.focal+' mm';
   $('#ratioReadout').textContent=ratioLabel(state.ratio).replace(':1','');
   $('#ratioText').textContent=ratioLabel(state.ratio);
   $('#hfovReadout').textContent=hf.toFixed(1)+'°';
@@ -524,7 +715,11 @@ function updateSimulation(){
 }
 
 function updateAll(){
-  updateReadout(); updateFrame(); updateSimulation(); renderGuideChoices();
+  updateReadout();
+  updateFrame();
+  if(state.mode==='preview') updatePreview();
+  else updateSimulation();
+  renderGuideChoices();
 }
 
 async function startCamera(deviceId){
@@ -946,54 +1141,35 @@ function toggleTheme(){
   applyTheme(document.body.classList.contains("dark")?"light":"dark");
 }
 
-
-let deferredInstallPrompt=null;
-
-function isStandaloneApp(){
-  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
-}
-function isIOSDevice(){
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-function updateInstallButton(){
-  const btn=$('#installBtn');
-  if(!btn) return;
-  if(isStandaloneApp()){
-    btn.classList.add('hidden');
-    return;
-  }
-  // On iOS, always offer our clear installation instructions.
-  // On other platforms, show when the native prompt is available; fallback after load if needed.
-  if(isIOSDevice() || deferredInstallPrompt){
-    btn.classList.remove('hidden');
-  }
-}
-async function handleInstall(){
-  if(isStandaloneApp()) return;
-  if(deferredInstallPrompt){
-    const promptEvent=deferredInstallPrompt;
-    deferredInstallPrompt=null;
-    try{
-      promptEvent.prompt();
-      await promptEvent.userChoice;
-    }catch(_){ }
-    updateInstallButton();
-    return;
-  }
-  $('#installDialog')?.showModal();
-}
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();
-  deferredInstallPrompt=e;
-  updateInstallButton();
-});
-window.addEventListener('appinstalled',()=>{
-  deferredInstallPrompt=null;
-  updateInstallButton();
-});
-
 function registerEvents(){
   $('#startCameraBtn').onclick=()=>startCamera();
+  $('#realModeBtn').onclick=()=>setFrameMode('real');
+  $('#previewModeBtn').onclick=()=>setFrameMode('preview');
+
+  $('#subjectHeightInput').oninput=e=>{
+    const v=parseFloat(e.target.value);
+    if(Number.isFinite(v)){
+      state.subjectHeight=Math.max(1.2,Math.min(2.2,v));
+      savePreviewSettings();
+      updatePreview();
+    }
+  };
+  $('#subjectDistanceInput').oninput=e=>{
+    const v=parseFloat(e.target.value);
+    if(Number.isFinite(v)){
+      state.subjectDistance=Math.max(.4,Math.min(30,v));
+      savePreviewSettings();
+      updatePreview();
+    }
+  };
+  $('#subjectDistanceSlider').oninput=e=>{
+    const v=parseFloat(e.target.value);
+    if(Number.isFinite(v)){
+      state.subjectDistance=Math.max(.4,Math.min(30,v));
+      savePreviewSettings();
+      updatePreview();
+    }
+  };
   $('#cameraBtn').onclick=()=>{$('#cameraDialog').showModal();updateCalibrationStatus()};
   $('#restartCameraBtn').onclick=()=>startCamera($('#deviceSelect').value);
 
@@ -1020,21 +1196,7 @@ function registerEvents(){
   $('#clearWideLimitBtn').onclick=()=>clearWideLimit();
   $('#saveProPointBtn').onclick=()=>saveCurrentProPoint();
 
-  const customFocalInput=$('#customFocalInput');
-  const applyCustomFocal=()=>{
-    if(!customFocalInput) return;
-    const raw=String(customFocalInput.value).replace(',','.');
-    const value=Number.parseFloat(raw);
-    if(!Number.isFinite(value) || value<=0 || value>1000) return;
-    state.focal=Math.round(value*10)/10;
-    renderLenses();
-    updateAll();
-  };
-  customFocalInput?.addEventListener('input',applyCustomFocal);
-  customFocalInput?.addEventListener('change',applyCustomFocal);
-
   $('#settingsBtn').onclick=()=>$('#settingsDialog').showModal();
-  $('#installBtn').onclick=()=>handleInstall();
   $('#themeBtn').onclick=()=>toggleTheme();
   $('#cameraPresetBtn').onclick=()=>{$('#sensorWidthInput').value=state.sensorWidth.toFixed(2);$('#presetDialog').showModal()};
   $('#ratioBtn').onclick=()=>$('#ratioDialog').showModal();
@@ -1082,6 +1244,7 @@ function registerEvents(){
       updateSimulation();
       if($('#proCalDialog')?.open) prepareProScale();
       if($('#calDialog')?.open) updateCalLines();
+      if(state.mode==='preview') updatePreview();
     });
   });
 }
@@ -1094,11 +1257,14 @@ function openCalibrationChooser(){
 function init(){
   applyTheme(preferredTheme(),false);
   loadMainCameraSetting();
+  loadPreviewSettings();
   renderLenses(); renderPresets(); renderRatios(); renderGuideChoices();
   renderProPresetSelect(); renderProLenses(); renderProPoints();
-  setupCalibrationDrag(); registerEvents(); updateAll();
-  updateInstallButton();
-  setTimeout(()=>{ if(!isStandaloneApp() && !deferredInstallPrompt) $('#installBtn')?.classList.remove('hidden'); },900);
-  if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  renderPreviewTargets();
+  setupCalibrationDrag(); registerEvents();
+  syncPreviewInputs();
+  setFrameMode(state.mode,false);
+  updateAll();
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 init();
