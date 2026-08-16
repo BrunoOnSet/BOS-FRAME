@@ -64,9 +64,21 @@ const state = {
   orientation: innerWidth >= innerHeight ? 'landscape' : 'portrait',
   calLeft:.30,
   calRight:.70,
-  mode:'real',
+  mode:'preview',
   subjectHeight:1.75,
-  subjectDistance:3.00
+  subjectDistance:3.00,
+  subjectCount:1,
+  subjects:[
+    {id:1,name:'S1',height:1.75,x:0.00,y:3.00},
+    {id:2,name:'S2',height:1.75,x:1.20,y:3.00},
+    {id:3,name:'S3',height:1.75,x:-1.20,y:3.50}
+  ],
+  cameraPos:{x:0,y:0},
+  cameraHeight:1.55,
+  aperture:2.8,
+  focusDistance:3.00,
+  dofRecommendation:null,
+  topDrag:null
 };
 
 const MAIN_SETTINGS_KEY='frame-main-settings-v1';
@@ -111,14 +123,45 @@ function loadPreviewSettings(){
     if(saved.mode==='real' || saved.mode==='preview') state.mode=saved.mode;
     if(Number.isFinite(saved.subjectHeight)) state.subjectHeight=Math.max(1.2,Math.min(2.2,saved.subjectHeight));
     if(Number.isFinite(saved.subjectDistance)) state.subjectDistance=Math.max(.4,Math.min(30,saved.subjectDistance));
+    if(Number.isFinite(saved.subjectCount)) state.subjectCount=Math.max(1,Math.min(3,Math.round(saved.subjectCount)));
+    if(Array.isArray(saved.subjects)){
+      saved.subjects.slice(0,3).forEach((s,i)=>{
+        if(!state.subjects[i]) return;
+        if(Number.isFinite(s.height)) state.subjects[i].height=Math.max(1.2,Math.min(2.2,s.height));
+        if(Number.isFinite(s.x)) state.subjects[i].x=Math.max(-5.5,Math.min(5.5,s.x));
+        if(Number.isFinite(s.y)) state.subjects[i].y=Math.max(-.5,Math.min(14.5,s.y));
+      });
+    }
+    if(saved.cameraPos && Number.isFinite(saved.cameraPos.x) && Number.isFinite(saved.cameraPos.y)){
+      state.cameraPos={
+        x:Math.max(-5.5,Math.min(5.5,saved.cameraPos.x)),
+        y:Math.max(-.5,Math.min(14.5,saved.cameraPos.y))
+      };
+    }
+    if(Number.isFinite(saved.aperture)) state.aperture=Math.max(1,Math.min(22,saved.aperture));
+    if(Number.isFinite(saved.focusDistance)) state.focusDistance=Math.max(.3,Math.min(50,saved.focusDistance));
+  }
+
+  // Migration from the original single-subject preview.
+  state.subjects[0].height=state.subjectHeight;
+  if(!saved?.subjects){
+    state.subjects[0].x=0;
+    state.subjects[0].y=state.subjectDistance;
   }
 }
 function savePreviewSettings(){
   try{
+    state.subjectHeight=state.subjects[0].height;
+    state.subjectDistance=subjectDistance(state.subjects[0]);
     localStorage.setItem(PREVIEW_SETTINGS_KEY,JSON.stringify({
       mode:state.mode,
       subjectHeight:state.subjectHeight,
-      subjectDistance:state.subjectDistance
+      subjectDistance:state.subjectDistance,
+      subjectCount:state.subjectCount,
+      subjects:state.subjects.map(s=>({height:s.height,x:s.x,y:s.y})),
+      cameraPos:state.cameraPos,
+      aperture:state.aperture,
+      focusDistance:state.focusDistance
     }));
   }catch{}
 }
@@ -299,20 +342,90 @@ function isTargetUnavailable(sensorWidth,focal){
   return hf > state.maxUsableHFov + 0.05;
 }
 
-function previewFrameMetrics(distance=state.subjectDistance){
+
+const apertureStops=[1.0,1.2,1.4,1.8,2.0,2.8,4.0,5.6,8,11,16,22];
+
+function activeSubjects(){
+  return state.subjects.slice(0,state.subjectCount);
+}
+function subjectDistance(subject){
+  return Math.hypot(subject.x-state.cameraPos.x,subject.y-state.cameraPos.y);
+}
+function groupCenter(subjects=activeSubjects()){
+  if(!subjects.length) return {x:0,y:3,z:.9};
+  return {
+    x:subjects.reduce((a,s)=>a+s.x,0)/subjects.length,
+    y:subjects.reduce((a,s)=>a+s.y,0)/subjects.length,
+    z:subjects.reduce((a,s)=>a+s.height*.50,0)/subjects.length
+  };
+}
+function groundViewBasis(cameraPos=state.cameraPos){
+  const g=groupCenter();
+  let dx=g.x-cameraPos.x,dy=g.y-cameraPos.y;
+  let len=Math.hypot(dx,dy);
+  if(len<.001){dx=0;dy=1;len=1}
+  return {
+    forward:{x:dx/len,y:dy/len},
+    right:{x:dy/len,y:-dx/len},
+    center:g
+  };
+}
+function dot3(a,b){return a.x*b.x+a.y*b.y+a.z*b.z}
+function cross3(a,b){return {x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}}
+function norm3(v){
+  const l=Math.hypot(v.x,v.y,v.z)||1;
+  return {x:v.x/l,y:v.y/l,z:v.z/l};
+}
+function cameraBasis(){
+  const g=groupCenter();
+  const pos={x:state.cameraPos.x,y:state.cameraPos.y,z:state.cameraHeight};
+  const target={x:g.x,y:g.y,z:g.z};
+  if(Math.hypot(target.x-pos.x,target.y-pos.y)<.04) target.y+=.20;
+  const forward=norm3({x:target.x-pos.x,y:target.y-pos.y,z:target.z-pos.z});
+  const right=norm3(cross3(forward,{x:0,y:0,z:1}));
+  const up=norm3(cross3(right,forward));
+  return {pos,forward,right,up};
+}
+function verticalFov(){
+  const h=rad(targetHFov());
+  return deg(2*Math.atan(Math.tan(h/2)/state.ratio));
+}
+function projectWorldPoint(p,basis=cameraBasis()){
+  const d={x:p.x-basis.pos.x,y:p.y-basis.pos.y,z:p.z-basis.pos.z};
+  const depth=dot3(d,basis.forward);
+  if(depth<=.03) return null;
+  const tx=Math.tan(rad(targetHFov())/2);
+  const ty=Math.tan(rad(verticalFov())/2);
+  return {
+    depth,
+    x:dot3(d,basis.right)/(depth*tx),
+    y:dot3(d,basis.up)/(depth*ty)
+  };
+}
+function subjectProjection(subject){
+  const basis=cameraBasis();
+  const feet=projectWorldPoint({x:subject.x,y:subject.y,z:0},basis);
+  const head=projectWorldPoint({x:subject.x,y:subject.y,z:subject.height},basis);
+  const center=projectWorldPoint({x:subject.x,y:subject.y,z:subject.height*.52},basis);
+  if(!feet || !head || !center) return null;
+  return {feet,head,center};
+}
+function bodyScaleForSubject(subject){
+  const p=subjectProjection(subject);
+  if(!p) return 0;
+  return Math.abs(p.feet.y-p.head.y)/2;
+}
+function previewFrameMetricsAt(distance){
   const d=Math.max(.01,Number(distance)||.01);
   const hfov=targetHFov();
   const frameWidth=2*d*Math.tan(rad(hfov)/2);
   const frameHeight=frameWidth/state.ratio;
-  const bodyScale=state.subjectHeight/frameHeight;
-  return {hfov,frameWidth,frameHeight,bodyScale};
+  return {hfov,frameWidth,frameHeight};
 }
-
 function closestPreviewPlan(scale){
   if(scale < .64) return {label:'PLAN LARGE', id:'wide'};
   if(scale > 6.2) return {label:'TRÈS GROS PLAN', id:'veryclose'};
-  let best=previewTargets[0];
-  let score=Infinity;
+  let best=previewTargets[0],score=Infinity;
   previewTargets.forEach(t=>{
     const s=Math.abs(Math.log(Math.max(.001,scale)/t.scale));
     if(s<score){score=s;best=t}
@@ -320,13 +433,32 @@ function closestPreviewPlan(scale){
   return {label:`PLAN ${best.label}`,id:best.id};
 }
 
-function distanceForPreviewTarget(target){
-  const hfov=targetHFov();
-  const tanHalf=Math.tan(rad(hfov)/2);
-  if(!tanHalf || !target?.scale) return state.subjectDistance;
-  // frameHeight = 2*d*tan(H/2)/ratio
-  // target.scale = subjectHeight/frameHeight
-  return state.subjectHeight*state.ratio/(2*tanHalf*target.scale);
+function placeCameraForTarget(target){
+  const subjects=activeSubjects();
+  const center=groupCenter(subjects);
+  let vx=state.cameraPos.x-center.x,vy=state.cameraPos.y-center.y;
+  let len=Math.hypot(vx,vy);
+  if(len<.1){vx=0;vy=-1;len=1}
+  vx/=len;vy/=len;
+
+  let lo=.35,hi=35;
+  for(let i=0;i<45;i++){
+    const d=(lo+hi)/2;
+    const candidate={x:center.x+vx*d,y:center.y+vy*d};
+    const old=state.cameraPos;
+    state.cameraPos=candidate;
+    const maxScale=Math.max(...subjects.map(bodyScaleForSubject));
+    state.cameraPos=old;
+    // Farther camera -> smaller scale.
+    if(maxScale>target.scale) lo=d;
+    else hi=d;
+  }
+  const d=(lo+hi)/2;
+  state.cameraPos={x:center.x+vx*d,y:center.y+vy*d};
+  state.focusDistance=Math.max(.3,Math.min(50,subjects.reduce((a,s)=>a+subjectDistance(s),0)/subjects.length));
+  savePreviewSettings();
+  syncPreviewInputs();
+  updatePreview();
 }
 
 function renderPreviewTargets(){
@@ -338,35 +470,369 @@ function renderPreviewTargets(){
     b.type='button';
     b.className='preview-target';
     b.textContent=target.label;
+    b.onclick=()=>placeCameraForTarget(target);
+    el.appendChild(b);
+  });
+}
+
+function moveSubjectToDistance(subject,distance){
+  const dx=subject.x-state.cameraPos.x,dy=subject.y-state.cameraPos.y;
+  let len=Math.hypot(dx,dy);
+  let ux=0,uy=1;
+  if(len>.001){ux=dx/len;uy=dy/len}
+  subject.x=state.cameraPos.x+ux*distance;
+  subject.y=state.cameraPos.y+uy*distance;
+}
+function syncPreviewInputs(){
+  const s1=state.subjects[0];
+  const d1=subjectDistance(s1);
+  state.subjectHeight=s1.height;
+  state.subjectDistance=d1;
+  const h=$('#subjectHeightInput');
+  const d=$('#subjectDistanceInput');
+  const slider=$('#subjectDistanceSlider');
+  const readout=$('#subjectDistanceReadout');
+  if(h) h.value=s1.height.toFixed(2);
+  if(d) d.value=d1.toFixed(2);
+  if(slider){
+    slider.max=Math.max(15,Math.ceil(d1+1));
+    slider.value=d1;
+  }
+  if(readout) readout.textContent=d1.toFixed(2).replace('.',',')+' m';
+  const fd=$('#focusDistanceInput');
+  if(fd) fd.value=state.focusDistance.toFixed(2);
+  const ar=$('#apertureReadout');
+  if(ar) ar.textContent=`f/${Number.isInteger(state.aperture)?state.aperture:state.aperture.toFixed(1)}`;
+}
+
+function preparePreviewSubjectClones(){
+  const source=$('#previewSubject');
+  if(!source) return;
+  const svg=source.querySelector('svg');
+  [2,3].forEach(i=>{
+    const el=$(`#previewSubject${i}`);
+    if(el && !el.querySelector('svg') && svg){
+      const clone=svg.cloneNode(true);
+      clone.removeAttribute('role');
+      clone.setAttribute('aria-hidden','true');
+      el.appendChild(clone);
+    }
+  });
+  [source,$('#previewSubject2'),$('#previewSubject3')].forEach((el,i)=>{
+    if(!el) return;
+    let badge=el.querySelector('.preview-person-badge');
+    if(!badge){
+      badge=document.createElement('span');
+      badge.className='preview-person-badge';
+      badge.textContent=`S${i+1}`;
+      el.appendChild(badge);
+    }
+  });
+}
+
+function setSubjectCount(count){
+  const previous=state.subjectCount;
+  state.subjectCount=Math.max(1,Math.min(3,Math.round(count)));
+  if(state.subjectCount>previous){
+    const basis=groundViewBasis();
+    const s1=state.subjects[0];
+    if(previous===1 && state.subjectCount>=2){
+      state.subjects[1].x=s1.x+basis.right.x*1.15;
+      state.subjects[1].y=s1.y+basis.right.y*1.15;
+      state.subjects[1].height=s1.height;
+    }
+    if(previous<3 && state.subjectCount===3){
+      state.subjects[2].x=s1.x-basis.right.x*1.15;
+      state.subjects[2].y=s1.y-basis.right.y*1.15;
+      state.subjects[2].height=s1.height;
+    }
+  }
+  state.focusDistance=Math.max(.3,Math.min(50,
+    activeSubjects().reduce((a,s)=>a+subjectDistance(s),0)/state.subjectCount
+  ));
+  renderSubjectCount();
+  renderExtraSubjectControls();
+  renderFocusQuickButtons();
+  savePreviewSettings();
+  updatePreview();
+}
+function renderSubjectCount(){
+  $$('#subjectCountSwitch button').forEach(b=>{
+    b.classList.toggle('active',Number(b.dataset.count)===state.subjectCount);
+  });
+}
+function renderExtraSubjectControls(){
+  const el=$('#extraSubjectControls');
+  if(!el) return;
+  el.innerHTML='';
+  activeSubjects().slice(1).forEach((s,index)=>{
+    const d=subjectDistance(s);
+    const row=document.createElement('div');
+    row.className='extra-subject-row';
+    row.innerHTML=`
+      <div class="extra-subject-title">
+        <strong>SUJET ${index+2}</strong>
+        <span id="subjectStatusText${index+2}">—</span>
+      </div>
+      <label>
+        <span>Taille</span>
+        <div><input type="number" min="1.20" max="2.20" step="0.01" value="${s.height.toFixed(2)}" data-subject-height="${index+1}"><em>m</em></div>
+      </label>
+      <div class="extra-subject-distance">Caméra → S${index+2} : <strong>${d.toFixed(2).replace('.',',')} m</strong></div>
+    `;
+    el.appendChild(row);
+  });
+  el.querySelectorAll('[data-subject-height]').forEach(input=>{
+    input.oninput=e=>{
+      const ix=Number(e.target.dataset.subjectHeight);
+      const v=parseFloat(e.target.value);
+      if(Number.isFinite(v)){
+        state.subjects[ix].height=Math.max(1.2,Math.min(2.2,v));
+        savePreviewSettings();
+        updatePreview();
+      }
+    };
+  });
+}
+
+function cocMm(){
+  // Classic 0.03 mm full-frame reference, scaled to sensor width.
+  return .030*(state.sensorWidth/36);
+}
+function dofBounds(focusDistance=state.focusDistance,aperture=state.aperture){
+  const f=state.focal; // mm
+  const s=Math.max(.301,focusDistance)*1000; // mm
+  const N=Math.max(.7,aperture);
+  const c=Math.max(.004,cocMm());
+  const H=(f*f)/(N*c)+f;
+  const near=(H*s)/(H+s-f);
+  const denom=H-s+f;
+  const far=denom<=0?Infinity:(H*s)/denom;
+  return {near:near/1000,far:far===Infinity?Infinity:far/1000,H:H/1000};
+}
+function dofStatus(distance,bounds=dofBounds()){
+  const inside=distance>=bounds.near && (bounds.far===Infinity || distance<=bounds.far);
+  if(!inside) return {key:'out',label:'HORS PDC'};
+  const total=bounds.far===Infinity?Math.max(1,distance-bounds.near):(bounds.far-bounds.near);
+  const margin=Math.min(distance-bounds.near,bounds.far===Infinity?Infinity:bounds.far-distance);
+  const threshold=Math.max(.06,total*.08);
+  if(margin<threshold) return {key:'edge',label:'LIMITE'};
+  return {key:'net',label:'NET'};
+}
+function groupDofRecommendation(){
+  const subjects=activeSubjects();
+  const ds=subjects.map(subjectDistance).sort((a,b)=>a-b);
+  if(!ds.length) return null;
+  if(ds.length===1) return {aperture:1.4,focus:ds[0],near:ds[0],far:ds[0]};
+
+  const minD=ds[0],maxD=ds[ds.length-1];
+  for(const N of apertureStops){
+    let best=null;
+    const lo=Math.max(.3,minD*.88);
+    const hi=Math.min(50,maxD*1.12);
+    for(let i=0;i<=220;i++){
+      const focus=lo+(hi-lo)*(i/220);
+      const b=dofBounds(focus,N);
+      const covers=ds.every(d=>d>=b.near && (b.far===Infinity || d<=b.far));
+      if(!covers) continue;
+      const front=minD-b.near;
+      const back=b.far===Infinity?front:maxD<=b.far?b.far-maxD:-999;
+      const score=Math.min(front,back);
+      if(!best || score>best.score) best={aperture:N,focus,near:b.near,far:b.far,score};
+    }
+    if(best) return best;
+  }
+  return null;
+}
+function formatDistance(v){
+  if(v===Infinity) return '∞';
+  return `${v.toFixed(2).replace('.',',')} m`;
+}
+function renderApertureChips(){
+  const el=$('#apertureChips');
+  if(!el) return;
+  el.innerHTML='';
+  apertureStops.forEach(N=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='aperture-chip'+(Math.abs(N-state.aperture)<.001?' active':'');
+    b.textContent=`f/${Number.isInteger(N)?N:N.toFixed(1)}`;
     b.onclick=()=>{
-      const d=distanceForPreviewTarget(target);
-      state.subjectDistance=Math.max(.4,Math.min(30,d));
-      syncPreviewInputs();
+      state.aperture=N;
       savePreviewSettings();
+      renderApertureChips();
       updatePreview();
     };
     el.appendChild(b);
   });
 }
-
-function syncPreviewInputs(){
-  const h=$('#subjectHeightInput');
-  const d=$('#subjectDistanceInput');
-  const slider=$('#subjectDistanceSlider');
-  const readout=$('#subjectDistanceReadout');
-  if(h) h.value=state.subjectHeight.toFixed(2);
-  if(d) d.value=state.subjectDistance.toFixed(2);
-  if(slider){
-    // Extend the visual slider if a target requires more than 15 m.
-    slider.max=Math.max(15,Math.ceil(state.subjectDistance+1));
-    slider.value=state.subjectDistance;
+function renderFocusQuickButtons(){
+  const el=$('#focusQuickButtons');
+  if(!el) return;
+  el.innerHTML='';
+  activeSubjects().forEach((s,i)=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.textContent=`MAP S${i+1}`;
+    b.onclick=()=>{
+      state.focusDistance=subjectDistance(s);
+      savePreviewSettings();syncPreviewInputs();updatePreview();
+    };
+    el.appendChild(b);
+  });
+  if(state.subjectCount>1){
+    const b=document.createElement('button');
+    b.type='button';
+    b.textContent='MAP GROUPE';
+    b.onclick=()=>{
+      const rec=groupDofRecommendation();
+      state.focusDistance=rec?.focus || activeSubjects().reduce((a,s)=>a+subjectDistance(s),0)/state.subjectCount;
+      savePreviewSettings();syncPreviewInputs();updatePreview();
+    };
+    el.appendChild(b);
   }
-  if(readout) readout.textContent=state.subjectDistance.toFixed(2).replace('.',',')+' m';
+}
+
+function worldToSvg(x,y){
+  return {x:x*100,y:1450-y*100};
+}
+function svgToWorld(svg,clientX,clientY){
+  const pt=svg.createSVGPoint();pt.x=clientX;pt.y=clientY;
+  const ctm=svg.getScreenCTM();
+  if(!ctm) return null;
+  const p=pt.matrixTransform(ctm.inverse());
+  return {x:p.x/100,y:(1450-p.y)/100};
+}
+function lineAcrossPlane(distance,basis,widthAtDistance){
+  const c={
+    x:state.cameraPos.x+basis.forward.x*distance,
+    y:state.cameraPos.y+basis.forward.y*distance
+  };
+  const half=widthAtDistance;
+  return [
+    {x:c.x-basis.right.x*half,y:c.y-basis.right.y*half},
+    {x:c.x+basis.right.x*half,y:c.y+basis.right.y*half}
+  ];
+}
+function pointsAttr(points){
+  return points.map(p=>{
+    const s=worldToSvg(p.x,p.y);
+    return `${s.x.toFixed(1)},${s.y.toFixed(1)}`;
+  }).join(' ');
+}
+function updateTopView(bounds){
+  const svg=$('#previewTopView');
+  if(!svg) return;
+  const basis=groundViewBasis();
+
+  // Camera
+  const cam=worldToSvg(state.cameraPos.x,state.cameraPos.y);
+  const angle=deg(Math.atan2(basis.forward.x,basis.forward.y));
+  const camEl=$('#topCamera');
+  camEl?.setAttribute('transform',`translate(${cam.x} ${cam.y}) rotate(${angle})`);
+
+  // FOV cone
+  const farDistance=15;
+  const half=farDistance*Math.tan(rad(targetHFov())/2);
+  const left={x:state.cameraPos.x+basis.forward.x*farDistance-basis.right.x*half,y:state.cameraPos.y+basis.forward.y*farDistance-basis.right.y*half};
+  const right={x:state.cameraPos.x+basis.forward.x*farDistance+basis.right.x*half,y:state.cameraPos.y+basis.forward.y*farDistance+basis.right.y*half};
+  $('#topFovCone')?.setAttribute('points',pointsAttr([state.cameraPos,left,right]));
+
+  // Subjects layer
+  const layer=$('#topSubjectsLayer');
+  if(layer){
+    layer.innerHTML='';
+    activeSubjects().forEach((s,i)=>{
+      const p=worldToSvg(s.x,s.y);
+      const status=dofStatus(subjectDistance(s),bounds);
+      const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class',`top-subject drag-node dof-${status.key}`);
+      g.setAttribute('data-drag-kind','subject');
+      g.setAttribute('data-index',String(i));
+      g.setAttribute('transform',`translate(${p.x} ${p.y})`);
+      g.innerHTML=`<circle r="34"></circle><circle r="9" class="top-subject-center"></circle><text x="0" y="61" text-anchor="middle">S${i+1}</text>`;
+      layer.appendChild(g);
+    });
+  }
+
+  // DOF polygon in the cone.
+  const near=Math.max(.05,bounds.near);
+  const far=bounds.far===Infinity?15:Math.min(15,bounds.far);
+  const nearHalf=near*Math.tan(rad(targetHFov())/2);
+  const farHalf=far*Math.tan(rad(targetHFov())/2);
+  const nearLine=lineAcrossPlane(near,basis,nearHalf);
+  const farLine=lineAcrossPlane(far,basis,farHalf);
+  $('#topDofZone')?.setAttribute('points',pointsAttr([nearLine[0],nearLine[1],farLine[1],farLine[0]]));
+
+  const n1=worldToSvg(nearLine[0].x,nearLine[0].y),n2=worldToSvg(nearLine[1].x,nearLine[1].y);
+  const f1=worldToSvg(farLine[0].x,farLine[0].y),f2=worldToSvg(farLine[1].x,farLine[1].y);
+  const nl=$('#topNearLine'),fl=$('#topFarLine');
+  if(nl){nl.setAttribute('x1',n1.x);nl.setAttribute('y1',n1.y);nl.setAttribute('x2',n2.x);nl.setAttribute('y2',n2.y)}
+  if(fl){fl.setAttribute('x1',f1.x);fl.setAttribute('y1',f1.y);fl.setAttribute('x2',f2.x);fl.setAttribute('y2',f2.y)}
+
+  const focus=Math.max(.05,state.focusDistance);
+  const focusHalf=focus*Math.tan(rad(targetHFov())/2);
+  const focusLine=lineAcrossPlane(focus,basis,focusHalf);
+  const fp1=worldToSvg(focusLine[0].x,focusLine[0].y),fp2=worldToSvg(focusLine[1].x,focusLine[1].y);
+  const fpl=$('#topFocusLine');
+  if(fpl){fpl.setAttribute('x1',fp1.x);fpl.setAttribute('y1',fp1.y);fpl.setAttribute('x2',fp2.x);fpl.setAttribute('y2',fp2.y)}
+
+  const info=$('#topViewGroupInfo');
+  if(info){
+    const ds=activeSubjects().map(subjectDistance);
+    let text=`${state.subjectCount} sujet${state.subjectCount>1?'s':''}`;
+    if(ds.length>1){
+      const sep=Math.hypot(activeSubjects()[0].x-activeSubjects()[1].x,activeSubjects()[0].y-activeSubjects()[1].y);
+      text+=` · S1↔S2 ${sep.toFixed(2).replace('.',',')} m`;
+    }
+    info.textContent=text;
+  }
+}
+function setupTopViewDrag(){
+  const svg=$('#previewTopView');
+  if(!svg) return;
+
+  svg.addEventListener('pointerdown',e=>{
+    const node=e.target.closest?.('.drag-node');
+    if(!node) return;
+    e.preventDefault();
+    svg.setPointerCapture?.(e.pointerId);
+    state.topDrag={
+      kind:node.dataset.dragKind,
+      index:Number(node.dataset.index||0),
+      pointerId:e.pointerId
+    };
+  });
+  svg.addEventListener('pointermove',e=>{
+    if(!state.topDrag || state.topDrag.pointerId!==e.pointerId) return;
+    e.preventDefault();
+    const p=svgToWorld(svg,e.clientX,e.clientY);
+    if(!p) return;
+    p.x=Math.max(-5.5,Math.min(5.5,p.x));
+    p.y=Math.max(-.5,Math.min(14.5,p.y));
+    if(state.topDrag.kind==='camera'){
+      state.cameraPos={x:p.x,y:p.y};
+    }else{
+      const s=state.subjects[state.topDrag.index];
+      if(s){s.x=p.x;s.y=p.y}
+    }
+    savePreviewSettings();
+    syncPreviewInputs();
+    renderExtraSubjectControls();
+    updatePreview();
+  });
+  const end=e=>{
+    if(state.topDrag && (!e.pointerId || state.topDrag.pointerId===e.pointerId)){
+      state.topDrag=null;
+      savePreviewSettings();
+    }
+  };
+  svg.addEventListener('pointerup',end);
+  svg.addEventListener('pointercancel',end);
 }
 
 function setFrameMode(mode,persist=true){
   state.mode=mode==='preview'?'preview':'real';
-
   const preview=state.mode==='preview';
   $('#realModeBtn')?.classList.toggle('active',!preview);
   $('#previewModeBtn')?.classList.toggle('active',preview);
@@ -374,75 +840,136 @@ function setFrameMode(mode,persist=true){
   $('#previewControls')?.classList.toggle('hidden',!preview);
   $('#video')?.classList.toggle('mode-hidden',preview);
   $('#cameraPlaceholder')?.classList.toggle('mode-hidden',preview);
-
-  // Phone-camera and calibration buttons only concern the real view.
   $('#cameraBtn')?.classList.toggle('hidden',preview);
   $('#calBtn')?.classList.toggle('hidden',preview);
 
   const kicker=$('#viewPanelKicker');
   const label=$('#viewModeLabel');
   if(kicker) kicker.textContent=preview?'PREVIEW':'VISEUR';
-  if(label) label.textContent=preview?'SIMULATION · BST':'VUE RÉELLE · BST';
+  if(label) label.textContent=preview?'SIMULATION · BOS':'VUE RÉELLE · BOS';
 
   if(persist) savePreviewSettings();
   requestAnimationFrame(()=>{
     updateFrame();
-    updatePreview();
-    if(!preview) updateSimulation();
+    if(preview) updatePreview();
+    else updateSimulation();
   });
+}
+
+function updateDofUI(){
+  const bounds=dofBounds();
+  const statuses=activeSubjects().map(s=>({s,d:subjectDistance(s),status:dofStatus(subjectDistance(s),bounds)}));
+
+  statuses.forEach((item,i)=>{
+    const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);
+    if(el){
+      el.classList.remove('dof-net','dof-edge','dof-out');
+      el.classList.add(`dof-${item.status.key}`);
+      const badge=el.querySelector('.preview-person-badge');
+      if(badge) badge.textContent=`S${i+1} · ${item.status.label}`;
+    }
+    const txt=$(`#subjectStatusText${i+1}`);
+    if(txt){txt.textContent=item.status.label;txt.className=`dof-text-${item.status.key}`}
+  });
+
+  const allNet=statuses.every(x=>x.status.key!=='out');
+  const anyEdge=statuses.some(x=>x.status.key==='edge');
+  const global=$('#dofGlobalStatus');
+  if(global){
+    global.textContent=allNet?(anyEdge?'LIMITE':'TOUS NETS'):'À CORRIGER';
+    global.className=allNet?(anyEdge?'dof-text-edge':'dof-text-net'):'dof-text-out';
+  }
+  const range=$('#dofRangeResult');
+  if(range) range.textContent=`${formatDistance(bounds.near)} → ${formatDistance(bounds.far)}`;
+  const subs=$('#dofSubjectsResult');
+  if(subs) subs.textContent=statuses.map((x,i)=>`S${i+1} ${x.status.label}`).join(' · ');
+
+  state.dofRecommendation=groupDofRecommendation();
+  const rec=$('#dofRecommendation');
+  const apply=$('#applyDofRecommendationBtn');
+  if(rec){
+    if(state.dofRecommendation){
+      const r=state.dofRecommendation;
+      rec.textContent=`MAP ${formatDistance(r.focus)} · f/${Number.isInteger(r.aperture)?r.aperture:r.aperture.toFixed(1)}`;
+      if(apply) apply.disabled=false;
+    }else{
+      rec.textContent='> f/22 avec cette mise en place';
+      if(apply) apply.disabled=true;
+    }
+  }
+  syncPreviewInputs();
+  renderApertureChips();
+  updateTopView(bounds);
 }
 
 function updatePreview(){
   if(state.mode!=='preview') return;
 
-  const scene=$('#previewScene');
-  const subject=$('#previewSubject');
-  const measure=$('#previewMeasure');
-  const ground=$('#previewGroundLine');
   const frame=$('#mainFrame');
   const stage=$('#cameraStage');
-  if(!scene || !subject || !frame || !stage) return;
-
+  if(!frame || !stage) return;
   const stageRect=stage.getBoundingClientRect();
   const frameRect=frame.getBoundingClientRect();
   if(!frameRect.width || !frameRect.height) return;
 
-  const metrics=previewFrameMetrics();
-  const plan=closestPreviewPlan(metrics.bodyScale);
+  preparePreviewSubjectClones();
+  const projections=activeSubjects().map(subjectProjection);
+  const scales=[];
 
-  const frameLeft=frameRect.left-stageRect.left;
-  const frameTop=frameRect.top-stageRect.top;
-  const headroom=.07*frameRect.height;
-  const personHeightPx=metrics.bodyScale*frameRect.height;
-  const personWidthPx=personHeightPx*(240/900);
+  state.subjects.forEach((subject,i)=>{
+    const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);
+    if(!el) return;
+    const active=i<state.subjectCount;
+    el.classList.toggle('hidden',!active);
+    if(!active) return;
 
-  subject.style.left=(frameLeft+frameRect.width/2)+'px';
-  subject.style.top=(frameTop+headroom)+'px';
-  subject.style.width=personWidthPx+'px';
-  subject.style.height=personHeightPx+'px';
+    const p=projections[i];
+    if(!p){
+      el.classList.add('behind-camera');
+      return;
+    }
+    el.classList.remove('behind-camera');
 
-  // Height ruler tracks the complete theoretical body even if feet are cropped.
-  if(measure){
-    const rulerX=frameLeft+frameRect.width/2+personWidthPx*.78;
-    measure.style.left=rulerX+'px';
-    measure.style.top=(frameTop+headroom)+'px';
-    measure.style.height=personHeightPx+'px';
+    const xPx=frameRect.left-stageRect.left + frameRect.width/2 + p.center.x*frameRect.width/2;
+    const headYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.head.y*frameRect.height/2;
+    const feetYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.feet.y*frameRect.height/2;
+    const hPx=Math.abs(feetYPx-headYPx);
+    const wPx=hPx*(240/900);
+    const top=Math.min(headYPx,feetYPx);
+
+    el.style.left=xPx+'px';
+    el.style.top=top+'px';
+    el.style.width=Math.max(8,wPx)+'px';
+    el.style.height=Math.max(30,hPx)+'px';
+
+    scales.push(hPx/frameRect.height);
+  });
+
+  const measure=$('#previewMeasure');
+  if(measure) measure.classList.toggle('hidden',state.subjectCount!==1);
+  if(state.subjectCount===1 && measure){
+    const s=state.subjects[0];
+    const p=projections[0];
+    const el=$('#previewSubject');
+    if(p && el){
+      const r=el.getBoundingClientRect();
+      measure.style.left=(r.right-stageRect.left+8)+'px';
+      measure.style.top=(r.top-stageRect.top)+'px';
+      measure.style.height=r.height+'px';
+      $('#previewMeasureText').textContent=s.height.toFixed(2).replace('.',',')+' m';
+    }
   }
 
-  if(ground){
-    const footY=frameTop+headroom+personHeightPx;
-    ground.style.top=Math.max(0,Math.min(stageRect.height,footY))+'px';
-    ground.classList.toggle('hidden',footY<0 || footY>stageRect.height);
-  }
-
-  const measureText=$('#previewMeasureText');
-  if(measureText) measureText.textContent=state.subjectHeight.toFixed(2).replace('.',',')+' m';
+  const maxScale=scales.length?Math.max(...scales):0;
+  const plan=closestPreviewPlan(maxScale);
+  const groupD=activeSubjects().reduce((a,s)=>a+subjectDistance(s),0)/state.subjectCount;
+  const metrics=previewFrameMetricsAt(groupD);
 
   const overlayPlan=$('#previewPlanOverlay');
   const overlayMetrics=$('#previewMetricsOverlay');
-  if(overlayPlan) overlayPlan.textContent=plan.label;
+  if(overlayPlan) overlayPlan.textContent=state.subjectCount>1?`${state.subjectCount} SUJETS · ${plan.label}`:plan.label;
   if(overlayMetrics){
-    overlayMetrics.textContent=`${metrics.frameWidth.toFixed(2).replace('.',',')} × ${metrics.frameHeight.toFixed(2).replace('.',',')} m · recul ${state.subjectDistance.toFixed(2).replace('.',',')} m`;
+    overlayMetrics.textContent=`${state.preset.name.replace('Sony ','')} · ${state.focal} mm · centre groupe ${groupD.toFixed(2).replace('.',',')} m`;
   }
 
   const resultPlan=$('#previewPlanResult');
@@ -451,13 +978,15 @@ function updatePreview(){
   if(resultSize) resultSize.textContent=`${metrics.frameWidth.toFixed(2).replace('.',',')} × ${metrics.frameHeight.toFixed(2).replace('.',',')} m`;
 
   syncPreviewInputs();
+  renderSubjectCount();
+  renderExtraSubjectControls();
+  renderFocusQuickButtons();
+  updateDofUI();
 
-  // Highlight the closest target, when applicable.
   $$('.preview-target').forEach((b,i)=>{
     b.classList.toggle('active',previewTargets[i]?.id===plan.id);
   });
 }
-
 function renderLenses(){
   const el=$('#lensStrip'); el.innerHTML='';
   lenses.forEach(mm=>{
@@ -1123,19 +1652,24 @@ function clearWideLimit(){
 
 
 function preferredTheme(){
-  return localStorage.getItem("bruno-set-tools-theme") || "light";
+  return localStorage.getItem("bruno-onset-theme") || localStorage.getItem("bruno-set-tools-theme") || "light";
 }
 function applyTheme(theme,persist=true){
   const dark=theme==="dark";
+  document.documentElement.dataset.theme=dark?"dark":"light";
   document.body.classList.toggle("dark",dark);
   document.body.dataset.theme=dark?"dark":"light";
 
   const themeToggle=$('#themeBtn');
   const themeColor=document.getElementById("themeColor") || document.querySelector('meta[name="theme-color"]');
   if(themeToggle) themeToggle.textContent=dark?"LIGHT":"DARK";
-  if(themeColor) themeColor.setAttribute("content",dark?"#0B0C0E":"#F3F1EC");
+  if(themeColor) themeColor.setAttribute("content",dark?"#111315":"#F3F1EC");
 
-  if(persist) localStorage.setItem("bruno-set-tools-theme",dark?"dark":"light");
+  if(persist){
+    localStorage.setItem("bruno-onset-theme",dark?"dark":"light");
+    // Transitional compatibility with older BOS/BST builds.
+    localStorage.setItem("bruno-set-tools-theme",dark?"dark":"light");
+  }
 }
 function toggleTheme(){
   applyTheme(document.body.classList.contains("dark")?"light":"dark");
@@ -1149,7 +1683,7 @@ function registerEvents(){
   $('#subjectHeightInput').oninput=e=>{
     const v=parseFloat(e.target.value);
     if(Number.isFinite(v)){
-      state.subjectHeight=Math.max(1.2,Math.min(2.2,v));
+      state.subjects[0].height=Math.max(1.2,Math.min(2.2,v));
       savePreviewSettings();
       updatePreview();
     }
@@ -1157,7 +1691,7 @@ function registerEvents(){
   $('#subjectDistanceInput').oninput=e=>{
     const v=parseFloat(e.target.value);
     if(Number.isFinite(v)){
-      state.subjectDistance=Math.max(.4,Math.min(30,v));
+      moveSubjectToDistance(state.subjects[0],Math.max(.4,Math.min(30,v)));
       savePreviewSettings();
       updatePreview();
     }
@@ -1165,10 +1699,28 @@ function registerEvents(){
   $('#subjectDistanceSlider').oninput=e=>{
     const v=parseFloat(e.target.value);
     if(Number.isFinite(v)){
-      state.subjectDistance=Math.max(.4,Math.min(30,v));
+      moveSubjectToDistance(state.subjects[0],Math.max(.4,Math.min(30,v)));
       savePreviewSettings();
       updatePreview();
     }
+  };
+  $$('#subjectCountSwitch button').forEach(b=>b.onclick=()=>setSubjectCount(Number(b.dataset.count)));
+  $('#focusDistanceInput').oninput=e=>{
+    const v=parseFloat(e.target.value);
+    if(Number.isFinite(v)){
+      state.focusDistance=Math.max(.3,Math.min(50,v));
+      savePreviewSettings();
+      updatePreview();
+    }
+  };
+  $('#applyDofRecommendationBtn').onclick=()=>{
+    const r=state.dofRecommendation;
+    if(!r) return;
+    state.focusDistance=r.focus;
+    state.aperture=r.aperture;
+    savePreviewSettings();
+    renderApertureChips();
+    updatePreview();
   };
   $('#cameraBtn').onclick=()=>{$('#cameraDialog').showModal();updateCalibrationStatus()};
   $('#restartCameraBtn').onclick=()=>startCamera($('#deviceSelect').value);
@@ -1260,8 +1812,13 @@ function init(){
   loadPreviewSettings();
   renderLenses(); renderPresets(); renderRatios(); renderGuideChoices();
   renderProPresetSelect(); renderProLenses(); renderProPoints();
+  preparePreviewSubjectClones();
   renderPreviewTargets();
-  setupCalibrationDrag(); registerEvents();
+  renderSubjectCount();
+  renderExtraSubjectControls();
+  renderApertureChips();
+  renderFocusQuickButtons();
+  setupCalibrationDrag(); registerEvents(); setupTopViewDrag();
   syncPreviewInputs();
   setFrameMode(state.mode,false);
   updateAll();
