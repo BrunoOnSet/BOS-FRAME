@@ -543,9 +543,10 @@ function subjectProjection(subject){
   const basis=cameraBasis();
   const feet=projectWorldPoint({x:subject.x,y:subject.y,z:0},basis);
   const head=projectWorldPoint({x:subject.x,y:subject.y,z:subject.height},basis);
+  const eye=projectWorldPoint({x:subject.x,y:subject.y,z:subject.height*previewFigureMetrics.eyeHeightRatio},basis);
   const center=projectWorldPoint({x:subject.x,y:subject.y,z:subject.height*.52},basis);
-  if(!feet || !head || !center) return null;
-  return {feet,head,center};
+  if(!feet || !head || !eye || !center) return null;
+  return {feet,head,eye,center};
 }
 function bodyScaleForSubject(subject){
   const p=subjectProjection(subject);
@@ -1049,16 +1050,20 @@ function updatePreview(){
 
     const xPx=frameRect.left-stageRect.left + frameRect.width/2 + p.center.x*frameRect.width/2;
     const headYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.head.y*frameRect.height/2;
+    const eyeYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.eye.y*frameRect.height/2;
     const feetYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.feet.y*frameRect.height/2;
 
-    // Projected world body height (head top -> feet).
+    // Keep eyes as the absolute anchor, especially in very close framings.
+    // We derive the SVG height from the projected eye-to-feet span so the
+    // internal eye position in the SVG stays exactly on the projected eye line.
+    const eyeToFeetPx=Math.abs(feetYPx-eyeYPx);
+    const svgHeightPx = eyeToFeetPx / (previewFigureMetrics.footRatio - previewFigureMetrics.eyeRatio);
+
+    // Secondary metric still used for plan naming/rough scale.
     const bodyPx=Math.abs(feetYPx-headYPx);
 
-    // Scale the full SVG so that its internal head-top / feet anchors match the
-    // projected head and feet of the preview model.
-    const svgHeightPx = bodyPx / previewFigureMetrics.bodyRatio;
     const wPx = svgHeightPx * (240/900);
-    const top = Math.min(headYPx, feetYPx) - previewFigureMetrics.headTopRatio * svgHeightPx;
+    const top = eyeYPx - previewFigureMetrics.eyeRatio * svgHeightPx;
 
     el.style.left=xPx+'px';
     el.style.top=top+'px';
