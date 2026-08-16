@@ -42,11 +42,11 @@ const PREVIEW_SETTINGS_KEY='frame-preview-settings-v1';
 
 const subjectAppearances = [
   {
-    skin:['#6B4333','#4E2D22','#392018'],
-    shirt:['#D9D4D0','#B8B8B7','#8F9291'],
-    pants:['#263340','#19222C','#111821'],
-    hairMain:'#161110',
-    hairAccent:'#0E0A09'
+    skin:['#A77458','#85553B','#613A27'],
+    shirt:['#D7D2CE','#B7B7B5','#8D908F'],
+    pants:['#33404B','#212A31','#161C21'],
+    hairMain:'#1B1512',
+    hairAccent:'#120D0B'
   },
   {
     skin:['#D6A77E','#B67D56','#905F41'],
@@ -63,13 +63,27 @@ const subjectAppearances = [
     hairAccent:'#34241D'
   },
   {
-    skin:['#8E5D43','#6C432D','#4F2F1F'],
-    shirt:['#C9D5DE','#A9BFCD','#7F9AAD'],
-    pants:['#2A3137','#1D2328','#12171B'],
-    hairMain:'#1E1715',
-    hairAccent:'#120D0B'
+    skin:['#6B4333','#4E2D22','#392018'],
+    shirt:['#D9D4D0','#B8B8B7','#8F9291'],
+    pants:['#263340','#19222C','#111821'],
+    hairMain:'#161110',
+    hairAccent:'#0E0A09'
   }
 ];
+
+const previewFigureMetrics = {
+  viewHeight: 900,
+  headTopY: 22,
+  eyeY: 92,
+  footY: 863,
+  shadowY: 884
+};
+previewFigureMetrics.headTopRatio = previewFigureMetrics.headTopY / previewFigureMetrics.viewHeight;
+previewFigureMetrics.eyeRatio = previewFigureMetrics.eyeY / previewFigureMetrics.viewHeight;
+previewFigureMetrics.footRatio = previewFigureMetrics.footY / previewFigureMetrics.viewHeight;
+previewFigureMetrics.bodyRatio = previewFigureMetrics.footRatio - previewFigureMetrics.headTopRatio;
+previewFigureMetrics.eyeFromTopRatio = (previewFigureMetrics.eyeRatio - previewFigureMetrics.headTopRatio) / previewFigureMetrics.bodyRatio;
+previewFigureMetrics.eyeHeightRatio = 1 - previewFigureMetrics.eyeFromTopRatio;
 
 function applyGradientStops(svg, id, colors){
   const grad = svg.querySelector(`linearGradient#${id}`);
@@ -440,12 +454,12 @@ function groupCenter(subjects=activeSubjects()){
 
 function groupEyeReference(subjects=activeSubjects()){
   if(!subjects.length) return {x:0,y:3,z:1.64};
-  // Eye height is approximated at 93.5% of standing body height.
-  // For several subjects we lock the average eye line to 1/3 from frame top.
+  // Lock the eye line using the actual SVG preview figure proportions,
+  // so the eyes stay at 1/3 from the top even in very close framing.
   return {
     x:subjects.reduce((a,s)=>a+s.x,0)/subjects.length,
     y:subjects.reduce((a,s)=>a+s.y,0)/subjects.length,
-    z:subjects.reduce((a,s)=>a+s.height*.935,0)/subjects.length
+    z:subjects.reduce((a,s)=>a+s.height*previewFigureMetrics.eyeHeightRatio,0)/subjects.length
   };
 }
 function groundViewBasis(cameraPos=state.cameraPos){
@@ -1036,16 +1050,22 @@ function updatePreview(){
     const xPx=frameRect.left-stageRect.left + frameRect.width/2 + p.center.x*frameRect.width/2;
     const headYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.head.y*frameRect.height/2;
     const feetYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.feet.y*frameRect.height/2;
-    const hPx=Math.abs(feetYPx-headYPx);
-    const wPx=hPx*(240/900);
-    const top=Math.min(headYPx,feetYPx);
+
+    // Projected world body height (head top -> feet).
+    const bodyPx=Math.abs(feetYPx-headYPx);
+
+    // Scale the full SVG so that its internal head-top / feet anchors match the
+    // projected head and feet of the preview model.
+    const svgHeightPx = bodyPx / previewFigureMetrics.bodyRatio;
+    const wPx = svgHeightPx * (240/900);
+    const top = Math.min(headYPx, feetYPx) - previewFigureMetrics.headTopRatio * svgHeightPx;
 
     el.style.left=xPx+'px';
     el.style.top=top+'px';
     el.style.width=Math.max(8,wPx)+'px';
-    el.style.height=Math.max(30,hPx)+'px';
+    el.style.height=Math.max(30,svgHeightPx)+'px';
 
-    scales.push(hPx/frameRect.height);
+    scales.push(bodyPx/frameRect.height);
   });
 
   const measure=$('#previewMeasure');
