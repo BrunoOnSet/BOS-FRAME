@@ -70,9 +70,12 @@ const state = {
   subjectCount:1,
   subjects:[
     {id:1,name:'S1',height:1.75,x:0.00,y:3.00},
-    {id:2,name:'S2',height:1.75,x:1.20,y:3.00},
-    {id:3,name:'S3',height:1.75,x:-1.20,y:3.50}
+    {id:2,name:'S2',height:1.75,x:-0.40,y:3.00},
+    {id:3,name:'S3',height:1.75,x:0.40,y:3.00},
+    {id:4,name:'S4',height:1.75,x:1.20,y:3.00}
   ],
+  groupDistance:3.00,
+  groupSpread:0.80,
   cameraPos:{x:0,y:0},
   cameraHeight:1.55,
   aperture:2.8,
@@ -123,45 +126,31 @@ function loadPreviewSettings(){
     if(saved.mode==='real' || saved.mode==='preview') state.mode=saved.mode;
     if(Number.isFinite(saved.subjectHeight)) state.subjectHeight=Math.max(1.2,Math.min(2.2,saved.subjectHeight));
     if(Number.isFinite(saved.subjectDistance)) state.subjectDistance=Math.max(.4,Math.min(30,saved.subjectDistance));
-    if(Number.isFinite(saved.subjectCount)) state.subjectCount=Math.max(1,Math.min(3,Math.round(saved.subjectCount)));
+    if(Number.isFinite(saved.subjectCount)) state.subjectCount=Math.max(1,Math.min(4,Math.round(saved.subjectCount)));
+    if(Number.isFinite(saved.groupDistance)) state.groupDistance=Math.max(.4,Math.min(30,saved.groupDistance));
+    if(Number.isFinite(saved.groupSpread)) state.groupSpread=Math.max(.2,Math.min(2.5,saved.groupSpread));
     if(Array.isArray(saved.subjects)){
-      saved.subjects.slice(0,3).forEach((s,i)=>{
+      saved.subjects.slice(0,4).forEach((s,i)=>{
         if(!state.subjects[i]) return;
         if(Number.isFinite(s.height)) state.subjects[i].height=Math.max(1.2,Math.min(2.2,s.height));
-        if(Number.isFinite(s.x)) state.subjects[i].x=Math.max(-5.5,Math.min(5.5,s.x));
-        if(Number.isFinite(s.y)) state.subjects[i].y=Math.max(-.5,Math.min(14.5,s.y));
       });
     }
-    if(saved.cameraPos && Number.isFinite(saved.cameraPos.x) && Number.isFinite(saved.cameraPos.y)){
-      state.cameraPos={
-        x:Math.max(-5.5,Math.min(5.5,saved.cameraPos.x)),
-        y:Math.max(-.5,Math.min(14.5,saved.cameraPos.y))
-      };
-    }
-    if(Number.isFinite(saved.aperture)) state.aperture=Math.max(1,Math.min(22,saved.aperture));
-    if(Number.isFinite(saved.focusDistance)) state.focusDistance=Math.max(.3,Math.min(50,saved.focusDistance));
   }
-
-  // Migration from the original single-subject preview.
   state.subjects[0].height=state.subjectHeight;
-  if(!saved?.subjects){
-    state.subjects[0].x=0;
-    state.subjects[0].y=state.subjectDistance;
-  }
+  rebuildGroupLayout();
 }
 function savePreviewSettings(){
   try{
     state.subjectHeight=state.subjects[0].height;
-    state.subjectDistance=subjectDistance(state.subjects[0]);
+    state.subjectDistance=state.groupDistance;
     localStorage.setItem(PREVIEW_SETTINGS_KEY,JSON.stringify({
       mode:state.mode,
       subjectHeight:state.subjectHeight,
       subjectDistance:state.subjectDistance,
       subjectCount:state.subjectCount,
-      subjects:state.subjects.map(s=>({height:s.height,x:s.x,y:s.y})),
-      cameraPos:state.cameraPos,
-      aperture:state.aperture,
-      focusDistance:state.focusDistance
+      groupDistance:state.groupDistance,
+      groupSpread:state.groupSpread,
+      subjects:state.subjects.map(s=>({height:s.height}))
     }));
   }catch{}
 }
@@ -359,6 +348,17 @@ function groupCenter(subjects=activeSubjects()){
     z:subjects.reduce((a,s)=>a+s.height*.50,0)/subjects.length
   };
 }
+
+function groupEyeReference(subjects=activeSubjects()){
+  if(!subjects.length) return {x:0,y:3,z:1.64};
+  // Eye height is approximated at 93.5% of standing body height.
+  // For several subjects we lock the average eye line to 1/3 from frame top.
+  return {
+    x:subjects.reduce((a,s)=>a+s.x,0)/subjects.length,
+    y:subjects.reduce((a,s)=>a+s.y,0)/subjects.length,
+    z:subjects.reduce((a,s)=>a+s.height*.935,0)/subjects.length
+  };
+}
 function groundViewBasis(cameraPos=state.cameraPos){
   const g=groupCenter();
   let dx=g.x-cameraPos.x,dy=g.y-cameraPos.y;
@@ -378,12 +378,46 @@ function norm3(v){
 }
 function cameraBasis(){
   const g=groupCenter();
+  const eyes=groupEyeReference();
   const pos={x:state.cameraPos.x,y:state.cameraPos.y,z:state.cameraHeight};
-  const target={x:g.x,y:g.y,z:g.z};
-  if(Math.hypot(target.x-pos.x,target.y-pos.y)<.04) target.y+=.20;
-  const forward=norm3({x:target.x-pos.x,y:target.y-pos.y,z:target.z-pos.z});
+
+  // Horizontal axis always aims at the centre of the active group.
+  let dx=g.x-pos.x;
+  let dy=g.y-pos.y;
+  let horizontalDistance=Math.hypot(dx,dy);
+  if(horizontalDistance<.04){
+    dx=0;
+    dy=.20;
+    horizontalDistance=.20;
+  }
+  const ux=dx/horizontalDistance;
+  const uy=dy/horizontalDistance;
+
+  // Composition rule:
+  // eye line = 1/3 from the top of the image.
+  // In normalized camera coordinates this corresponds to y = +1/3.
+  const eyeTargetNormalized=1/3;
+  const halfVFov=rad(verticalFov())/2;
+  const desiredEyeAngleAboveAxis=Math.atan(eyeTargetNormalized*Math.tan(halfVFov));
+
+  const eyeHorizontalDistance=Math.max(
+    .04,
+    Math.hypot(eyes.x-pos.x,eyes.y-pos.y)
+  );
+  const eyeElevation=Math.atan2(eyes.z-pos.z,eyeHorizontalDistance);
+
+  // Aim the optical axis slightly below the eyes so they stay on the 1/3 line.
+  const axisElevation=eyeElevation-desiredEyeAngleAboveAxis;
+
+  const cosE=Math.cos(axisElevation);
+  const forward=norm3({
+    x:ux*cosE,
+    y:uy*cosE,
+    z:Math.sin(axisElevation)
+  });
   const right=norm3(cross3(forward,{x:0,y:0,z:1}));
   const up=norm3(cross3(right,forward));
+
   return {pos,forward,right,up};
 }
 function verticalFov(){
@@ -434,28 +468,18 @@ function closestPreviewPlan(scale){
 }
 
 function placeCameraForTarget(target){
-  const subjects=activeSubjects();
-  const center=groupCenter(subjects);
-  let vx=state.cameraPos.x-center.x,vy=state.cameraPos.y-center.y;
-  let len=Math.hypot(vx,vy);
-  if(len<.1){vx=0;vy=-1;len=1}
-  vx/=len;vy/=len;
-
+  // Keep a simple mental model: fixed camera, group on one depth plane.
   let lo=.35,hi=35;
-  for(let i=0;i<45;i++){
+  for(let i=0;i<48;i++){
     const d=(lo+hi)/2;
-    const candidate={x:center.x+vx*d,y:center.y+vy*d};
-    const old=state.cameraPos;
-    state.cameraPos=candidate;
-    const maxScale=Math.max(...subjects.map(bodyScaleForSubject));
-    state.cameraPos=old;
-    // Farther camera -> smaller scale.
+    state.groupDistance=d;
+    rebuildGroupLayout();
+    const maxScale=Math.max(...activeSubjects().map(bodyScaleForSubject));
     if(maxScale>target.scale) lo=d;
     else hi=d;
   }
-  const d=(lo+hi)/2;
-  state.cameraPos={x:center.x+vx*d,y:center.y+vy*d};
-  state.focusDistance=Math.max(.3,Math.min(50,subjects.reduce((a,s)=>a+subjectDistance(s),0)/subjects.length));
+  state.groupDistance=(lo+hi)/2;
+  rebuildGroupLayout();
   savePreviewSettings();
   syncPreviewInputs();
   updatePreview();
@@ -485,31 +509,30 @@ function moveSubjectToDistance(subject,distance){
 }
 function syncPreviewInputs(){
   const s1=state.subjects[0];
-  const d1=subjectDistance(s1);
   state.subjectHeight=s1.height;
-  state.subjectDistance=d1;
+  state.subjectDistance=state.groupDistance;
   const h=$('#subjectHeightInput');
   const d=$('#subjectDistanceInput');
   const slider=$('#subjectDistanceSlider');
   const readout=$('#subjectDistanceReadout');
+  const spread=$('#groupSpreadSlider');
+  const spreadReadout=$('#groupSpreadReadout');
   if(h) h.value=s1.height.toFixed(2);
-  if(d) d.value=d1.toFixed(2);
+  if(d) d.value=state.groupDistance.toFixed(2);
   if(slider){
-    slider.max=Math.max(15,Math.ceil(d1+1));
-    slider.value=d1;
+    slider.max=Math.max(15,Math.ceil(state.groupDistance+1));
+    slider.value=state.groupDistance;
   }
-  if(readout) readout.textContent=d1.toFixed(2).replace('.',',')+' m';
-  const fd=$('#focusDistanceInput');
-  if(fd) fd.value=state.focusDistance.toFixed(2);
-  const ar=$('#apertureReadout');
-  if(ar) ar.textContent=`f/${Number.isInteger(state.aperture)?state.aperture:state.aperture.toFixed(1)}`;
+  if(readout) readout.textContent=state.groupDistance.toFixed(2).replace('.',',')+' m';
+  if(spread) spread.value=state.groupSpread;
+  if(spreadReadout) spreadReadout.textContent=state.groupSpread.toFixed(2).replace('.',',')+' m';
 }
 
 function preparePreviewSubjectClones(){
   const source=$('#previewSubject');
   if(!source) return;
   const svg=source.querySelector('svg');
-  [2,3].forEach(i=>{
+  [2,3,4].forEach(i=>{
     const el=$(`#previewSubject${i}`);
     if(el && !el.querySelector('svg') && svg){
       const clone=svg.cloneNode(true);
@@ -518,7 +541,7 @@ function preparePreviewSubjectClones(){
       el.appendChild(clone);
     }
   });
-  [source,$('#previewSubject2'),$('#previewSubject3')].forEach((el,i)=>{
+  [source,$('#previewSubject2'),$('#previewSubject3'),$('#previewSubject4')].forEach((el,i)=>{
     if(!el) return;
     let badge=el.querySelector('.preview-person-badge');
     if(!badge){
@@ -530,29 +553,40 @@ function preparePreviewSubjectClones(){
   });
 }
 
+function rebuildGroupLayout(){
+  state.cameraPos={x:0,y:0};
+
+  const layouts={
+    1:[0],
+    2:[-0.5,0.5],
+    3:[-1,0,1],
+    4:[-1.5,-0.5,0.5,1.5]
+  };
+  const offsets=layouts[state.subjectCount] || layouts[1];
+
+  activeSubjects().forEach((subject,i)=>{
+    subject.x=(offsets[i] || 0)*state.groupSpread;
+    subject.y=state.groupDistance;
+  });
+
+  // Keep inactive subjects ready as well.
+  state.subjects.slice(state.subjectCount).forEach((subject,i)=>{
+    subject.x=0;
+    subject.y=state.groupDistance;
+  });
+}
+
 function setSubjectCount(count){
   const previous=state.subjectCount;
-  state.subjectCount=Math.max(1,Math.min(3,Math.round(count)));
+  state.subjectCount=Math.max(1,Math.min(4,Math.round(count)));
   if(state.subjectCount>previous){
-    const basis=groundViewBasis();
-    const s1=state.subjects[0];
-    if(previous===1 && state.subjectCount>=2){
-      state.subjects[1].x=s1.x+basis.right.x*1.15;
-      state.subjects[1].y=s1.y+basis.right.y*1.15;
-      state.subjects[1].height=s1.height;
-    }
-    if(previous<3 && state.subjectCount===3){
-      state.subjects[2].x=s1.x-basis.right.x*1.15;
-      state.subjects[2].y=s1.y-basis.right.y*1.15;
-      state.subjects[2].height=s1.height;
+    for(let i=previous;i<state.subjectCount;i++){
+      state.subjects[i].height=state.subjects[0].height;
     }
   }
-  state.focusDistance=Math.max(.3,Math.min(50,
-    activeSubjects().reduce((a,s)=>a+subjectDistance(s),0)/state.subjectCount
-  ));
+  rebuildGroupLayout();
   renderSubjectCount();
   renderExtraSubjectControls();
-  renderFocusQuickButtons();
   savePreviewSettings();
   updatePreview();
 }
@@ -566,19 +600,17 @@ function renderExtraSubjectControls(){
   if(!el) return;
   el.innerHTML='';
   activeSubjects().slice(1).forEach((s,index)=>{
-    const d=subjectDistance(s);
     const row=document.createElement('div');
     row.className='extra-subject-row';
     row.innerHTML=`
       <div class="extra-subject-title">
-        <strong>SUJET ${index+2}</strong>
-        <span id="subjectStatusText${index+2}">—</span>
+        <strong>PERSONNE ${index+2}</strong>
+        <span>Même plan de profondeur que le groupe</span>
       </div>
       <label>
         <span>Taille</span>
         <div><input type="number" min="1.20" max="2.20" step="0.01" value="${s.height.toFixed(2)}" data-subject-height="${index+1}"><em>m</em></div>
       </label>
-      <div class="extra-subject-distance">Caméra → S${index+2} : <strong>${d.toFixed(2).replace('.',',')} m</strong></div>
     `;
     el.appendChild(row);
   });
@@ -831,6 +863,8 @@ function setupTopViewDrag(){
   svg.addEventListener('pointercancel',end);
 }
 
+function ensureLightGroupLayout(){ rebuildGroupLayout(); }
+
 function setFrameMode(mode,persist=true){
   state.mode=mode==='preview'?'preview':'real';
   const preview=state.mode==='preview';
@@ -848,6 +882,7 @@ function setFrameMode(mode,persist=true){
   if(kicker) kicker.textContent=preview?'PREVIEW':'VISEUR';
   if(label) label.textContent=preview?'SIMULATION · BOS':'VUE RÉELLE · BOS';
 
+  ensureLightGroupLayout();
   if(persist) savePreviewSettings();
   requestAnimationFrame(()=>{
     updateFrame();
@@ -856,51 +891,7 @@ function setFrameMode(mode,persist=true){
   });
 }
 
-function updateDofUI(){
-  const bounds=dofBounds();
-  const statuses=activeSubjects().map(s=>({s,d:subjectDistance(s),status:dofStatus(subjectDistance(s),bounds)}));
-
-  statuses.forEach((item,i)=>{
-    const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);
-    if(el){
-      el.classList.remove('dof-net','dof-edge','dof-out');
-      el.classList.add(`dof-${item.status.key}`);
-      const badge=el.querySelector('.preview-person-badge');
-      if(badge) badge.textContent=`S${i+1} · ${item.status.label}`;
-    }
-    const txt=$(`#subjectStatusText${i+1}`);
-    if(txt){txt.textContent=item.status.label;txt.className=`dof-text-${item.status.key}`}
-  });
-
-  const allNet=statuses.every(x=>x.status.key!=='out');
-  const anyEdge=statuses.some(x=>x.status.key==='edge');
-  const global=$('#dofGlobalStatus');
-  if(global){
-    global.textContent=allNet?(anyEdge?'LIMITE':'TOUS NETS'):'À CORRIGER';
-    global.className=allNet?(anyEdge?'dof-text-edge':'dof-text-net'):'dof-text-out';
-  }
-  const range=$('#dofRangeResult');
-  if(range) range.textContent=`${formatDistance(bounds.near)} → ${formatDistance(bounds.far)}`;
-  const subs=$('#dofSubjectsResult');
-  if(subs) subs.textContent=statuses.map((x,i)=>`S${i+1} ${x.status.label}`).join(' · ');
-
-  state.dofRecommendation=groupDofRecommendation();
-  const rec=$('#dofRecommendation');
-  const apply=$('#applyDofRecommendationBtn');
-  if(rec){
-    if(state.dofRecommendation){
-      const r=state.dofRecommendation;
-      rec.textContent=`MAP ${formatDistance(r.focus)} · f/${Number.isInteger(r.aperture)?r.aperture:r.aperture.toFixed(1)}`;
-      if(apply) apply.disabled=false;
-    }else{
-      rec.textContent='> f/22 avec cette mise en place';
-      if(apply) apply.disabled=true;
-    }
-  }
-  syncPreviewInputs();
-  renderApertureChips();
-  updateTopView(bounds);
-}
+function updateDofUI(){ return; }
 
 function updatePreview(){
   if(state.mode!=='preview') return;
@@ -967,7 +958,7 @@ function updatePreview(){
 
   const overlayPlan=$('#previewPlanOverlay');
   const overlayMetrics=$('#previewMetricsOverlay');
-  if(overlayPlan) overlayPlan.textContent=state.subjectCount>1?`${state.subjectCount} SUJETS · ${plan.label}`:plan.label;
+  if(overlayPlan) overlayPlan.textContent=state.subjectCount>1?`${state.subjectCount} PERSONNES · ${plan.label}`:plan.label;
   if(overlayMetrics){
     overlayMetrics.textContent=`${state.preset.name.replace('Sony ','')} · ${state.focal} mm · centre groupe ${groupD.toFixed(2).replace('.',',')} m`;
   }
@@ -980,8 +971,15 @@ function updatePreview(){
   syncPreviewInputs();
   renderSubjectCount();
   renderExtraSubjectControls();
-  renderFocusQuickButtons();
-  updateDofUI();
+
+  activeSubjects().forEach((subject,i)=>{
+    const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);
+    if(el){
+      el.classList.remove('dof-net','dof-edge','dof-out');
+      const badge=el.querySelector('.preview-person-badge');
+      if(badge) badge.textContent=`P${i+1}`;
+    }
+  });
 
   $$('.preview-target').forEach((b,i)=>{
     b.classList.toggle('active',previewTargets[i]?.id===plan.id);
@@ -1246,7 +1244,7 @@ function updateSimulation(){
 function updateAll(){
   updateReadout();
   updateFrame();
-  if(state.mode==='preview') updatePreview();
+  if(state.mode==='preview'){ ensureLightGroupLayout(); updatePreview(); }
   else updateSimulation();
   renderGuideChoices();
 }
@@ -1691,7 +1689,8 @@ function registerEvents(){
   $('#subjectDistanceInput').oninput=e=>{
     const v=parseFloat(e.target.value);
     if(Number.isFinite(v)){
-      moveSubjectToDistance(state.subjects[0],Math.max(.4,Math.min(30,v)));
+      state.groupDistance=Math.max(.4,Math.min(30,v));
+      rebuildGroupLayout();
       savePreviewSettings();
       updatePreview();
     }
@@ -1699,28 +1698,21 @@ function registerEvents(){
   $('#subjectDistanceSlider').oninput=e=>{
     const v=parseFloat(e.target.value);
     if(Number.isFinite(v)){
-      moveSubjectToDistance(state.subjects[0],Math.max(.4,Math.min(30,v)));
+      state.groupDistance=Math.max(.4,Math.min(30,v));
+      rebuildGroupLayout();
       savePreviewSettings();
       updatePreview();
     }
   };
   $$('#subjectCountSwitch button').forEach(b=>b.onclick=()=>setSubjectCount(Number(b.dataset.count)));
-  $('#focusDistanceInput').oninput=e=>{
+  $('#groupSpreadSlider').oninput=e=>{
     const v=parseFloat(e.target.value);
     if(Number.isFinite(v)){
-      state.focusDistance=Math.max(.3,Math.min(50,v));
+      state.groupSpread=Math.max(.2,Math.min(2.5,v));
+      rebuildGroupLayout();
       savePreviewSettings();
       updatePreview();
     }
-  };
-  $('#applyDofRecommendationBtn').onclick=()=>{
-    const r=state.dofRecommendation;
-    if(!r) return;
-    state.focusDistance=r.focus;
-    state.aperture=r.aperture;
-    savePreviewSettings();
-    renderApertureChips();
-    updatePreview();
   };
   $('#cameraBtn').onclick=()=>{$('#cameraDialog').showModal();updateCalibrationStatus()};
   $('#restartCameraBtn').onclick=()=>startCamera($('#deviceSelect').value);
@@ -1816,9 +1808,7 @@ function init(){
   renderPreviewTargets();
   renderSubjectCount();
   renderExtraSubjectControls();
-  renderApertureChips();
-  renderFocusQuickButtons();
-  setupCalibrationDrag(); registerEvents(); setupTopViewDrag();
+  setupCalibrationDrag(); registerEvents();
   syncPreviewInputs();
   setFrameMode(state.mode,false);
   updateAll();

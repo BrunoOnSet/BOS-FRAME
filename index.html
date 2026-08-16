@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BOS" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=3.2-test" />
+  <link rel="stylesheet" href="styles.css?v=3.4-light" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -54,6 +54,9 @@
           <div class="preview-wall"></div>
           <div class="preview-floor"></div>
           <div id="previewGroundLine" class="preview-ground-line"></div>
+          <div class="preview-eye-guide" aria-hidden="true">
+            <span>LIGNE DES YEUX · 1/3</span>
+          </div>
 
           <div id="previewSubject" class="preview-subject">
             <svg class="preview-person" viewBox="0 0 240 900" role="img" aria-label="Personne debout de référence">
@@ -120,6 +123,7 @@
 
           <div id="previewSubject2" class="preview-subject preview-subject-2 hidden" aria-label="Sujet 2"></div>
           <div id="previewSubject3" class="preview-subject preview-subject-3 hidden" aria-label="Sujet 3"></div>
+          <div id="previewSubject4" class="preview-subject preview-subject-4 hidden" aria-label="Sujet 4"></div>
 
           <div id="previewMeasure" class="preview-measure">
             <span class="preview-measure-line"></span>
@@ -195,26 +199,27 @@
       <div id="previewControls" class="preview-controls hidden">
         <div class="preview-subject-count-block">
           <div class="preview-target-head">
-            <span>NOMBRE DE SUJETS</span>
-            <small>La caméra vise automatiquement le centre du groupe.</small>
+            <span>NOMBRE DE PERSONNES</span>
+            <small>Mini groupe simple · la caméra se centre automatiquement sur le groupe.</small>
           </div>
           <div class="subject-count-switch" id="subjectCountSwitch">
-            <button type="button" data-count="1" class="active">1 SUJET</button>
-            <button type="button" data-count="2">2 SUJETS</button>
-            <button type="button" data-count="3">3 SUJETS</button>
+            <button type="button" data-count="1" class="active">1</button>
+            <button type="button" data-count="2">2</button>
+            <button type="button" data-count="3">3</button>
+            <button type="button" data-count="4">4</button>
           </div>
         </div>
 
         <div class="preview-fields">
           <label class="preview-field">
-            <span>TAILLE SUJET 1</span>
+            <span>TAILLE PERSONNE 1</span>
             <div>
               <input id="subjectHeightInput" type="number" min="1.20" max="2.20" step="0.01" value="1.75">
               <em>m</em>
             </div>
           </label>
           <label class="preview-field">
-            <span>DISTANCE CAMÉRA / S1</span>
+            <span>DISTANCE CAMÉRA / GROUPE</span>
             <div>
               <input id="subjectDistanceInput" type="number" min="0.40" max="30" step="0.05" value="3.00">
               <em>m</em>
@@ -223,102 +228,24 @@
         </div>
 
         <div class="preview-distance-slider">
-          <span>RECUL S1</span>
+          <span>RECUL</span>
           <input id="subjectDistanceSlider" type="range" min="0.40" max="15" step="0.05" value="3.00">
           <strong id="subjectDistanceReadout">3,00 m</strong>
+        </div>
+
+        <div class="preview-distance-slider group-spacing-row">
+          <span>ÉCARTEMENT DU GROUPE</span>
+          <input id="groupSpreadSlider" type="range" min="0.20" max="2.50" step="0.05" value="0.80">
+          <strong id="groupSpreadReadout">0,80 m</strong>
         </div>
 
         <div id="extraSubjectControls" class="extra-subject-controls"></div>
 
         <div class="preview-target-head">
           <span>CADRE VISÉ</span>
-          <small>Déplace automatiquement la caméra en gardant la mise en place du groupe.</small>
+          <small>La caméra recule/avance pour garder le groupe dans le type de plan choisi.</small>
         </div>
         <div id="previewTargetButtons" class="preview-targets"></div>
-
-        <section class="mini-topview-card">
-          <div class="mini-topview-head">
-            <div>
-              <span>MISE EN PLACE · VUE DU DESSUS</span>
-              <small>Déplace directement la caméra ou les sujets au doigt.</small>
-            </div>
-            <strong id="topViewGroupInfo">—</strong>
-          </div>
-
-          <svg id="previewTopView" class="preview-topview" viewBox="-600 -100 1200 1600" aria-label="Mini vue du dessus">
-            <defs>
-              <pattern id="topGridSmall" width="50" height="50" patternUnits="userSpaceOnUse">
-                <path d="M 50 0 L 0 0 0 50" fill="none" stroke="currentColor" stroke-opacity=".055" stroke-width="1"/>
-              </pattern>
-              <pattern id="topGridBig" width="100" height="100" patternUnits="userSpaceOnUse">
-                <rect width="100" height="100" fill="url(#topGridSmall)"/>
-                <path d="M 100 0 L 0 0 0 100" fill="none" stroke="currentColor" stroke-opacity=".11" stroke-width="1.4"/>
-              </pattern>
-            </defs>
-            <rect x="-600" y="-100" width="1200" height="1600" class="top-grid-bg"/>
-            <polygon id="topFovCone" class="top-fov-cone" points=""></polygon>
-            <polygon id="topDofZone" class="top-dof-zone" points=""></polygon>
-            <line id="topNearLine" class="top-dof-line top-near-line" x1="0" y1="0" x2="0" y2="0"></line>
-            <line id="topFarLine" class="top-dof-line top-far-line" x1="0" y1="0" x2="0" y2="0"></line>
-            <line id="topFocusLine" class="top-focus-line" x1="0" y1="0" x2="0" y2="0"></line>
-
-            <g id="topSubjectsLayer"></g>
-
-            <g id="topCamera" class="top-camera drag-node" data-drag-kind="camera">
-              <circle cx="0" cy="0" r="34"></circle>
-              <path d="M 0 -52 L -30 15 L 30 15 Z"></path>
-              <text x="0" y="61" text-anchor="middle">CAM</text>
-            </g>
-          </svg>
-          <div class="topview-scale">Grille : 0,5 m · grand carré : 1 m</div>
-        </section>
-
-        <section class="dof-card">
-          <div class="mini-topview-head">
-            <div>
-              <span>NETTETÉ · PDC</span>
-              <small>Estimation géométrique de profondeur de champ.</small>
-            </div>
-            <strong id="dofGlobalStatus">—</strong>
-          </div>
-
-          <div class="dof-field-grid">
-            <label class="preview-field">
-              <span>DISTANCE DE MAP</span>
-              <div>
-                <input id="focusDistanceInput" type="number" min="0.30" max="50" step="0.05" value="3.00">
-                <em>m</em>
-              </div>
-            </label>
-            <div class="preview-field">
-              <span>DIAPH (f/)</span>
-              <div class="aperture-readout"><strong id="apertureReadout">f/2.8</strong></div>
-            </div>
-          </div>
-
-          <div id="apertureChips" class="aperture-chips"></div>
-          <div id="focusQuickButtons" class="focus-quick-buttons"></div>
-
-          <div class="dof-results">
-            <div>
-              <span>ZONE PDC ESTIMÉE</span>
-              <strong id="dofRangeResult">—</strong>
-            </div>
-            <div>
-              <span>SUJETS</span>
-              <strong id="dofSubjectsResult">—</strong>
-            </div>
-          </div>
-
-          <div class="dof-recommendation">
-            <div>
-              <span>POUR GARDER TOUT LE GROUPE NET</span>
-              <strong id="dofRecommendation">—</strong>
-              <small id="dofRecommendationNote">Calcul selon capteur, focale et positions actuelles.</small>
-            </div>
-            <button type="button" id="applyDofRecommendationBtn" class="small-action">APPLIQUER</button>
-          </div>
-        </section>
 
         <div class="preview-result-card">
           <div>
@@ -330,7 +257,14 @@
             <strong id="previewFrameSizeResult">—</strong>
           </div>
         </div>
-      </div>
+
+        <!-- hidden legacy placeholders so the old code does not break if called -->
+        <input id="focusDistanceInput" type="hidden" value="3.00">
+        <div id="apertureChips" class="hidden"></div>
+        <div id="focusQuickButtons" class="hidden"></div>
+        <div id="dofRecommendation" class="hidden"></div>
+        <button type="button" id="applyDofRecommendationBtn" class="hidden">APPLIQUER</button>
+      </div>      </div>
     </section>
 
     <footer>
@@ -340,7 +274,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.2 TEST</span>
+        <span class="app-version">v3.4 LIGHT</span>
       </div>
     </footer>
   </main>
@@ -561,6 +495,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.2-test"></script>
+  <script src="app.js?v=3.4-light"></script>
 </body>
 </html>

@@ -2223,3 +2223,127 @@ body.dark .pro-lens.active{
   .dof-field-grid,.dof-results{grid-template-columns:1fr}
   .preview-topview{height:190px}
 }
+
+
+/* ============================================================
+   FRAME BOS V3.3 TEST — Eye line lock
+   ============================================================ */
+.preview-eye-guide{
+  position:absolute;
+  z-index:7;
+  left:0;
+  right:0;
+  top:33.333%;
+  height:1px;
+  border-top:1px dashed rgba(46,127,142,.34);
+  pointer-events:none;
+}
+.preview-eye-guide span{
+  position:absolute;
+  right:8px;
+  top:-14px;
+  padding:2px 5px;
+  border-radius:5px;
+  background:rgba(11,12,14,.48);
+  color:rgba(255,255,255,.72);
+  font-size:6px;
+  font-weight:850;
+  letter-spacing:.06em;
+}
+body.dark .preview-eye-guide{
+  border-top-color:rgba(98,169,181,.38);
+}
+
+
+/* ============================================================
+   FRAME BOS V3.4 LIGHT — Mini groupe jusqu'à 4 personnes
+   ============================================================ */
+.subject-count-switch{
+  grid-template-columns:repeat(4,1fr) !important;
+}
+.subject-count-switch button{
+  font-size:10px !important;
+}
+.group-spacing-row{
+  margin-top:10px;
+}
+.group-spacing-row>span{
+  min-width:118px;
+}
+.extra-subject-controls{
+  display:grid;
+  gap:8px;
+  margin-top:10px;
+}
+.extra-subject-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 118px;
+  gap:8px;
+  align-items:end;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--field-bg);
+}
+.extra-subject-title strong{
+  display:block;
+  font-size:10px;
+}
+.extra-subject-title span{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:8px;
+}
+.extra-subject-row label>span{
+  display:block;
+  margin-bottom:4px;
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.extra-subject-row label>div{
+  display:flex;
+  align-items:center;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--field-bg);
+  overflow:hidden;
+}
+.extra-subject-row input{
+  min-width:0;
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  padding:8px 8px;
+  font-weight:800;
+}
+.extra-subject-row em{
+  padding-right:8px;
+  color:var(--muted);
+  font-style:normal;
+  font-size:9px;
+}
+.preview-subject-2 .preview-person{filter:hue-rotate(188deg) saturate(.75) brightness(.98) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-subject-3 .preview-person{filter:hue-rotate(312deg) saturate(.72) brightness(.96) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-subject-4 .preview-person{filter:hue-rotate(78deg) saturate(.74) brightness(.98) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-person-badge{
+  min-width:24px !important;
+  text-align:center;
+}
+.hidden-legacy,
+#focusDistanceInput.hidden,
+#apertureChips.hidden,
+#focusQuickButtons.hidden,
+#dofRecommendation.hidden,
+#applyDofRecommendationBtn.hidden{
+  display:none !important;
+}
+@media(max-width:420px){
+  .extra-subject-row{
+    grid-template-columns:1fr 108px;
+  }
+}
