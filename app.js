@@ -72,13 +72,15 @@ const ratios = [
 ];
 
 const previewFigureMetrics = {
-  viewHeight: 900,
-  headTopY: 24,
-  eyeY: 96,
-  chestY: 300,
-  waistY: 430,
-  kneeY: 675,
-  footY: 883
+  // Exact pixel coordinates of assets/mannequin-preview.png (266 × 1250).
+  viewWidth:266,
+  viewHeight:1250,
+  headTopY:2,
+  eyeY:76.5,
+  chestY:286.5,
+  waistY:443.5,
+  kneeY:842,
+  footY:1240
 };
 previewFigureMetrics.headTopRatio = previewFigureMetrics.headTopY / previewFigureMetrics.viewHeight;
 previewFigureMetrics.eyeRatio = previewFigureMetrics.eyeY / previewFigureMetrics.viewHeight;
@@ -1075,21 +1077,21 @@ function updatePreview(){
     const feetYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.feet.y*frameRect.height/2 + eyeComposition.offsetY;
 
     // Keep eyes as the absolute anchor, especially in very close framings.
-    // We derive the SVG height from the projected eye-to-feet span so the
-    // internal eye position in the SVG stays exactly on the projected eye line.
+    // We derive the image height from the projected eye-to-feet span so the
+    // mannequin's REAL eye pixels stay exactly on the projected eye line.
     const eyeToFeetPx=Math.abs(feetYPx-eyeYPx);
-    const svgHeightPx = eyeToFeetPx / (previewFigureMetrics.footRatio - previewFigureMetrics.eyeRatio);
+    const mannequinHeightPx = eyeToFeetPx / (previewFigureMetrics.footRatio - previewFigureMetrics.eyeRatio);
 
     // Secondary metric still used for plan naming/rough scale.
     const bodyPx=Math.abs(feetYPx-headYPx);
 
-    const wPx = svgHeightPx * (240/900);
-    const top = eyeYPx - previewFigureMetrics.eyeRatio * svgHeightPx;
+    const wPx = mannequinHeightPx * (previewFigureMetrics.viewWidth/previewFigureMetrics.viewHeight);
+    const top = eyeYPx - previewFigureMetrics.eyeRatio * mannequinHeightPx;
 
     el.style.left=xPx+'px';
     el.style.top=top+'px';
     el.style.width=Math.max(8,wPx)+'px';
-    el.style.height=Math.max(30,svgHeightPx)+'px';
+    el.style.height=Math.max(30,mannequinHeightPx)+'px';
 
     scales.push(bodyPx/frameRect.height);
   });

@@ -2707,3 +2707,12 @@ body.dark .brand-chips button.active{
 .preview-person .figure-detail-line{
   vector-effect:non-scaling-stroke;
 }
+
+
+/* ============================================================
+   FRAME BOS V3.18 — calibrated mannequin image
+   ============================================================ */
+.preview-person{
+  object-fit:contain !important;
+  object-position:center top !important;
+}
