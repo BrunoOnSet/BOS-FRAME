@@ -71,54 +71,53 @@ const ratios = [
   {label:'4:5', value:4/5},{label:'9:16', value:9/16}
 ];
 
-// PREVIEW: body scale = full standing person's height / visible frame height.
-// Values assume normal headroom and a recomposed camera angle.
-const previewTargets = [
-  {id:'full', label:'PIED', scale:0.86},
-  {id:'american', label:'AMÉRICAIN', scale:1.26},
-  {id:'waist', label:'TAILLE', scale:1.95},
-  {id:'chest', label:'POITRINE', scale:2.86},
-  {id:'close', label:'GROS PLAN', scale:4.75}
-];
-const PREVIEW_SETTINGS_KEY='frame-preview-settings-v1';
+// PREVIEW framing references.
+// Eyes are always locked to the upper 1/3 line.
+// Each reference below defines which anatomical Y position lands on the BOTTOM edge.
+const previewPlanReferences = [
+  // Extremely tight: eyes very large, bottom edge just below nose/chin area.
+  {id:'extreme', label:'TRÈS GROS PLAN', cropY:145},
 
-const subjectAppearances = [
+  // Face dominates, with lower face / upper neck close to bottom edge.
+  {id:'close', label:'GROS PLAN', cropY:220},
+
+  // Exact requested landmarks:
+  {id:'chest', label:'POITRINE', cropY:previewFigureMetrics.chestY},
+  {id:'waist', label:'TAILLE', cropY:previewFigureMetrics.waistY},
+
+  // Exact midpoint between waist and knees:
   {
-    skin:['#A77458','#85553B','#613A27'],
-    shirt:['#D7D2CE','#B7B7B5','#8D908F'],
-    pants:['#33404B','#212A31','#161C21'],
-    hairMain:'#1B1512',
-    hairAccent:'#120D0B'
+    id:'american',
+    label:'AMÉRICAIN',
+    cropY:(previewFigureMetrics.waistY+previewFigureMetrics.kneeY)/2
   },
-  {
-    skin:['#D6A77E','#B67D56','#905F41'],
-    shirt:['#DFD8C6','#CDBFA5','#AC9D86'],
-    pants:['#4C4F45','#373A31','#262821'],
-    hairMain:'#2F241E',
-    hairAccent:'#221913'
-  },
-  {
-    skin:['#F2D0B7','#DFA984','#C17E63'],
-    shirt:['#ECE8E2','#DAD5CF','#C2BCB4'],
-    pants:['#31373C','#23282D','#171C21'],
-    hairMain:'#4A3428',
-    hairAccent:'#34241D'
-  },
-  {
-    skin:['#6B4333','#4E2D22','#392018'],
-    shirt:['#D9D4D0','#B8B8B7','#8F9291'],
-    pants:['#263340','#19222C','#111821'],
-    hairMain:'#161110',
-    hairAccent:'#0E0A09'
-  }
+
+  // Full standing figure.
+  {id:'full', label:'PIED', cropY:previewFigureMetrics.footY}
 ];
+
+function scaleForPreviewCropY(cropY){
+  const figureBody=previewFigureMetrics.footY-previewFigureMetrics.headTopY;
+  const eyeToCrop=Math.max(1,cropY-previewFigureMetrics.eyeY);
+
+  // Because the eyes are at 1/3, the distance eye -> bottom edge occupies 2/3 of frame height.
+  return (2/3) * figureBody / eyeToCrop;
+}
+
+const previewTargets=previewPlanReferences.map(ref=>({
+  ...ref,
+  scale:scaleForPreviewCropY(ref.cropY)
+}));
+const PREVIEW_SETTINGS_KEY='frame-preview-settings-v1';
 
 const previewFigureMetrics = {
   viewHeight: 900,
-  headTopY: 22,
-  eyeY: 92,
-  footY: 863,
-  shadowY: 884
+  headTopY: 24,
+  eyeY: 96,
+  chestY: 300,
+  waistY: 430,
+  kneeY: 675,
+  footY: 883
 };
 previewFigureMetrics.headTopRatio = previewFigureMetrics.headTopY / previewFigureMetrics.viewHeight;
 previewFigureMetrics.eyeRatio = previewFigureMetrics.eyeY / previewFigureMetrics.viewHeight;
@@ -127,63 +126,9 @@ previewFigureMetrics.bodyRatio = previewFigureMetrics.footRatio - previewFigureM
 previewFigureMetrics.eyeFromTopRatio = (previewFigureMetrics.eyeRatio - previewFigureMetrics.headTopRatio) / previewFigureMetrics.bodyRatio;
 previewFigureMetrics.eyeHeightRatio = 1 - previewFigureMetrics.eyeFromTopRatio;
 
-function applyGradientStops(svg, id, colors){
-  const grad = svg.querySelector(`linearGradient#${id}`);
-  if(!grad) return;
-  const stops = grad.querySelectorAll('stop');
-  stops.forEach((stop, i) => {
-    if(colors[i]) stop.setAttribute('stop-color', colors[i]);
-  });
-}
 
-function uniquifySubjectSvgGradients(svg, subjectIndex){
-  if(!svg) return;
 
-  const ids=['skinGrad','shirtGrad','pantsGrad','softShadow'];
-  ids.forEach(baseId=>{
-    const node=svg.querySelector(`#${baseId}`);
-    if(!node) return;
 
-    const uniqueId=`${baseId}-p${subjectIndex+1}`;
-    node.setAttribute('id',uniqueId);
-
-    svg.querySelectorAll(`[fill="url(#${baseId})"]`).forEach(el=>{
-      el.setAttribute('fill',`url(#${uniqueId})`);
-    });
-    svg.querySelectorAll(`[filter="url(#${baseId})"]`).forEach(el=>{
-      el.setAttribute('filter',`url(#${uniqueId})`);
-    });
-  });
-}
-
-function applySubjectAppearance(subjectEl, variantIndex){
-  if(!subjectEl) return;
-  const svg = subjectEl.querySelector('svg');
-  if(!svg) return;
-
-  const variant = subjectAppearances[variantIndex % subjectAppearances.length];
-  const suffix=`-p${variantIndex+1}`;
-
-  applyGradientStops(svg, `skinGrad${suffix}`, variant.skin);
-  applyGradientStops(svg, `shirtGrad${suffix}`, variant.shirt);
-  applyGradientStops(svg, `pantsGrad${suffix}`, variant.pants);
-
-  const hairMain = svg.querySelector('ellipse[data-hair-main="1"]') || svg.querySelector('ellipse[fill="#2d2724"]');
-  const hairAccent = svg.querySelector('path[data-hair-accent="1"]') || svg.querySelector('path[fill="#332a27"]');
-  if(hairMain){
-    hairMain.setAttribute('data-hair-main','1');
-    hairMain.setAttribute('fill', variant.hairMain);
-  }
-  if(hairAccent){
-    hairAccent.setAttribute('data-hair-accent','1');
-    hairAccent.setAttribute('fill', variant.hairAccent);
-  }
-
-  const eyes = svg.querySelectorAll('ellipse[fill="#29211f"]');
-  eyes.forEach(el => el.setAttribute('fill', '#201917'));
-
-  subjectEl.dataset.appearance = String(variantIndex + 1);
-}
 
 
 const state = {
@@ -603,14 +548,24 @@ function previewFrameMetricsAt(distance){
   return {hfov,frameWidth,frameHeight};
 }
 function closestPreviewPlan(scale){
-  if(scale < .64) return {label:'PLAN LARGE', id:'wide'};
-  if(scale > 6.2) return {label:'TRÈS GROS PLAN', id:'veryclose'};
-  let best=previewTargets[0],score=Infinity;
-  previewTargets.forEach(t=>{
-    const s=Math.abs(Math.log(Math.max(.001,scale)/t.scale));
-    if(s<score){score=s;best=t}
-  });
-  return {label:`PLAN ${best.label}`,id:best.id};
+  // References are ordered from tightest to widest.
+  // Category boundaries are exactly halfway between adjacent reference scales.
+  const refs=[...previewTargets].sort((a,b)=>b.scale-a.scale);
+
+  if(scale>=refs[0].scale) return {label:`PLAN ${refs[0].label}`,id:refs[0].id};
+
+  for(let i=0;i<refs.length-1;i++){
+    const tight=refs[i];
+    const wide=refs[i+1];
+
+    // User-requested transition: exactly halfway from one reference to the next.
+    const boundary=(tight.scale+wide.scale)/2;
+    if(scale>=boundary){
+      return {label:`PLAN ${tight.label}`,id:tight.id};
+    }
+  }
+
+  return {label:`PLAN ${refs[refs.length-1].label}`,id:refs[refs.length-1].id};
 }
 
 function placeCameraForTarget(target){
@@ -677,34 +632,24 @@ function syncPreviewInputs(){
 function preparePreviewSubjectClones(){
   const source=$('#previewSubject');
   if(!source) return;
-
-  let sourceSvg=source.querySelector('svg');
-  if(sourceSvg && !sourceSvg.dataset.uniqueGradients){
-    uniquifySubjectSvgGradients(sourceSvg,0);
-    sourceSvg.dataset.uniqueGradients='1';
-  }
+  const svg=source.querySelector('svg');
 
   [2,3,4].forEach(i=>{
     const el=$(`#previewSubject${i}`);
-    if(el && !el.querySelector('svg') && sourceSvg){
-      const clone=sourceSvg.cloneNode(true);
+    if(el && !el.querySelector('svg') && svg){
+      const clone=svg.cloneNode(true);
       clone.removeAttribute('role');
       clone.setAttribute('aria-hidden','true');
 
-      // The source already has P1 IDs after uniquifying.
-      // Convert them back conceptually to person-specific IDs for this clone.
-      ['skinGrad','shirtGrad','pantsGrad','softShadow'].forEach(baseId=>{
-        const sourceId=`${baseId}-p1`;
-        const node=clone.querySelector(`#${sourceId}`);
-        if(node){
-          const uniqueId=`${baseId}-p${i}`;
-          node.setAttribute('id',uniqueId);
-          clone.querySelectorAll(`[fill="url(#${sourceId})"]`).forEach(x=>x.setAttribute('fill',`url(#${uniqueId})`));
-          clone.querySelectorAll(`[filter="url(#${sourceId})"]`).forEach(x=>x.setAttribute('filter',`url(#${uniqueId})`));
-        }
-      });
-
-      clone.dataset.uniqueGradients='1';
+      // Unique shadow filter id for cloned SVGs.
+      const filter=clone.querySelector('#softShadow');
+      if(filter){
+        const newId=`softShadow-p${i}`;
+        filter.setAttribute('id',newId);
+        clone.querySelectorAll('[filter="url(#softShadow)"]').forEach(node=>{
+          node.setAttribute('filter',`url(#${newId})`);
+        });
+      }
       el.appendChild(clone);
     }
   });
@@ -718,7 +663,6 @@ function preparePreviewSubjectClones(){
       badge.textContent=`P${i+1}`;
       el.appendChild(badge);
     }
-    applySubjectAppearance(el, i);
   });
 }
 

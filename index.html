@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BOS" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=3.14" />
+  <link rel="stylesheet" href="styles.css?v=3.15" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -85,65 +85,71 @@
           </div>
 
           <div id="previewSubject" class="preview-subject">
-            <svg class="preview-person" viewBox="0 0 240 900" role="img" aria-label="Personne debout de référence">
+            <svg class="preview-person" viewBox="0 0 240 900" role="img" aria-label="Silhouette androgyne de référence">
               <defs>
-                <linearGradient id="skinGrad" x1="0" x2="1" y1="0" y2="1">
-                  <stop offset="0" stop-color="#e1ae89"/>
-                  <stop offset=".55" stop-color="#c98763"/>
-                  <stop offset="1" stop-color="#a96048"/>
-                </linearGradient>
-                <linearGradient id="shirtGrad" x1="0" x2="1">
-                  <stop offset="0" stop-color="#ececea"/>
-                  <stop offset=".52" stop-color="#d7d8d6"/>
-                  <stop offset="1" stop-color="#bfc1c0"/>
-                </linearGradient>
-                <linearGradient id="pantsGrad" x1="0" x2="1">
-                  <stop offset="0" stop-color="#30353a"/>
-                  <stop offset=".5" stop-color="#20252a"/>
-                  <stop offset="1" stop-color="#101418"/>
-                </linearGradient>
                 <filter id="softShadow" x="-50%" y="-20%" width="200%" height="160%">
-                  <feGaussianBlur stdDeviation="8"/>
+                  <feGaussianBlur stdDeviation="7"/>
                 </filter>
               </defs>
 
-              <ellipse cx="120" cy="884" rx="72" ry="12" fill="rgba(0,0,0,.20)" filter="url(#softShadow)"/>
+              <!-- ombre au sol -->
+              <ellipse cx="120" cy="884" rx="70" ry="10" fill="rgba(0,0,0,.16)" filter="url(#softShadow)"/>
 
-              <!-- hair / head -->
-              <ellipse cx="120" cy="83" rx="52" ry="61" fill="#2d2724"/>
-              <ellipse cx="120" cy="94" rx="45" ry="54" fill="url(#skinGrad)"/>
-              <path d="M77 79 C82 29 158 25 166 77 C146 60 102 58 77 79Z" fill="#332a27"/>
-              <ellipse cx="103" cy="92" rx="4.2" ry="3" fill="#29211f"/>
-              <ellipse cx="137" cy="92" rx="4.2" ry="3" fill="#29211f"/>
-              <path d="M120 96 C116 108 116 113 123 116" fill="none" stroke="#a96751" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M105 126 C116 132 127 132 138 126" fill="none" stroke="#8c4e45" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M86 111 C90 139 99 151 120 153 C141 151 151 139 154 111" fill="none" stroke="rgba(115,68,51,.22)" stroke-width="2"/>
+              <!-- silhouette neutre et androgyne -->
+              <path class="figure-body" d="
+                M120 24
+                C88 24 71 46 70 82
+                C69 102 75 122 88 139
+                L88 169
+                C73 178 60 187 48 205
+                C39 219 34 242 31 268
+                L23 406
+                C22 430 28 449 37 462
+                C42 469 47 470 51 466
+                C56 461 55 452 53 443
+                L67 320
+                L71 462
+                C73 498 77 544 80 583
+                L83 824
+                C82 844 74 856 64 866
+                C58 872 59 881 72 883
+                L101 883
+                C110 882 114 875 113 864
+                L111 608
+                L120 494
+                L129 608
+                L127 864
+                C126 875 130 882 139 883
+                L168 883
+                C181 881 182 872 176 866
+                C166 856 158 844 157 824
+                L160 583
+                C163 544 167 498 169 462
+                L173 320
+                L187 443
+                C185 452 184 461 189 466
+                C193 470 198 469 203 462
+                C212 449 218 430 217 406
+                L209 268
+                C206 242 201 219 192 205
+                C180 187 167 178 152 169
+                L152 139
+                C165 122 171 102 170 82
+                C169 46 152 24 120 24
+                Z" />
 
-              <!-- neck -->
-              <path d="M102 143 L100 184 Q120 199 140 184 L138 143Z" fill="url(#skinGrad)"/>
+              <!-- visage : uniquement yeux + nez -->
+              <ellipse class="figure-detail eye" cx="104" cy="96" rx="5.1" ry="3.8"/>
+              <ellipse class="figure-detail eye" cx="136" cy="96" rx="5.1" ry="3.8"/>
+              <path class="figure-detail-line nose" d="M120 101 L118 119 L124 123"/>
 
-              <!-- torso / shirt -->
-              <path d="M82 177 Q120 160 158 177 L178 372 Q149 397 120 397 Q91 397 62 372Z" fill="url(#shirtGrad)"/>
-              <path d="M82 177 Q61 184 45 214 L24 405 Q29 421 44 421 L72 247Z" fill="url(#skinGrad)"/>
-              <path d="M158 177 Q179 184 195 214 L216 405 Q211 421 196 421 L168 247Z" fill="url(#skinGrad)"/>
-              <path d="M44 416 Q37 445 45 466 Q55 478 65 463 L68 419Z" fill="url(#skinGrad)"/>
-              <path d="M196 416 Q203 445 195 466 Q185 478 175 463 L172 419Z" fill="url(#skinGrad)"/>
-
-              <!-- subtle shirt structure -->
-              <path d="M120 189 L120 385" stroke="rgba(0,0,0,.06)" stroke-width="2"/>
-              <path d="M89 199 Q120 215 151 199" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3"/>
-
-              <!-- trousers -->
-              <path d="M65 369 Q120 386 175 369 L168 626 L140 824 L113 824 L111 592 L101 824 L73 824 L69 627Z" fill="url(#pantsGrad)"/>
-              <path d="M120 389 L120 628" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
-              <path d="M73 617 Q94 625 111 608" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="3"/>
-              <path d="M168 617 Q147 625 120 608" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="3"/>
-
-              <!-- shoes -->
-              <path d="M72 815 L107 815 L111 860 Q92 875 48 863 Q45 841 72 815Z" fill="#171a1d"/>
-              <path d="M133 815 L168 815 Q195 841 192 863 Q148 875 129 860Z" fill="#171a1d"/>
-              <path d="M52 858 Q83 865 109 855" stroke="#4c5053" stroke-width="5" fill="none"/>
-              <path d="M131 855 Q157 865 188 858" stroke="#4c5053" stroke-width="5" fill="none"/>
+              <!-- repères anatomiques de cadrage -->
+              <line class="figure-marker chest" x1="76" y1="300" x2="164" y2="300"/>
+              <line class="figure-marker waist" x1="78" y1="430" x2="162" y2="430"/>
+              <line class="figure-marker elbow left" x1="31" y1="405" x2="55" y2="409"/>
+              <line class="figure-marker elbow right" x1="185" y1="409" x2="209" y2="405"/>
+              <line class="figure-marker knee left" x1="82" y1="675" x2="109" y2="675"/>
+              <line class="figure-marker knee right" x1="131" y1="675" x2="158" y2="675"/>
             </svg>
           </div>
 
@@ -296,7 +302,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.14</span>
+        <span class="app-version">v3.15</span>
       </div>
     </footer>
   </main>
@@ -505,6 +511,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.14"></script>
+  <script src="app.js?v=3.15"></script>
 </body>
 </html>

@@ -2659,3 +2659,50 @@ body.dark .brand-chips button.active{
 .preview-eye-guide{
   right:auto !important;
 }
+
+
+/* ============================================================
+   FRAME BOS V3.15 — Silhouette androgyne neutre
+   ============================================================ */
+
+/* IMPORTANT: le fond Preview existant reste inchangé / gris clair. */
+.preview-person .figure-body{
+  fill:#111315;
+}
+.preview-person .figure-detail{
+  fill:#E9ECEC;
+}
+.preview-person .figure-detail-line{
+  fill:none;
+  stroke:#D5D9D9;
+  stroke-width:3.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.preview-person .figure-marker{
+  stroke:#AAB2B3;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  opacity:.90;
+}
+
+/* Aucune variation de couleur corporelle entre P1/P2/P3/P4. */
+.preview-subject .preview-person,
+.preview-subject-2 .preview-person,
+.preview-subject-3 .preview-person,
+.preview-subject-4 .preview-person{
+  filter:drop-shadow(0 7px 7px rgba(0,0,0,.13)) !important;
+}
+
+/* Les badges servent uniquement à distinguer les personnes. */
+.preview-subject[data-appearance] .preview-person-badge,
+.preview-person-badge{
+  background:rgba(46,127,142,.86) !important;
+  color:#fff !important;
+}
+
+/* Repères restent fins même en très gros plan. */
+.preview-person .figure-marker,
+.preview-person .figure-detail-line{
+  vector-effect:non-scaling-stroke;
+}
