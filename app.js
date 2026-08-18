@@ -72,15 +72,15 @@ const ratios = [
 ];
 
 const previewFigureMetrics = {
-  // Exact pixel coordinates of assets/mannequin-preview.png (327 × 1250).
-  viewWidth:327,
-  viewHeight:1250,
-  headTopY:2.0,
-  eyeY:76.5,
-  chestY:286.5,
-  waistY:443.5,
-  kneeY:842.0,
-  footY:1240.0
+  // Exact pixel coordinates of assets/mannequin-preview.png (310 × 1300).
+  viewWidth:310,
+  viewHeight:1300,
+  headTopY:2.08,
+  eyeY:79.56,
+  chestY:297.96,
+  waistY:461.24,
+  kneeY:875.68,
+  footY:1289.6
 };
 previewFigureMetrics.headTopRatio = previewFigureMetrics.headTopY / previewFigureMetrics.viewHeight;
 previewFigureMetrics.eyeRatio = previewFigureMetrics.eyeY / previewFigureMetrics.viewHeight;

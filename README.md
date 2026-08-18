@@ -1,10 +1,8 @@
-# BOS FRAME V3.20 — HALO FIX
+# BOS FRAME V3.21 — CLEAN ASSET
 
-Base : BOS_FRAME_V3_19_WIDEFIX_ARMS
+Base: BOS_FRAME_V3_20_HALO_FIX
 
-Correction :
-- suppression du contour blanc autour des mannequins
-- décontamination du PNG transparent (unmatted from white)
-- conservation des corrections V3.19 :
-  - plans serrés / focales larges
-  - bras complets
+Correction:
+- remplacement complet du mannequin par un asset reconstruit depuis la référence propre de l’utilisateur
+- suppression des contours / silhouettes parasites derrière les personnages
+- conservation des corrections précédentes
