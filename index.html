@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BOS" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=3.13" />
+  <link rel="stylesheet" href="styles.css?v=3.14" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -59,6 +59,10 @@
           <div class="camera-select-wrap">
             <select class="camera-select" id="presetCameraSelect" aria-label="Choisir la caméra"></select>
           </div>
+          <div class="camera-inline-sensor">
+            <span>CAPTEUR UTILISÉ</span>
+            <strong id="presetSensorInfo">—</strong>
+          </div>
         </div>
       </div>
     </section>
@@ -76,7 +80,7 @@
           <div class="preview-wall"></div>
           <div class="preview-floor"></div>
           <div id="previewGroundLine" class="preview-ground-line"></div>
-          <div class="preview-eye-guide" aria-hidden="true">
+          <div class="preview-eye-guide" id="previewEyeGuide" aria-hidden="true">
             <span>LIGNE DES YEUX · 1/3</span>
           </div>
 
@@ -292,7 +296,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.13</span>
+        <span class="app-version">v3.14</span>
       </div>
     </footer>
   </main>
@@ -501,6 +505,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.13"></script>
+  <script src="app.js?v=3.14"></script>
 </body>
 </html>

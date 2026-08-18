@@ -1,24 +1,30 @@
-# BOS FRAME V3.13 — CAMERA INLINE
+# BOS FRAME V3.14 — SENSOR + EYE LINE
 
-FRAME reprend maintenant le sélecteur caméra d'EXPO directement dans l'application.
+## Taille exacte du capteur
+Sous le choix du modèle caméra, FRAME affiche maintenant en petit la largeur exacte
+de capteur utilisée pour le calcul du cadrage.
 
-## Interface
-- panneau RÉGLAGES CAMÉRA
-- repliable comme dans EXPO
-- Marque en boutons
-- Caméra en menu déroulant
-- plus aucune fenêtre modale pour choisir la caméra
+Exemples :
+- FX3 : 35,60 mm
+- FX30 : 23,30 mm
+- ALEXA 35 : valeur issue directement de BOS-CAMERA-DB
 
-Le panneau est replié au démarrage, comme EXPO.
+La valeur change immédiatement avec le modèle choisi.
+
+## Règle des yeux corrigée
+La ligne des yeux n'est plus simplement placée à 1/3 de toute la zone Preview.
+
+Elle est maintenant placée à exactement 1/3 du CADRE CINÉMA BLEU.
+
+En plus, FRAME applique une correction de composition après la projection :
+- 1 personne : ses yeux sont exactement au tiers supérieur ;
+- plusieurs personnes : la moyenne des yeux du groupe est exactement au tiers supérieur ;
+- les différences de taille entre personnes sont conservées ;
+- le comportement reste identique du plan large au très gros plan.
+
+Règle :
+- 1/3 au-dessus des yeux
+- 2/3 en dessous des yeux
 
 ## Camera DB
-Toujours connectée à la base commune :
-https://raw.githubusercontent.com/BrunoSetTools/BOS-CAMERA-DB/main/cameras.json
-
-Fallback hors ligne : BOS Camera DB V1.2.
-
-## Mémoire
-- dernière caméra sélectionnée conservée
-- dernier modèle utilisé conservé pour chaque marque
-
-Le reste de FRAME V3.12 est inchangé.
+FRAME reste connecté à la base commune BOS-CAMERA-DB.

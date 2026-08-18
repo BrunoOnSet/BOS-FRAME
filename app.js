@@ -1062,6 +1062,27 @@ function setFrameMode(mode,persist=true){
 
 function updateDofUI(){ return; }
 
+function previewEyeComposition(frameRect,stageRect,projections){
+  const valid=projections.filter(Boolean);
+  if(!valid.length){
+    return {offsetY:0,desiredEyeY:null};
+  }
+
+  // Absolute composition rule:
+  // 1/3 of the image is above the eye line, 2/3 below.
+  const desiredEyeY=(frameRect.top-stageRect.top)+(frameRect.height/3);
+
+  const currentEyes=valid.map(p=>
+    (frameRect.top-stageRect.top)+(frameRect.height/2)-(p.eye.y*frameRect.height/2)
+  );
+  const currentAverage=currentEyes.reduce((a,v)=>a+v,0)/currentEyes.length;
+
+  return {
+    offsetY:desiredEyeY-currentAverage,
+    desiredEyeY
+  };
+}
+
 function updatePreview(){
   if(state.mode!=='preview') return;
 
@@ -1074,7 +1095,17 @@ function updatePreview(){
 
   preparePreviewSubjectClones();
   const projections=activeSubjects().map(subjectProjection);
+  const eyeComposition=previewEyeComposition(frameRect,stageRect,projections);
   const scales=[];
+
+  // Position the visible 1/3 guide against the ACTUAL blue cinema frame.
+  const eyeGuide=$('#previewEyeGuide');
+  if(eyeGuide && eyeComposition.desiredEyeY!==null){
+    eyeGuide.style.top=`${eyeComposition.desiredEyeY}px`;
+    eyeGuide.style.left=`${frameRect.left-stageRect.left}px`;
+    eyeGuide.style.right='auto';
+    eyeGuide.style.width=`${frameRect.width}px`;
+  }
 
   state.subjects.forEach((subject,i)=>{
     const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);
@@ -1091,9 +1122,12 @@ function updatePreview(){
     el.classList.remove('behind-camera');
 
     const xPx=frameRect.left-stageRect.left + frameRect.width/2 + p.center.x*frameRect.width/2;
-    const headYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.head.y*frameRect.height/2;
-    const eyeYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.eye.y*frameRect.height/2;
-    const feetYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.feet.y*frameRect.height/2;
+
+    // Optical projection + a single composition correction for the whole group.
+    // This guarantees that the average eye line stays exactly at 1/3.
+    const headYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.head.y*frameRect.height/2 + eyeComposition.offsetY;
+    const eyeYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.eye.y*frameRect.height/2 + eyeComposition.offsetY;
+    const feetYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.feet.y*frameRect.height/2 + eyeComposition.offsetY;
 
     // Keep eyes as the absolute anchor, especially in very close framings.
     // We derive the SVG height from the projected eye-to-feet span so the
@@ -1309,7 +1343,7 @@ function renderPresets(){
   const shownPreset=presets.find(p=>p.id===select.value);
   if(sensorInfo){
     sensorInfo.textContent=shownPreset
-      ? `${shownPreset.width.toFixed(2).replace('.',',')} mm · ${shownPreset.name}`
+      ? `${shownPreset.width.toFixed(2).replace('.',',')} mm`
       : '—';
   }
 }

@@ -2627,3 +2627,35 @@ body.dark .brand-chips button.active{
 .ratio-only-controls{
   grid-template-columns:1fr !important;
 }
+
+
+/* ============================================================
+   FRAME BOS V3.14 — Camera sensor + absolute eye-line lock
+   ============================================================ */
+
+.camera-inline-sensor{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:6px;
+  padding:0 2px;
+}
+.camera-inline-sensor span{
+  color:var(--muted);
+  font-size:7px;
+  font-weight:850;
+  letter-spacing:.10em;
+}
+.camera-inline-sensor strong{
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+/* JS now places this guide exactly at 1/3 of mainFrame.
+   The old 33.333% remains only as a harmless pre-render fallback. */
+.preview-eye-guide{
+  right:auto !important;
+}

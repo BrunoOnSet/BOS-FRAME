@@ -1,4 +1,4 @@
-const CACHE='frame-bos-v3-13-camera-inline';
+const CACHE='frame-bos-v3-14-sensor-eyeline';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','./logo-bruno-guillard.png'];
 
 self.addEventListener('install',e=>{
