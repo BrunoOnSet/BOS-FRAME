@@ -71,6 +71,22 @@ const ratios = [
   {label:'4:5', value:4/5},{label:'9:16', value:9/16}
 ];
 
+const previewFigureMetrics = {
+  viewHeight: 900,
+  headTopY: 24,
+  eyeY: 96,
+  chestY: 300,
+  waistY: 430,
+  kneeY: 675,
+  footY: 883
+};
+previewFigureMetrics.headTopRatio = previewFigureMetrics.headTopY / previewFigureMetrics.viewHeight;
+previewFigureMetrics.eyeRatio = previewFigureMetrics.eyeY / previewFigureMetrics.viewHeight;
+previewFigureMetrics.footRatio = previewFigureMetrics.footY / previewFigureMetrics.viewHeight;
+previewFigureMetrics.bodyRatio = previewFigureMetrics.footRatio - previewFigureMetrics.headTopRatio;
+previewFigureMetrics.eyeFromTopRatio = (previewFigureMetrics.eyeRatio - previewFigureMetrics.headTopRatio) / previewFigureMetrics.bodyRatio;
+previewFigureMetrics.eyeHeightRatio = 1 - previewFigureMetrics.eyeFromTopRatio;
+
 // PREVIEW framing references.
 // Eyes are always locked to the upper 1/3 line.
 // Each reference below defines which anatomical Y position lands on the BOTTOM edge.
@@ -110,21 +126,6 @@ const previewTargets=previewPlanReferences.map(ref=>({
 }));
 const PREVIEW_SETTINGS_KEY='frame-preview-settings-v1';
 
-const previewFigureMetrics = {
-  viewHeight: 900,
-  headTopY: 24,
-  eyeY: 96,
-  chestY: 300,
-  waistY: 430,
-  kneeY: 675,
-  footY: 883
-};
-previewFigureMetrics.headTopRatio = previewFigureMetrics.headTopY / previewFigureMetrics.viewHeight;
-previewFigureMetrics.eyeRatio = previewFigureMetrics.eyeY / previewFigureMetrics.viewHeight;
-previewFigureMetrics.footRatio = previewFigureMetrics.footY / previewFigureMetrics.viewHeight;
-previewFigureMetrics.bodyRatio = previewFigureMetrics.footRatio - previewFigureMetrics.headTopRatio;
-previewFigureMetrics.eyeFromTopRatio = (previewFigureMetrics.eyeRatio - previewFigureMetrics.headTopRatio) / previewFigureMetrics.bodyRatio;
-previewFigureMetrics.eyeHeightRatio = 1 - previewFigureMetrics.eyeFromTopRatio;
 
 
 
