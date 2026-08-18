@@ -1,30 +1,13 @@
-# BOS FRAME V3.14 — SENSOR + EYE LINE
+# BOS FRAME V3.17 MANNEQUIN ASSET
 
-## Taille exacte du capteur
-Sous le choix du modèle caméra, FRAME affiche maintenant en petit la largeur exacte
-de capteur utilisée pour le calcul du cadrage.
+Base: BOS_FRAME_V3_15_1_HOTFIX
 
-Exemples :
-- FX3 : 35,60 mm
-- FX30 : 23,30 mm
-- ALEXA 35 : valeur issue directement de BOS-CAMERA-DB
+Cette version remplace la silhouette SVG simplifiée du mode PREVIEW
+par un vrai mannequin image, intégré comme asset PNG transparent.
 
-La valeur change immédiatement avec le modèle choisi.
-
-## Règle des yeux corrigée
-La ligne des yeux n'est plus simplement placée à 1/3 de toute la zone Preview.
-
-Elle est maintenant placée à exactement 1/3 du CADRE CINÉMA BLEU.
-
-En plus, FRAME applique une correction de composition après la projection :
-- 1 personne : ses yeux sont exactement au tiers supérieur ;
-- plusieurs personnes : la moyenne des yeux du groupe est exactement au tiers supérieur ;
-- les différences de taille entre personnes sont conservées ;
-- le comportement reste identique du plan large au très gros plan.
-
-Règle :
-- 1/3 au-dessus des yeux
-- 2/3 en dessous des yeux
-
-## Camera DB
-FRAME reste connecté à la base commune BOS-CAMERA-DB.
+Modifications :
+- nouveau mannequin PREVIEW intégré comme image
+- même mannequin pour Sujet 1 à Sujet 4
+- fond gris clair du cadre conservé
+- logique de cadrage existante conservée
+- cache PWA incrémenté
