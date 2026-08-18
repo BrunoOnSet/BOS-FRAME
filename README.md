@@ -1,54 +1,24 @@
-# FRAME — BOS V3.12 CAMERA DROPDOWN
+# BOS FRAME V3.13 — CAMERA INLINE
 
-## Sélection caméra harmonisée avec EXPO V3.31
+FRAME reprend maintenant le sélecteur caméra d'EXPO directement dans l'application.
 
-Le choix de caméra dans FRAME utilise désormais le même principe qu'EXPO :
+## Interface
+- panneau RÉGLAGES CAMÉRA
+- repliable comme dans EXPO
+- Marque en boutons
+- Caméra en menu déroulant
+- plus aucune fenêtre modale pour choisir la caméra
 
-1. sélection de la MARQUE par boutons
-2. sélection du MODÈLE dans un menu déroulant
+Le panneau est replié au démarrage, comme EXPO.
 
-Les marques et modèles sont générés automatiquement depuis BOS-CAMERA-DB.
-
-## Base caméra commune
-
-URL centrale utilisée par FRAME :
-
+## Camera DB
+Toujours connectée à la base commune :
 https://raw.githubusercontent.com/BrunoSetTools/BOS-CAMERA-DB/main/cameras.json
 
-FRAME et EXPO pointent donc vers la même base distante.
-
-## Hors ligne
-
-Le fallback local de FRAME est désormais harmonisé avec celui d'EXPO V3.31 :
-- databaseVersion 1.2
-- Sony
-- RED
-- ARRI
-- Blackmagic
-- capteurs génériques
-
-Le cache Camera DB passe également sur :
-bos-camera-db-cache-v2
+Fallback hors ligne : BOS Camera DB V1.2.
 
 ## Mémoire
+- dernière caméra sélectionnée conservée
+- dernier modèle utilisé conservé pour chaque marque
 
-FRAME conserve toujours la caméra principale sélectionnée.
-En plus, il mémorise maintenant le dernier modèle utilisé pour chaque marque,
-comme EXPO.
-
-Exemple :
-- Sony → FX6
-- ARRI → ALEXA 35
-- Blackmagic → Pocket Cinema Camera 6K
-
-Quand on revient sur une marque, son dernier modèle est repris automatiquement.
-
-## Inchangé
-
-- PREVIEW / VUE RÉELLE
-- Preview jusqu'à 4 personnes
-- carnations/diversité
-- règle des yeux
-- CAL RAPIDE / CAL PRO
-- calibrations portrait / paysage
-- RESET calibration
+Le reste de FRAME V3.12 est inchangé.

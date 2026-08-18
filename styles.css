@@ -2487,3 +2487,143 @@ body.dark .camera-brand-chips button.active{
 .camera-picker-sheet .custom-sensor{
   margin-top:14px;
 }
+
+
+/* ============================================================
+   FRAME BOS V3.13 — Réglages caméra inline comme EXPO V3.31
+   ============================================================ */
+
+.method-panel{
+  margin-bottom:12px;
+}
+.compact-head{
+  margin-bottom:0 !important;
+}
+.collapsible-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.collapse-toggle{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.collapse-toggle .panel-kicker{
+  margin:0;
+}
+.collapse-chevron{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  color:var(--muted);
+  font-size:16px;
+  line-height:1;
+  transition:transform .18s ease,color .18s ease;
+}
+.method-panel:not(.collapsed) .collapse-chevron{
+  transform:rotate(180deg);
+  color:var(--text);
+}
+.method-content{
+  margin-top:10px;
+}
+.method-panel.collapsed .method-content{
+  margin-top:0;
+}
+
+.camera-row{
+  margin-bottom:0;
+}
+.camera-row .method-label{
+  display:block;
+  margin-bottom:6px;
+  font-size:11px;
+  color:var(--muted);
+  font-weight:800;
+}
+.chips{
+  display:flex;
+  gap:7px;
+}
+.brand-chips{
+  margin-bottom:9px;
+  flex-wrap:wrap;
+  overflow:visible;
+}
+.brand-chips button{
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--muted);
+  border-radius:999px;
+  padding:8px 14px;
+  font-size:11px;
+  font-weight:850;
+}
+.brand-chips button.active{
+  background:var(--chip-active-bg);
+  color:var(--chip-active-text);
+  border-color:var(--chip-active-bg);
+}
+body.dark .brand-chips button.active{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+.camera-model-label{
+  display:block;
+  margin-top:2px;
+  margin-bottom:6px;
+}
+.camera-select-wrap{
+  position:relative;
+  width:100%;
+}
+.camera-select-wrap::after{
+  content:"⌄";
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-55%);
+  color:var(--muted);
+  font-size:16px;
+  font-weight:900;
+  pointer-events:none;
+}
+.camera-select{
+  width:100%;
+  min-width:0;
+  height:46px;
+  appearance:none;
+  -webkit-appearance:none;
+  border:1px solid var(--line) !important;
+  border-radius:14px !important;
+  background:var(--field-bg) !important;
+  color:var(--text) !important;
+  padding:0 42px 0 13px !important;
+  font:inherit;
+  font-size:13px !important;
+  font-weight:850 !important;
+  outline:none;
+}
+.camera-select:focus{
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 2px var(--accent-soft);
+}
+.camera-select option{
+  background:var(--panel);
+  color:var(--text);
+}
+.ratio-only-controls{
+  grid-template-columns:1fr !important;
+}

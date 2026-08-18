@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BOS" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=3.12" />
+  <link rel="stylesheet" href="styles.css?v=3.13" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -40,6 +40,28 @@
       <button class="utility-link" id="calBtn" type="button">CAL</button>
       <button class="utility-link" id="settingsBtn" type="button">RÉGLAGES</button>
     </div>
+
+    <section class="panel method-panel collapsed" id="frameCameraSettingsPanel">
+      <div class="panel-head compact-head collapsible-head">
+        <button type="button" class="collapse-toggle" id="frameCameraSettingsToggle"
+                aria-expanded="false" aria-controls="frameCameraSettingsContent">
+          <span class="panel-kicker">RÉGLAGES CAMÉRA</span>
+          <span class="collapse-chevron" aria-hidden="true">⌄</span>
+        </button>
+      </div>
+
+      <div class="method-content" id="frameCameraSettingsContent" hidden>
+        <div class="camera-row">
+          <span class="method-label">Marque</span>
+          <div class="chips mode-chips brand-chips" id="presetBrandMode"></div>
+
+          <span class="method-label camera-model-label">Caméra</span>
+          <div class="camera-select-wrap">
+            <select class="camera-select" id="presetCameraSelect" aria-label="Choisir la caméra"></select>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="panel camera-panel">
       <div class="panel-head frame-panel-head">
@@ -185,12 +207,8 @@
 
       <div class="lens-strip" id="lensStrip"></div>
 
-      <div class="main-controls">
-        <button id="cameraPresetBtn" class="control-button">
-          <span>CAMÉRA CINÉMA</span>
-          <strong id="cameraPresetText">Sony FX6</strong>
-        </button>
-        <button id="ratioBtn" class="control-button small">
+      <div class="main-controls ratio-only-controls">
+        <button id="ratioBtn" class="control-button">
           <span>RATIO</span>
           <strong id="ratioText">16:9</strong>
         </button>
@@ -274,7 +292,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.12</span>
+        <span class="app-version">v3.13</span>
       </div>
     </footer>
   </main>
@@ -460,34 +478,7 @@
     </div>
   </dialog>
 
-  <dialog id="presetDialog" class="sheet camera-picker-sheet">
-    <form method="dialog">
-      <header><h2>Caméra cinéma</h2><button value="cancel" class="close">×</button></header>
 
-      <div class="camera-picker">
-        <span class="camera-picker-label">Marque</span>
-        <div class="camera-brand-chips" id="presetBrandMode"></div>
-
-        <span class="camera-picker-label camera-picker-model-label">Caméra</span>
-        <div class="camera-select-wrap">
-          <select class="camera-select" id="presetCameraSelect" aria-label="Choisir la caméra"></select>
-        </div>
-
-        <div class="camera-picker-info">
-          <span>CAPTEUR DE RÉFÉRENCE</span>
-          <strong id="presetSensorInfo">—</strong>
-        </div>
-      </div>
-
-      <div class="custom-sensor">
-        <label>Largeur capteur personnalisée
-          <div><input id="sensorWidthInput" type="number" min="5" max="70" step="0.01"><span>mm</span></div>
-        </label>
-        <button type="button" id="applySensorBtn" class="secondary">APPLIQUER</button>
-      </div>
-      <small class="footnote">Les caméras viennent de BOS-CAMERA-DB. La largeur active peut varier selon le mode d'enregistrement ; le champ personnalisé permet une correction ponctuelle.</small>
-    </form>
-  </dialog>
 
   <dialog id="ratioDialog" class="sheet">
     <form method="dialog">
@@ -510,6 +501,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.12"></script>
+  <script src="app.js?v=3.13"></script>
 </body>
 </html>

@@ -1239,7 +1239,7 @@ function rememberFrameCameraForBrand(preset){
     localStorage.setItem(LAST_FRAME_CAMERA_BY_BRAND_KEY,JSON.stringify(saved));
   }catch(_){}
 }
-function applyCinemaPreset(preset,{close=false}={}){
+function applyCinemaPreset(preset){
   if(!preset) return;
 
   state.preset=preset;
@@ -1248,8 +1248,6 @@ function applyCinemaPreset(preset,{close=false}={}){
   rememberFrameCameraForBrand(preset);
   saveMainCameraSetting();
 
-  const sensorInput=$('#sensorWidthInput');
-  if(sensorInput) sensorInput.value=preset.width.toFixed(2);
 
   if(isTargetUnavailable(state.sensorWidth,state.focal)){
     const first=lenses.find(mm=>!isTargetUnavailable(state.sensorWidth,mm));
@@ -1260,7 +1258,6 @@ function applyCinemaPreset(preset,{close=false}={}){
   renderLenses();
   updateAll();
 
-  if(close) $('#presetDialog')?.close();
 }
 function renderPresets(){
   const brandsHost=$('#presetBrandMode');
@@ -1369,7 +1366,7 @@ function renderGuides(){
 function updateReadout(){
   const hf=targetHFov();
   $('#cameraReadout').textContent=state.preset.name.replace('ARRI ','').replace('Sony ','').replace('RED ','');
-  $('#cameraPresetText').textContent=state.preset.name;
+  if($('#cameraPresetText')) $('#cameraPresetText').textContent=state.preset.name;
   $('#focalReadout').textContent=state.focal+' mm';
   $('#ratioReadout').textContent=ratioLabel(state.ratio).replace(':1','');
   $('#ratioText').textContent=ratioLabel(state.ratio);
@@ -1945,6 +1942,16 @@ function toggleTheme(){
   applyTheme(document.body.classList.contains("dark")?"light":"dark");
 }
 
+function setFrameCameraSettingsOpen(open){
+  const panel=$('#frameCameraSettingsPanel');
+  const toggle=$('#frameCameraSettingsToggle');
+  const content=$('#frameCameraSettingsContent');
+  if(!panel || !toggle || !content) return;
+  panel.classList.toggle('collapsed',!open);
+  toggle.setAttribute('aria-expanded',open?'true':'false');
+  content.hidden=!open;
+}
+
 function registerEvents(){
   $('#startCameraBtn').onclick=()=>startCamera();
   $('#realModeBtn').onclick=()=>setFrameMode('real');
@@ -2014,13 +2021,12 @@ function registerEvents(){
 
   $('#settingsBtn').onclick=()=>$('#settingsDialog').showModal();
   $('#themeBtn').onclick=()=>toggleTheme();
-  $('#cameraPresetBtn').onclick=()=>{
-    $('#sensorWidthInput').value=state.sensorWidth.toFixed(2);
-    if(state.preset?.id!=='custom') cameraPickerBrand=cameraBrand(state.preset);
-    renderPresets();
-    $('#presetDialog').showModal();
-  };
 
+  $('#frameCameraSettingsToggle').onclick=()=>{
+    setFrameCameraSettingsOpen(
+      $('#frameCameraSettingsToggle').getAttribute('aria-expanded')!=='true'
+    );
+  };
   $('#presetBrandMode').addEventListener('click',e=>{
     const btn=e.target.closest('button[data-brand]');
     if(!btn) return;
@@ -2032,28 +2038,15 @@ function registerEvents(){
     const first=camerasForBrand(brand)[0];
     const next=presets.find(p=>p.id===(remembered||first?.id));
 
-    if(next) applyCinemaPreset(next,{close:false});
+    if(next) applyCinemaPreset(next);
     else renderPresets();
   });
 
   $('#presetCameraSelect').addEventListener('change',e=>{
     const next=presets.find(p=>p.id===e.target.value);
-    if(next) applyCinemaPreset(next,{close:false});
+    if(next) applyCinemaPreset(next);
   });
   $('#ratioBtn').onclick=()=>$('#ratioDialog').showModal();
-  $('#applySensorBtn').onclick=()=>{
-    const w=parseFloat($('#sensorWidthInput').value);
-    if(w>5&&w<70){
-      state.sensorWidth=w;
-      state.preset={id:'custom',name:`Capteur ${w.toFixed(2)} mm`,width:w};
-      saveMainCameraSetting();
-      if(isTargetUnavailable(state.sensorWidth,state.focal)){
-        const first=lenses.find(mm=>!isTargetUnavailable(state.sensorWidth,mm));
-        if(first) state.focal=first;
-      }
-      renderLenses(); updateAll(); renderPresets(); $('#presetDialog').close()
-    }
-  };
   $('#objectWidth').oninput=calculateCalibration;
   $('#objectDistance').oninput=calculateCalibration;
   $('#saveCalibrationBtn').onclick=()=>{
@@ -2099,6 +2092,7 @@ function init(){
   applyTheme(preferredTheme(),false);
   loadCachedCameraDb();
   loadMainCameraSetting();
+  setFrameCameraSettingsOpen(false);
   loadPreviewSettings();
   renderLenses(); renderPresets(); renderRatios(); renderGuideChoices();
   renderProPresetSelect(); renderProLenses(); renderProPoints();
