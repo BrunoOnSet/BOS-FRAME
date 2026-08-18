@@ -2378,3 +2378,112 @@ body.dark .preview-eye-guide{
   color:#fff !important;
   border-color:rgba(255,255,255,.18) !important;
 }
+
+
+/* ============================================================
+   FRAME BOS V3.12 — Camera dropdown aligned with EXPO V3.31
+   ============================================================ */
+.camera-picker{
+  margin-bottom:12px;
+}
+.camera-picker-label{
+  display:block;
+  margin-bottom:6px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+.camera-picker-model-label{
+  margin-top:4px;
+}
+.camera-brand-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-bottom:10px;
+}
+.camera-brand-chips button{
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--muted);
+  border-radius:999px;
+  padding:8px 14px;
+  font-size:11px;
+  font-weight:850;
+}
+.camera-brand-chips button.active{
+  background:var(--chip-active-bg);
+  color:var(--chip-active-text);
+  border-color:var(--chip-active-bg);
+}
+body.dark .camera-brand-chips button.active{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+.camera-select-wrap{
+  position:relative;
+  width:100%;
+}
+.camera-select-wrap::after{
+  content:"⌄";
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-55%);
+  color:var(--muted);
+  font-size:16px;
+  font-weight:900;
+  pointer-events:none;
+}
+.camera-select{
+  width:100%;
+  min-width:0;
+  height:46px;
+  appearance:none;
+  -webkit-appearance:none;
+  border:1px solid var(--line) !important;
+  border-radius:14px !important;
+  background:var(--field-bg) !important;
+  color:var(--text) !important;
+  padding:0 42px 0 13px !important;
+  font:inherit;
+  font-size:13px !important;
+  font-weight:850 !important;
+  outline:none;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.camera-select:focus{
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 2px var(--accent-soft);
+}
+.camera-select option{
+  background:var(--panel);
+  color:var(--text);
+}
+.camera-picker-info{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:8px;
+  padding:8px 10px;
+  border-radius:11px;
+  background:var(--panel2);
+}
+.camera-picker-info span{
+  color:var(--muted);
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:.08em;
+}
+.camera-picker-info strong{
+  color:var(--text);
+  font-size:9px;
+  text-align:right;
+}
+.camera-picker-sheet .custom-sensor{
+  margin-top:14px;
+}

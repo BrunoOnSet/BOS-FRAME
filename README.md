@@ -1,26 +1,54 @@
-# FRAME — BOS V3.11
+# FRAME — BOS V3.12 CAMERA DROPDOWN
 
-## Correctif ancrage du visage en très gros plan
+## Sélection caméra harmonisée avec EXPO V3.31
 
-Problème :
-en 1 personne, quand on allait très près / très gros plan, le rendu finissait
-par s'ancrer davantage sur la masse des cheveux que sur la ligne des yeux.
+Le choix de caméra dans FRAME utilise désormais le même principe qu'EXPO :
 
-## Correctif
-La preview place maintenant le personnage à partir de :
-- la projection des yeux
-- la projection des pieds
+1. sélection de la MARQUE par boutons
+2. sélection du MODÈLE dans un menu déroulant
 
-Les yeux deviennent l'ancre absolue du rendu.
+Les marques et modèles sont générés automatiquement depuis BOS-CAMERA-DB.
 
-### Résultat attendu
-- les yeux restent la vraie référence
-- la ligne 1/3 reste fiable
-- en très gros plan, l'image ne "glisse" plus vers les cheveux
+## Base caméra commune
 
+URL centrale utilisée par FRAME :
 
-## V3.11 — BOS Camera DB
-- Base exacte : FRAME BOS V3.10 EYESLOCK.
-- Conservation de toutes les fonctions V3.10 (Preview, multi-sujets, eye lock, etc.).
-- La liste des caméras est maintenant chargée depuis BOS-CAMERA-DB.
-- Cache local + fallback embarqué pour le fonctionnement hors ligne.
+https://raw.githubusercontent.com/BrunoSetTools/BOS-CAMERA-DB/main/cameras.json
+
+FRAME et EXPO pointent donc vers la même base distante.
+
+## Hors ligne
+
+Le fallback local de FRAME est désormais harmonisé avec celui d'EXPO V3.31 :
+- databaseVersion 1.2
+- Sony
+- RED
+- ARRI
+- Blackmagic
+- capteurs génériques
+
+Le cache Camera DB passe également sur :
+bos-camera-db-cache-v2
+
+## Mémoire
+
+FRAME conserve toujours la caméra principale sélectionnée.
+En plus, il mémorise maintenant le dernier modèle utilisé pour chaque marque,
+comme EXPO.
+
+Exemple :
+- Sony → FX6
+- ARRI → ALEXA 35
+- Blackmagic → Pocket Cinema Camera 6K
+
+Quand on revient sur une marque, son dernier modèle est repris automatiquement.
+
+## Inchangé
+
+- PREVIEW / VUE RÉELLE
+- Preview jusqu'à 4 personnes
+- carnations/diversité
+- règle des yeux
+- CAL RAPIDE / CAL PRO
+- calibrations portrait / paysage
+- RESET calibration
