@@ -2706,3 +2706,40 @@ body.dark .brand-chips button.active{
 .preview-person .figure-detail-line{
   vector-effect:non-scaling-stroke;
 }
+
+
+/* ============================================================
+   FRAME BOS V3.16 — mannequin androgyne plus élégant
+   ============================================================ */
+.preview-person .figure-body{
+  fill:url(#figureGrad);
+}
+.preview-person .figure-eye-line{
+  stroke:#C7D0D1;
+  stroke-width:2.1;
+  stroke-linecap:round;
+  opacity:.92;
+  vector-effect:non-scaling-stroke;
+}
+.preview-person .figure-detail-line{
+  fill:none;
+  stroke:#AAB5B7;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  opacity:.88;
+  vector-effect:non-scaling-stroke;
+}
+.preview-person .figure-marker{
+  stroke:#9BA8AA;
+  stroke-width:2;
+  stroke-linecap:round;
+  opacity:.88;
+  vector-effect:non-scaling-stroke;
+}
+.preview-subject .preview-person,
+.preview-subject-2 .preview-person,
+.preview-subject-3 .preview-person,
+.preview-subject-4 .preview-person{
+  filter:drop-shadow(0 7px 7px rgba(0,0,0,.12)) !important;
+}

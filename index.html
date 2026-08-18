@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BOS" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=3.15.1" />
+  <link rel="stylesheet" href="styles.css?v=3.16" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -85,71 +85,55 @@
           </div>
 
           <div id="previewSubject" class="preview-subject">
-            <svg class="preview-person" viewBox="0 0 240 900" role="img" aria-label="Silhouette androgyne de référence">
+            <svg class="preview-person" viewBox="0 0 240 900" role="img" aria-label="Mannequin androgyne de référence">
               <defs>
-                <filter id="softShadow" x="-50%" y="-20%" width="200%" height="160%">
-                  <feGaussianBlur stdDeviation="7"/>
+                <linearGradient id="figureGrad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#2A2E31"/>
+                  <stop offset=".52" stop-color="#171A1D"/>
+                  <stop offset="1" stop-color="#0C0E10"/>
+                </linearGradient>
+                <filter id="softShadow" x="-60%" y="-30%" width="220%" height="190%">
+                  <feGaussianBlur stdDeviation="6"/>
                 </filter>
               </defs>
 
-              <!-- ombre au sol -->
-              <ellipse cx="120" cy="884" rx="70" ry="10" fill="rgba(0,0,0,.16)" filter="url(#softShadow)"/>
+              <ellipse cx="120" cy="876" rx="58" ry="9" fill="rgba(0,0,0,.17)" filter="url(#softShadow)"/>
 
-              <!-- silhouette neutre et androgyne -->
-              <path class="figure-body" d="
-                M120 24
-                C88 24 71 46 70 82
-                C69 102 75 122 88 139
-                L88 169
-                C73 178 60 187 48 205
-                C39 219 34 242 31 268
-                L23 406
-                C22 430 28 449 37 462
-                C42 469 47 470 51 466
-                C56 461 55 452 53 443
-                L67 320
-                L71 462
-                C73 498 77 544 80 583
-                L83 824
-                C82 844 74 856 64 866
-                C58 872 59 881 72 883
-                L101 883
-                C110 882 114 875 113 864
-                L111 608
-                L120 494
-                L129 608
-                L127 864
-                C126 875 130 882 139 883
-                L168 883
-                C181 881 182 872 176 866
-                C166 856 158 844 157 824
-                L160 583
-                C163 544 167 498 169 462
-                L173 320
-                L187 443
-                C185 452 184 461 189 466
-                C193 470 198 469 203 462
-                C212 449 218 430 217 406
-                L209 268
-                C206 242 201 219 192 205
-                C180 187 167 178 152 169
-                L152 139
-                C165 122 171 102 170 82
-                C169 46 152 24 120 24
-                Z" />
+              <!-- tête ovale, neutre -->
+              <ellipse class="figure-body" cx="120" cy="88" rx="39" ry="57"/>
 
-              <!-- visage : uniquement yeux + nez -->
-              <ellipse class="figure-detail eye" cx="104" cy="96" rx="5.1" ry="3.8"/>
-              <ellipse class="figure-detail eye" cx="136" cy="96" rx="5.1" ry="3.8"/>
-              <path class="figure-detail-line nose" d="M120 101 L118 119 L124 123"/>
+              <!-- cou -->
+              <path class="figure-body" d="M101 133 C103 151 100 168 90 180 L150 180 C140 168 137 151 139 133 Z"/>
 
-              <!-- repères anatomiques de cadrage -->
-              <line class="figure-marker chest" x1="76" y1="300" x2="164" y2="300"/>
-              <line class="figure-marker waist" x1="78" y1="430" x2="162" y2="430"/>
-              <line class="figure-marker elbow left" x1="31" y1="405" x2="55" y2="409"/>
-              <line class="figure-marker elbow right" x1="185" y1="409" x2="209" y2="405"/>
-              <line class="figure-marker knee left" x1="82" y1="675" x2="109" y2="675"/>
-              <line class="figure-marker knee right" x1="131" y1="675" x2="158" y2="675"/>
+              <!-- torse : épaules modérées, taille peu marquée -->
+              <path class="figure-body" d="M90 174 C72 180 58 187 49 202 C41 218 40 246 43 281 L51 411 C53 443 61 459 73 466 L84 463 L89 422 L88 317 L94 441 C96 468 101 486 106 497 L134 497 C139 486 144 468 146 441 L152 317 L151 422 L156 463 L167 466 C179 459 187 443 189 411 L197 281 C200 246 199 218 191 202 C182 187 168 180 150 174 C139 181 130 185 120 185 C110 185 101 181 90 174 Z"/>
+
+              <!-- bassin : très léger, sans code genré marqué -->
+              <path class="figure-body" d="M106 492 C101 515 97 542 96 579 L100 623 L111 623 L120 515 L129 623 L140 623 L144 579 C143 542 139 515 134 492 Z"/>
+
+              <!-- jambes longues et droites -->
+              <path class="figure-body" d="M96 570 L100 623 L104 795 C104 825 99 843 91 857 C86 865 89 873 101 874 L112 874 C119 872 121 866 120 856 L118 628 L120 519 L122 628 L120 856 C119 866 121 872 128 874 L139 874 C151 873 154 865 149 857 C141 843 136 825 136 795 L140 623 L144 570 L129 570 L120 515 L111 570 Z"/>
+
+              <!-- bras plus fins et détachés visuellement -->
+              <path class="figure-body" d="M50 205 C39 218 35 241 35 269 L30 408 C29 437 33 454 40 468 C44 475 50 476 54 472 C58 468 57 460 55 452 L64 332 L66 255 C66 227 61 210 50 205 Z"/>
+              <path class="figure-body" d="M190 205 C201 218 205 241 205 269 L210 408 C211 437 207 454 200 468 C196 475 190 476 186 472 C182 468 183 460 185 452 L176 332 L174 255 C174 227 179 210 190 205 Z"/>
+
+              <!-- mains sobres -->
+              <path class="figure-body" d="M40 455 C35 464 34 477 38 488 C41 496 46 499 50 495 C53 492 52 487 51 482 C57 489 62 486 60 478 L54 458 Z"/>
+              <path class="figure-body" d="M200 455 C205 464 206 477 202 488 C199 496 194 499 190 495 C187 492 188 487 189 482 C183 489 178 486 180 478 L186 458 Z"/>
+
+              <!-- visage minimal -->
+              <line class="figure-eye-line" x1="99" y1="95" x2="108" y2="95"/>
+              <line class="figure-eye-line" x1="132" y1="95" x2="141" y2="95"/>
+              <path class="figure-detail-line nose" d="M120 99 L119 116 L124 120"/>
+
+              <!-- repères anatomiques -->
+              <line class="figure-marker chest" x1="78" y1="292" x2="162" y2="292"/>
+              <line class="figure-marker waist" x1="82" y1="422" x2="158" y2="422"/>
+              <line class="figure-marker elbow left" x1="33" y1="411" x2="55" y2="414"/>
+              <line class="figure-marker elbow right" x1="185" y1="414" x2="207" y2="411"/>
+              <line class="figure-marker knee left" x1="101" y1="664" x2="116" y2="664"/>
+              <line class="figure-marker knee right" x1="124" y1="664" x2="139" y2="664"/>
             </svg>
           </div>
 
@@ -302,7 +286,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.15.1</span>
+        <span class="app-version">v3.16</span>
       </div>
     </footer>
   </main>
@@ -511,6 +495,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.15.1"></script>
+  <script src="app.js?v=3.16"></script>
 </body>
 </html>

@@ -73,18 +73,18 @@ const ratios = [
 
 const previewFigureMetrics = {
   viewHeight: 900,
-  headTopY: 24,
-  eyeY: 96,
-  chestY: 300,
-  waistY: 430,
-  kneeY: 675,
-  footY: 883
+  headTopY: 31,
+  eyeY: 95,
+  chestY: 292,
+  waistY: 422,
+  kneeY: 664,
+  footY: 874
 };
 previewFigureMetrics.headTopRatio = previewFigureMetrics.headTopY / previewFigureMetrics.viewHeight;
 previewFigureMetrics.eyeRatio = previewFigureMetrics.eyeY / previewFigureMetrics.viewHeight;
 previewFigureMetrics.footRatio = previewFigureMetrics.footY / previewFigureMetrics.viewHeight;
 previewFigureMetrics.bodyRatio = previewFigureMetrics.footRatio - previewFigureMetrics.headTopRatio;
-previewFigureMetrics.eyeFromTopRatio = (previewFigureMetrics.eyeRatio - previewFigureMetrics.headTopRatio) / previewFigureMetrics.bodyRatio;
+previewFigureMetrics.eyeFromTopRatio = (previewFigureMetrics.eyeRatio - previewFigureMetrics.headTopY) / (previewFigureMetrics.footY - previewFigureMetrics.headTopY);
 previewFigureMetrics.eyeHeightRatio = 1 - previewFigureMetrics.eyeFromTopRatio;
 
 // PREVIEW framing references.
@@ -642,15 +642,14 @@ function preparePreviewSubjectClones(){
       clone.removeAttribute('role');
       clone.setAttribute('aria-hidden','true');
 
-      // Unique shadow filter id for cloned SVGs.
-      const filter=clone.querySelector('#softShadow');
-      if(filter){
-        const newId=`softShadow-p${i}`;
-        filter.setAttribute('id',newId);
-        clone.querySelectorAll('[filter="url(#softShadow)"]').forEach(node=>{
-          node.setAttribute('filter',`url(#${newId})`);
-        });
-      }
+      ['figureGrad','softShadow'].forEach(baseId=>{
+        const node=clone.querySelector(`#${baseId}`);
+        if(!node) return;
+        const newId=`${baseId}-p${i}`;
+        node.setAttribute('id',newId);
+        clone.querySelectorAll(`[fill="url(#${baseId})"]`).forEach(x=>x.setAttribute('fill',`url(#${newId})`));
+        clone.querySelectorAll(`[filter="url(#${baseId})"]`).forEach(x=>x.setAttribute('filter',`url(#${newId})`));
+      });
       el.appendChild(clone);
     }
   });
