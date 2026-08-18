@@ -72,15 +72,15 @@ const ratios = [
 ];
 
 const previewFigureMetrics = {
-  // Exact pixel coordinates of assets/mannequin-preview.png (266 × 1250).
-  viewWidth:266,
+  // Exact pixel coordinates of assets/mannequin-preview.png (327 × 1250).
+  viewWidth:327,
   viewHeight:1250,
-  headTopY:2,
+  headTopY:2.0,
   eyeY:76.5,
   chestY:286.5,
   waistY:443.5,
-  kneeY:842,
-  footY:1240
+  kneeY:842.0,
+  footY:1240.0
 };
 previewFigureMetrics.headTopRatio = previewFigureMetrics.headTopY / previewFigureMetrics.viewHeight;
 previewFigureMetrics.eyeRatio = previewFigureMetrics.eyeY / previewFigureMetrics.viewHeight;
@@ -540,7 +540,13 @@ function subjectProjection(subject){
 }
 function bodyScaleForSubject(subject){
   const p=subjectProjection(subject);
-  if(!p) return 0;
+
+  // If projection becomes invalid, it means the camera is too close
+  // (typically feet or head crossing the near plane in wide lenses).
+  // Treat this as "too large / too close" so the binary search moves
+  // the camera farther away instead of collapsing to the minimum distance.
+  if(!p) return Number.POSITIVE_INFINITY;
+
   return Math.abs(p.feet.y-p.head.y)/2;
 }
 function previewFrameMetricsAt(distance){
