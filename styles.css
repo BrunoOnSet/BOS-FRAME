@@ -337,8 +337,8 @@ html,body,#app{
 
 
 /* =========================================================
-   FRAME V2.0 — BRUNO ONSET VISUAL SYSTEM
-   Light / Dark + shared BOS blue accent
+   FRAME V2.0 — BRUNO SET TOOLS VISUAL SYSTEM
+   Light / Dark + shared BST blue accent
    ========================================================= */
 
 :root{
@@ -350,7 +350,7 @@ html,body,#app{
   --bst-shadow:0 14px 40px rgba(20,35,50,.10);
 }
 
-/* LIGHT is the default BOS appearance */
+/* LIGHT is the default BST appearance */
 body[data-theme="light"]{
   --bg:#f3f5f7;
   --fg:#171b20;
@@ -420,7 +420,7 @@ body{
   background:var(--bst-blue) !important;
 }
 
-/* Shared BOS cards / bubbles */
+/* Shared BST cards / bubbles */
 .glass{
   background:var(--glass) !important;
   border-color:var(--border) !important;
@@ -503,7 +503,7 @@ body{
   color:var(--bst-blue);
 }
 
-/* Frame = neutral white line + BOS blue corners, readable on all footage */
+/* Frame = neutral white line + BST blue corners, readable on all footage */
 .main-frame,.pro-frame{
   border-color:rgba(255,255,255,.76) !important;
 }
@@ -646,7 +646,7 @@ input[type="range"],.center-slider{
   accent-color:var(--bst-blue) !important;
 }
 
-/* Explicit LIGHT / DARK segmented control like the other BOS utilities */
+/* Explicit LIGHT / DARK segmented control like the other BST utilities */
 .theme-segment{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -693,7 +693,7 @@ input[type="range"],.center-slider{
   color:var(--fg) !important;
 }
 
-/* Camera placeholder / empty state gets a recognizable BOS badge */
+/* Camera placeholder / empty state gets a recognizable BST badge */
 .camera-placeholder strong{
   display:inline-flex;
   padding:8px 14px;
@@ -726,7 +726,7 @@ body[data-theme="dark"] .viewfinder:has(.camera-placeholder:not(.hidden)){
 
 
 /* =========================================================
-   FRAME V2.1 — DA alignment with other BOS apps
+   FRAME V2.1 — DA alignment with other BST apps
    ========================================================= */
 
 .viewfinder{
@@ -849,7 +849,7 @@ body[data-theme="dark"] .viewfinder:has(.camera-placeholder:not(.hidden)){
   z-index:11;
 }
 
-/* Main controls block recognisable as a BOS footer card */
+/* Main controls block recognisable as a BST footer card */
 .bottom-panel{
   position:relative !important;
   left:auto !important;
@@ -1007,44 +1007,33 @@ button{cursor:pointer;color:var(--text)}
   justify-content:space-between;
   gap:14px;
 }
-.top-title{min-width:0}
-.tool-eyebrow{
+.eyebrow-row{display:block}
+.eyebrow{
   display:flex;
   align-items:center;
   gap:7px;
   font-size:11px;
   letter-spacing:.12em;
   font-weight:850;
-  white-space:nowrap;
-  text-decoration:none;
-  color:inherit;
 }
-.eyebrow-logo{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:40px;
-  height:24px;
-  padding:0 9px;
-  border-radius:999px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  color:#2E7F8E;
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.04em;
-  line-height:1;
-  flex:0 0 auto;
+.eyebrow-link{text-decoration:none;color:inherit}
+.eyebrow-link:active{opacity:.7}
+.eyebrow-mark{
+  width:18px;
+  height:2px;
+  background:var(--accent);
+  display:inline-block;
+  border-radius:2px;
 }
-.eyebrow-brand{font-weight:900;color:var(--text)}
-.bos-letter{color:#2E7F8E}
-.top h1{
+.eyebrow-brand{color:#252A2F;font-weight:900}
+.eyebrow-tool{color:var(--muted);font-weight:800}
+body.dark .eyebrow-brand{color:#D7DADF}
+h1{
   font-size:27px !important;
   line-height:1.05 !important;
   margin:10px 0 0 !important;
   letter-spacing:-.03em !important;
   color:var(--text) !important;
-  font-weight:900 !important;
 }
 .theme-toggle,.utility-link{
   border:1px solid var(--line) !important;
@@ -1675,65 +1664,717 @@ body:not(.dark) .footer-logo{filter:invert(1)}
    it stays in the chooser/settings, never as another overlay on the image. */
 
 
-/* FRAME V2.8 — PWA installation */
-.utility-row{flex-wrap:wrap}
-.install-link{border-color:var(--accent)!important;color:var(--accent)!important}
-.install-sheet .install-instructions{display:grid;gap:10px}
-.install-step{display:grid;gap:4px;padding:12px 13px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
-.install-step strong{font-size:12px;color:var(--text)}
-.install-step span{font-size:12px;line-height:1.45;color:var(--muted)}
-.install-note{margin:2px 0 0;font-size:11px;line-height:1.45;color:var(--muted)}
+/* ============================================================
+   FRAME V3.0 — VUE RÉELLE / PREVIEW
+   ============================================================ */
 
+.mode-switch{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  padding:4px;
+  margin:0 0 12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--panel2);
+}
+.mode-choice{
+  min-height:38px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.10em;
+}
+.mode-choice.active{
+  background:var(--accent);
+  color:#fff;
+}
+.mode-hidden{
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
 
-/* FRAME V2.9 — focale libre */
-.custom-focal-row{
+/* Preview studio */
+.preview-scene{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  background:#d8dad9;
+}
+.preview-wall{
+  position:absolute;
+  inset:0 0 24% 0;
+  background:
+    radial-gradient(circle at 50% 34%,rgba(255,255,255,.95) 0%,rgba(240,241,239,.92) 28%,rgba(207,211,209,.98) 74%,#c3c7c5 100%);
+}
+.preview-floor{
+  position:absolute;
+  left:-12%;
+  right:-12%;
+  bottom:-7%;
+  height:38%;
+  background:
+    linear-gradient(to bottom,rgba(191,195,193,.72),#b8bcba 62%,#aeb2b0);
+  transform:perspective(480px) rotateX(63deg);
+  transform-origin:bottom center;
+}
+.preview-floor:after{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:12%;
+  height:1px;
+  background:rgba(74,80,78,.22);
+  box-shadow:0 26px rgba(74,80,78,.08),0 52px rgba(74,80,78,.06);
+}
+.preview-ground-line{
+  position:absolute;
+  z-index:2;
+  left:6%;
+  right:6%;
+  height:1px;
+  background:rgba(47,91,102,.34);
+  pointer-events:none;
+}
+.preview-subject{
+  position:absolute;
+  z-index:3;
+  transform:translateX(-50%);
+  transform-origin:top center;
+  pointer-events:none;
+}
+.preview-person{
+  display:block;
+  width:100%;
+  height:100%;
+  overflow:visible;
+  filter:drop-shadow(0 8px 8px rgba(0,0,0,.12));
+}
+.preview-measure{
+  position:absolute;
+  z-index:4;
+  width:42px;
+  pointer-events:none;
+}
+.preview-measure-line{
+  position:absolute;
+  left:7px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:rgba(47,91,102,.62);
+}
+.preview-measure-line:before,
+.preview-measure-line:after{
+  content:"";
+  position:absolute;
+  left:-4px;
+  width:9px;
+  height:1px;
+  background:rgba(47,91,102,.62);
+}
+.preview-measure-line:before{top:0}
+.preview-measure-line:after{bottom:0}
+.preview-measure strong{
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  padding:3px 5px;
+  border-radius:6px;
+  background:rgba(255,255,255,.82);
+  color:#2F5B66;
+  font-size:8px;
+  white-space:nowrap;
+}
+.preview-info-overlay{
+  position:absolute;
+  z-index:8;
+  left:12px;
+  bottom:12px;
+  max-width:calc(100% - 24px);
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(11,12,14,.72);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.preview-info-overlay strong{
+  display:block;
+  font-size:10px;
+  letter-spacing:.08em;
+}
+.preview-info-overlay span{
+  display:block;
+  margin-top:2px;
+  color:#c9ced1;
+  font-size:8px;
+}
+
+/* Preview controls */
+.preview-controls{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+}
+.preview-fields{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.preview-field>span,
+.preview-distance-slider>span,
+.preview-target-head>span,
+.preview-result-card span{
+  display:block;
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.11em;
+}
+.preview-field>div{
   display:flex;
   align-items:center;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--field-bg);
+  overflow:hidden;
+}
+.preview-field input{
+  min-width:0;
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  padding:11px 10px;
+  font-weight:800;
+}
+.preview-field em{
+  padding-right:10px;
+  color:var(--muted);
+  font-style:normal;
+  font-size:10px;
+}
+.preview-distance-slider{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  margin-top:12px;
+}
+.preview-distance-slider>span{
+  margin:0;
+}
+.preview-distance-slider input{
+  width:100%;
+  accent-color:var(--accent);
+}
+.preview-distance-slider strong{
+  min-width:54px;
+  color:var(--text);
+  font-size:11px;
+  text-align:right;
+}
+.preview-target-head{
+  display:flex;
+  align-items:flex-end;
   justify-content:space-between;
   gap:12px;
-  margin:2px 0 14px;
-  padding:10px 12px;
+  margin-top:14px;
+}
+.preview-target-head>span{margin:0}
+.preview-target-head small{
+  color:var(--muted);
+  font-size:8px;
+  text-align:right;
+}
+.preview-targets{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:8px;
+}
+.preview-target{
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--chip-bg);
+  color:var(--chip-text);
+  padding:8px 11px;
+  font-size:9px;
+  font-weight:850;
+}
+.preview-target.active{
+  background:var(--chip-active-bg);
+  color:var(--chip-active-text);
+  border-color:var(--chip-active-bg);
+}
+body.dark .preview-target.active{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+.preview-result-card{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+  padding:11px 12px;
   border:1px solid var(--line);
   border-radius:14px;
   background:var(--field-bg);
 }
-.custom-focal-row>label{
-  font-size:10px;
-  letter-spacing:.12em;
-  font-weight:900;
-  color:var(--muted);
-  white-space:nowrap;
+.preview-result-card span{margin-bottom:3px}
+.preview-result-card strong{
+  color:var(--text);
+  font-size:13px;
 }
-.custom-focal-input-wrap{
+
+/* In preview, do not darken the outside frame too aggressively. */
+.preview-scene + .camera-placeholder.mode-hidden ~ .frame-mask .main-frame{
+  box-shadow:0 0 0 9999px rgba(0,0,0,.14);
+}
+
+@media(max-width:420px){
+  .preview-fields{grid-template-columns:1fr}
+  .preview-target-head{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:3px;
+  }
+  .preview-target-head small{text-align:left}
+}
+
+@media(orientation:landscape){
+  .preview-fields{grid-template-columns:1fr 1fr}
+}
+
+
+/* ============================================================
+   FRAME BOS V3.2 TEST
+   DA source : MEDIA V2.2 / Bruno OnSet
+   ============================================================ */
+:root{
+  --bg:#F3F1EC !important;
+  --panel:#FBFAF7 !important;
+  --panel2:#EEEAE2 !important;
+  --field-bg:#FFFFFF !important;
+  --text:#17191C !important;
+  --muted:#74777C !important;
+  --line:#D8D3C9 !important;
+  --card-border:#DDD8CE !important;
+  --accent:#2E7F8E !important;
+  --accent-soft:rgba(46,127,142,.10) !important;
+  --accent-strong:#236B78 !important;
+  --chip-active-bg:#92B8C0 !important;
+  --chip-active-text:#182126 !important;
+  --stepper-bg:#2F5B66 !important;
+  --danger:#9A4C47 !important;
+  --shadow:0 9px 28px rgba(20,20,20,.055) !important;
+  --dof-net:#3F8B62;
+  --dof-edge:#B77B2A;
+  --dof-out:#B5534D;
+}
+html[data-theme="dark"], body.dark{
+  --bg:#111315 !important;
+  --panel:#181B1E !important;
+  --panel2:#22262A !important;
+  --field-bg:#131619 !important;
+  --text:#F1F1EF !important;
+  --muted:#92979D !important;
+  --line:#34393E !important;
+  --card-border:#2D3237 !important;
+  --accent:#62A9B5 !important;
+  --accent-soft:rgba(98,169,181,.12) !important;
+  --accent-strong:#72BBC6 !important;
+  --chip-active-bg:#2F5B66 !important;
+  --chip-active-text:#F3F3F0 !important;
+  --stepper-bg:#62A9B5 !important;
+  --danger:#E08B84 !important;
+  --shadow:none !important;
+}
+html{background:var(--bg) !important;color-scheme:light dark}
+body{background:var(--bg) !important;color:var(--text) !important}
+.top{background:var(--panel2) !important;border-color:var(--line) !important;box-shadow:var(--shadow) !important}
+.eyebrow-mark{background:var(--accent) !important}
+.panel{background:var(--panel) !important;border-color:var(--card-border) !important;box-shadow:var(--shadow) !important}
+.theme-toggle,.utility-link{background:var(--panel) !important;border-color:var(--line) !important;color:var(--text) !important}
+.panel-kicker{color:var(--accent) !important}
+.mode-choice.active{background:var(--accent) !important}
+.primary{background:var(--accent) !important;border-color:var(--accent) !important}
+.lens-pill.active,.ratio-choice.active,.guide-chip.active,.pro-lens.active{
+  background:var(--chip-active-bg) !important;
+  border-color:var(--chip-active-bg) !important;
+  color:var(--chip-active-text) !important;
+}
+body.dark .lens-pill.active,
+body.dark .ratio-choice.active,
+body.dark .guide-chip.active,
+body.dark .pro-lens.active{
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+  color:#fff !important;
+}
+
+/* Subject count */
+.subject-count-switch{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:4px;
+  padding:4px;
+  margin-top:8px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--panel2);
+}
+.subject-count-switch button{
+  min-height:35px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.subject-count-switch button.active{background:var(--accent);color:#fff}
+
+.extra-subject-controls{display:grid;gap:8px;margin-top:10px}
+.extra-subject-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 120px;
+  gap:8px;
+  align-items:end;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--field-bg);
+}
+.extra-subject-title{align-self:center}
+.extra-subject-title strong{display:block;font-size:10px}
+.extra-subject-title span{display:block;margin-top:2px;font-size:8px;font-weight:850}
+.extra-subject-row label>span{display:block;color:var(--muted);font-size:7px;font-weight:850;letter-spacing:.08em;margin-bottom:4px}
+.extra-subject-row label>div{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.extra-subject-row input{min-width:0;width:100%;border:0;outline:0;background:transparent;color:var(--text);padding:8px;font-weight:800}
+.extra-subject-row em{padding-right:8px;color:var(--muted);font-style:normal;font-size:9px}
+.extra-subject-distance{grid-column:1/-1;color:var(--muted);font-size:8px}
+.extra-subject-distance strong{color:var(--text)}
+
+/* Multiple people in preview */
+.preview-subject{transition:filter .12s,outline-color .12s}
+.preview-subject-2 .preview-person{filter:hue-rotate(188deg) saturate(.75) brightness(.98) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-subject-3 .preview-person{filter:hue-rotate(312deg) saturate(.72) brightness(.96) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-person-badge{
+  position:absolute;
+  left:50%;
+  top:-22px;
+  transform:translateX(-50%);
+  min-width:max-content;
+  padding:3px 6px;
+  border-radius:999px;
+  background:rgba(11,12,14,.78);
+  border:1px solid rgba(255,255,255,.16);
+  color:#fff;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.06em;
+  z-index:3;
+}
+.preview-subject.dof-net .preview-person-badge{background:rgba(43,111,74,.90)}
+.preview-subject.dof-edge .preview-person-badge{background:rgba(157,100,25,.92)}
+.preview-subject.dof-out .preview-person-badge{background:rgba(159,59,54,.92)}
+.preview-subject.dof-net .preview-person{filter:drop-shadow(0 0 4px rgba(63,139,98,.68)) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-subject.dof-edge .preview-person{filter:drop-shadow(0 0 4px rgba(183,123,42,.72)) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-subject.dof-out .preview-person{filter:drop-shadow(0 0 4px rgba(181,83,77,.75)) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-subject.behind-camera{display:none !important}
+
+/* Mini top view */
+.mini-topview-card,.dof-card{
+  margin-top:14px;
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--field-bg);
+}
+.mini-topview-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:9px;
+}
+.mini-topview-head span{
+  display:block;
+  color:var(--accent);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.11em;
+}
+.mini-topview-head small{display:block;margin-top:2px;color:var(--muted);font-size:8px;line-height:1.35}
+.mini-topview-head>strong{color:var(--text);font-size:9px;text-align:right}
+.preview-topview{
+  display:block;
+  width:100%;
+  height:205px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--panel2);
+  color:var(--text);
+  touch-action:none;
+  user-select:none;
+  overflow:hidden;
+}
+.top-grid-bg{fill:url(#topGridBig)}
+.top-fov-cone{fill:var(--accent-soft);stroke:var(--accent);stroke-width:3;stroke-opacity:.5}
+.top-dof-zone{fill:rgba(63,139,98,.13);stroke:none}
+.top-dof-line{stroke:var(--dof-net);stroke-width:4;stroke-dasharray:8 7;opacity:.58}
+.top-focus-line{stroke:var(--accent);stroke-width:5;stroke-dasharray:13 7;opacity:.9}
+.top-camera circle{fill:var(--panel);stroke:var(--accent);stroke-width:5}
+.top-camera path{fill:var(--accent)}
+.top-camera text,.top-subject text{fill:var(--text);font-size:30px;font-weight:900;pointer-events:none}
+.top-subject{cursor:grab}
+.top-subject circle:first-child{stroke-width:7}
+.top-subject.dof-net circle:first-child{fill:rgba(63,139,98,.22);stroke:var(--dof-net)}
+.top-subject.dof-edge circle:first-child{fill:rgba(183,123,42,.22);stroke:var(--dof-edge)}
+.top-subject.dof-out circle:first-child{fill:rgba(181,83,77,.20);stroke:var(--dof-out)}
+.top-subject-center{fill:var(--text);stroke:none !important}
+.drag-node{cursor:grab}
+.drag-node:active{cursor:grabbing}
+.topview-scale{margin-top:5px;text-align:right;color:var(--muted);font-size:7px}
+
+/* DOF controls */
+.dof-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.aperture-readout{
+  min-height:43px;
   display:flex;
   align-items:center;
-  gap:7px;
+  padding:0 11px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--panel);
+}
+.aperture-readout strong{font-size:15px}
+.aperture-chips,.focus-quick-buttons{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  padding:9px 0 2px;
+}
+.aperture-chips::-webkit-scrollbar,.focus-quick-buttons::-webkit-scrollbar{display:none}
+.aperture-chip,.focus-quick-buttons button{
+  flex:0 0 auto;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--panel2);
+  color:var(--text);
+  padding:7px 9px;
+  font-size:8px;
+  font-weight:850;
+}
+.aperture-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.dof-results{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:9px;
+}
+.dof-results>div{
+  padding:9px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel);
+}
+.dof-results span,.dof-recommendation span{
+  display:block;
+  color:var(--muted);
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.09em;
+  margin-bottom:3px;
+}
+.dof-results strong{font-size:10px}
+.dof-recommendation{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+  margin-top:8px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel2);
+}
+.dof-recommendation strong{display:block;font-size:12px;color:var(--text)}
+.dof-recommendation small{display:block;margin-top:3px;color:var(--muted);font-size:7px}
+.dof-recommendation button:disabled{opacity:.35}
+.dof-text-net{color:var(--dof-net) !important}
+.dof-text-edge{color:var(--dof-edge) !important}
+.dof-text-out{color:var(--dof-out) !important}
+
+@media(max-width:420px){
+  .extra-subject-row{grid-template-columns:1fr 108px}
+  .dof-field-grid,.dof-results{grid-template-columns:1fr}
+  .preview-topview{height:190px}
+}
+
+
+/* ============================================================
+   FRAME BOS V3.3 TEST — Eye line lock
+   ============================================================ */
+.preview-eye-guide{
+  position:absolute;
+  z-index:7;
+  left:0;
+  right:0;
+  top:33.333%;
+  height:1px;
+  border-top:1px dashed rgba(46,127,142,.34);
+  pointer-events:none;
+}
+.preview-eye-guide span{
+  position:absolute;
+  right:8px;
+  top:-14px;
+  padding:2px 5px;
+  border-radius:5px;
+  background:rgba(11,12,14,.48);
+  color:rgba(255,255,255,.72);
+  font-size:6px;
+  font-weight:850;
+  letter-spacing:.06em;
+}
+body.dark .preview-eye-guide{
+  border-top-color:rgba(98,169,181,.38);
+}
+
+
+/* ============================================================
+   FRAME BOS V3.4 LIGHT — Mini groupe jusqu'à 4 personnes
+   ============================================================ */
+.subject-count-switch{
+  grid-template-columns:repeat(4,1fr) !important;
+}
+.subject-count-switch button{
+  font-size:10px !important;
+}
+.group-spacing-row{
+  margin-top:10px;
+}
+.group-spacing-row>span{
   min-width:118px;
 }
-.custom-focal-input-wrap input{
-  width:82px;
-  height:38px;
+.extra-subject-controls{
+  display:grid;
+  gap:8px;
+  margin-top:10px;
+}
+.extra-subject-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 118px;
+  gap:8px;
+  align-items:end;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--field-bg);
+}
+.extra-subject-title strong{
+  display:block;
+  font-size:10px;
+}
+.extra-subject-title span{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:8px;
+}
+.extra-subject-row label>span{
+  display:block;
+  margin-bottom:4px;
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.extra-subject-row label>div{
+  display:flex;
+  align-items:center;
   border:1px solid var(--line);
   border-radius:10px;
-  background:var(--panel);
+  background:var(--field-bg);
+  overflow:hidden;
+}
+.extra-subject-row input{
+  min-width:0;
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
   color:var(--text);
-  padding:0 9px;
-  text-align:right;
-  font-size:17px;
-  font-weight:850;
-  outline:none;
-}
-.custom-focal-input-wrap input:focus{
-  border-color:var(--accent);
-  box-shadow:0 0 0 2px var(--accent-soft);
-}
-.custom-focal-input-wrap span{
-  font-size:11px;
-  color:var(--muted);
+  padding:8px 8px;
   font-weight:800;
 }
-@media(max-width:430px){
-  .custom-focal-row{padding:9px 10px;}
-  .custom-focal-input-wrap{min-width:108px;}
-  .custom-focal-input-wrap input{width:74px;}
+.extra-subject-row em{
+  padding-right:8px;
+  color:var(--muted);
+  font-style:normal;
+  font-size:9px;
+}
+.preview-subject-2 .preview-person{filter:hue-rotate(188deg) saturate(.75) brightness(.98) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-subject-3 .preview-person{filter:hue-rotate(312deg) saturate(.72) brightness(.96) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-subject-4 .preview-person{filter:hue-rotate(78deg) saturate(.74) brightness(.98) drop-shadow(0 8px 8px rgba(0,0,0,.12))}
+.preview-person-badge{
+  min-width:24px !important;
+  text-align:center;
+}
+.hidden-legacy,
+#focusDistanceInput.hidden,
+#apertureChips.hidden,
+#focusQuickButtons.hidden,
+#dofRecommendation.hidden,
+#applyDofRecommendationBtn.hidden{
+  display:none !important;
+}
+@media(max-width:420px){
+  .extra-subject-row{
+    grid-template-columns:1fr 108px;
+  }
+}
+
+
+/* ============================================================
+   FRAME BOS V3.5 TEST — Diversity / natural skin tones
+   ============================================================ */
+
+/* No more global hue-rotate on whole characters. */
+.preview-subject .preview-person,
+.preview-subject-2 .preview-person,
+.preview-subject-3 .preview-person,
+.preview-subject-4 .preview-person{
+  filter:drop-shadow(0 8px 8px rgba(0,0,0,.12)) !important;
+}
+
+/* Small clothing/readability cues only, never skin recoloring. */
+.preview-subject[data-appearance="1"] .preview-person-badge{
+  background:rgba(46,127,142,.86);
+}
+.preview-subject[data-appearance="2"] .preview-person-badge{
+  background:rgba(90,103,126,.88);
+}
+.preview-subject[data-appearance="3"] .preview-person-badge{
+  background:rgba(138,112,79,.88);
+}
+.preview-subject[data-appearance="4"] .preview-person-badge{
+  background:rgba(74,88,80,.90);
+}
+.preview-person-badge{
+  color:#fff !important;
+  border-color:rgba(255,255,255,.18) !important;
 }

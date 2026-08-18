@@ -1,63 +1,26 @@
-# FRAME - BOS V2.8
+# FRAME — BOS V3.11
 
-## Nouveau : RESET CALIBRATION
+## Correctif ancrage du visage en très gros plan
 
-Dans CAL, FRAME affiche maintenant un bloc explicite :
+Problème :
+en 1 personne, quand on allait très près / très gros plan, le rendu finissait
+par s'ancrer davantage sur la masse des cheveux que sur la ligne des yeux.
 
-RESET CALIBRATION PORTRAIT
-ou
-RESET CALIBRATION PAYSAGE
+## Correctif
+La preview place maintenant le personnage à partir de :
+- la projection des yeux
+- la projection des pieds
 
-selon l’orientation actuelle du téléphone.
+Les yeux deviennent l'ancre absolue du rendu.
 
-### Sécurité
-Le reset efface uniquement :
-- la CAL RAPIDE de l’orientation actuelle ;
-- les points CAL PRO de l’orientation actuelle ;
-- la limite grand-angle de l’orientation actuelle ;
-- les corrections de centrage liées à cette calibration.
-
-La calibration de l’autre orientation reste intacte.
-
-### Confirmation
-Une confirmation est demandée avant l’effacement.
-
-### Si aucune calibration n’existe
-Le bouton est désactivé et affiche :
-AUCUNE CALIBRATION PORTRAIT / PAYSAGE.
-
-### Où le trouver
-CAL → bas de l’écran de choix.
-
-Le bouton déjà présent dans RÉGLAGES a également été renommé clairement :
-RESET CALIBRATION · ORIENTATION ACTUELLE.
-
-## Inchangé
-- DA EXPO V3.19
-- calibration portrait / paysage séparée
-- CAL PRO paysage compact
-- FX6 par défaut au premier lancement
-- dernière caméra cinéma mémorisée
-- 16:9
-- limite grand-angle
+### Résultat attendu
+- les yeux restent la vraie référence
+- la ligne 1/3 reste fiable
+- en très gros plan, l'image ne "glisse" plus vers les cheveux
 
 
-## V2.8
-- Ajout d’un bouton INSTALL dans l’app pour faciliter l’installation PWA.
-- Android/Chrome : utilise le prompt natif lorsqu’il est disponible.
-- iPhone/iPad : affiche directement les instructions Safari → Partager → Sur l’écran d’accueil.
-- Manifest renforcé avec id/scope et cache PWA v2.8.
-
-
-## V2.9
-- Ajout d’un champ **FOCALE LIBRE** dans la section CADRAGE.
-- Accepte toute focale de 1 à 1000 mm, avec décimales au dixième.
-- Les focales prédéfinies restent disponibles comme raccourcis.
-- Si la valeur libre correspond à un preset, celui-ci redevient actif.
-
-
-## V3.0 — BOS Camera DB
-- Liste caméra alimentée par la base centrale BOS.
-- URL : `https://raw.githubusercontent.com/BrunoSetTools/BOS-CAMERA-DB/main/cameras.json`
-- Cache local + fallback embarqué : FRAME reste utilisable hors ligne.
-- Une modification de `cameras.json` peut mettre à jour la liste sans nouvelle version de FRAME.
+## V3.11 — BOS Camera DB
+- Base exacte : FRAME BOS V3.10 EYESLOCK.
+- Conservation de toutes les fonctions V3.10 (Preview, multi-sujets, eye lock, etc.).
+- La liste des caméras est maintenant chargée depuis BOS-CAMERA-DB.
+- Cache local + fallback embarqué pour le fonctionnement hors ligne.

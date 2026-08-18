@@ -1,5 +1,5 @@
 {
-  "name": "BRUNO ONSET / FRAME",
+  "name": "FRAME · BRUNO ONSET",
   "short_name": "FRAME - BOS",
   "start_url": "./",
   "display": "standalone",
@@ -19,7 +19,7 @@
       "purpose": "any maskable"
     }
   ],
-  "version": "3.0",
+  "version": "3.11",
   "id": "./",
   "scope": "./",
   "prefer_related_applications": false

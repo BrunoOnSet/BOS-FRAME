@@ -9,39 +9,132 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BOS" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=3.0" />
+  <link rel="stylesheet" href="styles.css?v=3.11-camera-db" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
   <main class="app" id="app">
     <header class="top">
       <div class="top-inner">
-        <div class="top-title">
-          <a class="tool-eyebrow" href="https://www.brunoguillard.com/" target="_blank" rel="noopener noreferrer" aria-label="Site de Bruno Guillard">
-            <span class="eyebrow-logo" aria-hidden="true">BOS</span>
-            <span class="eyebrow-brand" aria-label="Bruno OnSet"><span class="bos-letter">B</span>RUNO <span class="bos-letter">O</span>N<span class="bos-letter">S</span>ET</span>
-          </a>
-          <h1>FRAME</h1>
+        <div>
+          <div class="eyebrow-row">
+            <a class="eyebrow eyebrow-link" href="https://www.brunoguillard.com/" target="_blank" rel="noopener noreferrer">
+              <span class="eyebrow-mark"></span>
+              <span class="eyebrow-brand">BRUNO ONSET</span>
+              <span class="eyebrow-tool">/ FRAME</span>
+            </a>
+          </div>
+          <h1>Director's Viewfinder</h1>
         </div>
         <button class="theme-toggle" id="themeBtn" type="button">DARK</button>
       </div>
     </header>
 
-    <div class="utility-row">
+    <div class="mode-switch" role="group" aria-label="Mode FRAME">
+      <button type="button" id="realModeBtn" class="mode-choice">VUE RÉELLE</button>
+      <button type="button" id="previewModeBtn" class="mode-choice active">PREVIEW</button>
+    </div>
+
+    <div class="utility-row" id="utilityRow">
       <button class="utility-link" id="cameraBtn" type="button">CAM</button>
       <button class="utility-link" id="calBtn" type="button">CAL</button>
       <button class="utility-link" id="settingsBtn" type="button">RÉGLAGES</button>
-      <button class="utility-link install-link hidden" id="installBtn" type="button">INSTALL</button>
     </div>
 
     <section class="panel camera-panel">
       <div class="panel-head frame-panel-head">
-        <span class="panel-kicker">VISEUR</span>
-        <span class="camera-live-label">FRAME · BOS</span>
+        <span class="panel-kicker" id="viewPanelKicker">VISEUR</span>
+        <span class="camera-live-label" id="viewModeLabel">VUE RÉELLE · BOS</span>
       </div>
 
       <div class="camera-stage" id="cameraStage">
         <video id="video" autoplay playsinline muted></video>
+
+        <div id="previewScene" class="preview-scene hidden" aria-hidden="true">
+          <div class="preview-wall"></div>
+          <div class="preview-floor"></div>
+          <div id="previewGroundLine" class="preview-ground-line"></div>
+          <div class="preview-eye-guide" aria-hidden="true">
+            <span>LIGNE DES YEUX · 1/3</span>
+          </div>
+
+          <div id="previewSubject" class="preview-subject">
+            <svg class="preview-person" viewBox="0 0 240 900" role="img" aria-label="Personne debout de référence">
+              <defs>
+                <linearGradient id="skinGrad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#e1ae89"/>
+                  <stop offset=".55" stop-color="#c98763"/>
+                  <stop offset="1" stop-color="#a96048"/>
+                </linearGradient>
+                <linearGradient id="shirtGrad" x1="0" x2="1">
+                  <stop offset="0" stop-color="#ececea"/>
+                  <stop offset=".52" stop-color="#d7d8d6"/>
+                  <stop offset="1" stop-color="#bfc1c0"/>
+                </linearGradient>
+                <linearGradient id="pantsGrad" x1="0" x2="1">
+                  <stop offset="0" stop-color="#30353a"/>
+                  <stop offset=".5" stop-color="#20252a"/>
+                  <stop offset="1" stop-color="#101418"/>
+                </linearGradient>
+                <filter id="softShadow" x="-50%" y="-20%" width="200%" height="160%">
+                  <feGaussianBlur stdDeviation="8"/>
+                </filter>
+              </defs>
+
+              <ellipse cx="120" cy="884" rx="72" ry="12" fill="rgba(0,0,0,.20)" filter="url(#softShadow)"/>
+
+              <!-- hair / head -->
+              <ellipse cx="120" cy="83" rx="52" ry="61" fill="#2d2724"/>
+              <ellipse cx="120" cy="94" rx="45" ry="54" fill="url(#skinGrad)"/>
+              <path d="M77 79 C82 29 158 25 166 77 C146 60 102 58 77 79Z" fill="#332a27"/>
+              <ellipse cx="103" cy="92" rx="4.2" ry="3" fill="#29211f"/>
+              <ellipse cx="137" cy="92" rx="4.2" ry="3" fill="#29211f"/>
+              <path d="M120 96 C116 108 116 113 123 116" fill="none" stroke="#a96751" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M105 126 C116 132 127 132 138 126" fill="none" stroke="#8c4e45" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M86 111 C90 139 99 151 120 153 C141 151 151 139 154 111" fill="none" stroke="rgba(115,68,51,.22)" stroke-width="2"/>
+
+              <!-- neck -->
+              <path d="M102 143 L100 184 Q120 199 140 184 L138 143Z" fill="url(#skinGrad)"/>
+
+              <!-- torso / shirt -->
+              <path d="M82 177 Q120 160 158 177 L178 372 Q149 397 120 397 Q91 397 62 372Z" fill="url(#shirtGrad)"/>
+              <path d="M82 177 Q61 184 45 214 L24 405 Q29 421 44 421 L72 247Z" fill="url(#skinGrad)"/>
+              <path d="M158 177 Q179 184 195 214 L216 405 Q211 421 196 421 L168 247Z" fill="url(#skinGrad)"/>
+              <path d="M44 416 Q37 445 45 466 Q55 478 65 463 L68 419Z" fill="url(#skinGrad)"/>
+              <path d="M196 416 Q203 445 195 466 Q185 478 175 463 L172 419Z" fill="url(#skinGrad)"/>
+
+              <!-- subtle shirt structure -->
+              <path d="M120 189 L120 385" stroke="rgba(0,0,0,.06)" stroke-width="2"/>
+              <path d="M89 199 Q120 215 151 199" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3"/>
+
+              <!-- trousers -->
+              <path d="M65 369 Q120 386 175 369 L168 626 L140 824 L113 824 L111 592 L101 824 L73 824 L69 627Z" fill="url(#pantsGrad)"/>
+              <path d="M120 389 L120 628" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+              <path d="M73 617 Q94 625 111 608" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="3"/>
+              <path d="M168 617 Q147 625 120 608" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="3"/>
+
+              <!-- shoes -->
+              <path d="M72 815 L107 815 L111 860 Q92 875 48 863 Q45 841 72 815Z" fill="#171a1d"/>
+              <path d="M133 815 L168 815 Q195 841 192 863 Q148 875 129 860Z" fill="#171a1d"/>
+              <path d="M52 858 Q83 865 109 855" stroke="#4c5053" stroke-width="5" fill="none"/>
+              <path d="M131 855 Q157 865 188 858" stroke="#4c5053" stroke-width="5" fill="none"/>
+            </svg>
+          </div>
+
+          <div id="previewSubject2" class="preview-subject preview-subject-2 hidden" aria-label="Sujet 2"></div>
+          <div id="previewSubject3" class="preview-subject preview-subject-3 hidden" aria-label="Sujet 3"></div>
+          <div id="previewSubject4" class="preview-subject preview-subject-4 hidden" aria-label="Sujet 4"></div>
+
+          <div id="previewMeasure" class="preview-measure">
+            <span class="preview-measure-line"></span>
+            <strong id="previewMeasureText">1,75 m</strong>
+          </div>
+
+          <div class="preview-info-overlay">
+            <strong id="previewPlanOverlay">PLAN PIED</strong>
+            <span id="previewMetricsOverlay">—</span>
+          </div>
+        </div>
 
         <div id="cameraPlaceholder" class="camera-placeholder">
           <div class="reticle-big"></div>
@@ -92,14 +185,6 @@
 
       <div class="lens-strip" id="lensStrip"></div>
 
-      <div class="custom-focal-row">
-        <label for="customFocalInput">FOCALE LIBRE</label>
-        <div class="custom-focal-input-wrap">
-          <input id="customFocalInput" type="number" inputmode="decimal" min="1" max="1000" step="0.1" value="35" aria-label="Focale personnalisée en millimètres" />
-          <span>mm</span>
-        </div>
-      </div>
-
       <div class="main-controls">
         <button id="cameraPresetBtn" class="control-button">
           <span>CAMÉRA CINÉMA</span>
@@ -110,6 +195,76 @@
           <strong id="ratioText">16:9</strong>
         </button>
       </div>
+
+      <div id="previewControls" class="preview-controls hidden">
+        <div class="preview-subject-count-block">
+          <div class="preview-target-head">
+            <span>NOMBRE DE PERSONNES</span>
+            <small>Mini groupe simple · la caméra se centre automatiquement sur le groupe.</small>
+          </div>
+          <div class="subject-count-switch" id="subjectCountSwitch">
+            <button type="button" data-count="1" class="active">1</button>
+            <button type="button" data-count="2">2</button>
+            <button type="button" data-count="3">3</button>
+            <button type="button" data-count="4">4</button>
+          </div>
+        </div>
+
+        <div class="preview-fields">
+          <label class="preview-field">
+            <span>TAILLE PERSONNE 1</span>
+            <div>
+              <input id="subjectHeightInput" type="number" min="1.20" max="2.20" step="0.01" value="1.75">
+              <em>m</em>
+            </div>
+          </label>
+          <label class="preview-field">
+            <span>DISTANCE CAMÉRA / GROUPE</span>
+            <div>
+              <input id="subjectDistanceInput" type="number" min="0.40" max="30" step="0.05" value="3.00">
+              <em>m</em>
+            </div>
+          </label>
+        </div>
+
+        <div class="preview-distance-slider">
+          <span>RECUL</span>
+          <input id="subjectDistanceSlider" type="range" min="0.40" max="15" step="0.05" value="3.00">
+          <strong id="subjectDistanceReadout">3,00 m</strong>
+        </div>
+
+        <div class="preview-distance-slider group-spacing-row">
+          <span>ÉCARTEMENT DU GROUPE</span>
+          <input id="groupSpreadSlider" type="range" min="0.20" max="2.50" step="0.05" value="0.80">
+          <strong id="groupSpreadReadout">0,80 m</strong>
+        </div>
+
+        <div id="extraSubjectControls" class="extra-subject-controls"></div>
+
+        <div class="preview-target-head">
+          <span>CADRE VISÉ</span>
+          <small>La caméra recule/avance pour garder le groupe dans le type de plan choisi.</small>
+        </div>
+        <div id="previewTargetButtons" class="preview-targets"></div>
+
+        <div class="preview-result-card">
+          <div>
+            <span>CADRE APPROX.</span>
+            <strong id="previewPlanResult">—</strong>
+          </div>
+          <div>
+            <span>CHAMP AU CENTRE DU GROUPE</span>
+            <strong id="previewFrameSizeResult">—</strong>
+          </div>
+        </div>
+
+        <!-- hidden legacy placeholders so the old code does not break if called -->
+        <input id="focusDistanceInput" type="hidden" value="3.00">
+        <div id="apertureChips" class="hidden"></div>
+        <div id="focusQuickButtons" class="hidden"></div>
+        <div id="dofRecommendation" class="hidden"></div>
+        <button type="button" id="applyDofRecommendationBtn" class="hidden">APPLIQUER</button>
+      </div>      </div>
     </section>
 
     <footer>
@@ -117,9 +272,9 @@
       <div class="signature">
         <a class="footer-brand-link" href="https://www.brunoguillard.com/" target="_blank" rel="noopener noreferrer">
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
-          <span>Made for the set · Bruno Guillard</span>
+          <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.0</span>
+        <span class="app-version">v3.11</span>
       </div>
     </footer>
   </main>
@@ -340,19 +495,6 @@
     </form>
   </dialog>
 
-
-  <dialog id="installDialog" class="sheet install-sheet">
-    <form method="dialog">
-      <header><h2>Installer FRAME</h2><button value="cancel" class="close">×</button></header>
-      <div id="installInstructions" class="install-instructions">
-        <p class="muted">Installe FRAME sur l’écran d’accueil pour l’utiliser comme une app, y compris hors connexion après le premier chargement.</p>
-        <div class="install-step"><strong>iPhone / iPad</strong><span>Ouvre la page dans Safari → touche Partager → <b>Sur l’écran d’accueil</b>.</span></div>
-        <div class="install-step"><strong>Android</strong><span>Ouvre la page dans Chrome → menu ⋮ → <b>Installer l’application</b> ou <b>Ajouter à l’écran d’accueil</b>.</span></div>
-        <p class="install-note">Si tu as ouvert le lien depuis WhatsApp, Gmail ou une autre app, ouvre d’abord la page dans Safari ou Chrome.</p>
-      </div>
-    </form>
-  </dialog>
-
-  <script src="app.js?v=3.0"></script>
+  <script src="app.js?v=3.11-camera-db"></script>
 </body>
 </html>
