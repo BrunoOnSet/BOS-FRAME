@@ -54,3 +54,10 @@ RESET CALIBRATION · ORIENTATION ACTUELLE.
 - Accepte toute focale de 1 à 1000 mm, avec décimales au dixième.
 - Les focales prédéfinies restent disponibles comme raccourcis.
 - Si la valeur libre correspond à un preset, celui-ci redevient actif.
+
+
+## V3.0 — BOS Camera DB
+- Liste caméra alimentée par la base centrale BOS.
+- URL : `https://raw.githubusercontent.com/BrunoSetTools/BOS-CAMERA-DB/main/cameras.json`
+- Cache local + fallback embarqué : FRAME reste utilisable hors ligne.
+- Une modification de `cameras.json` peut mettre à jour la liste sans nouvelle version de FRAME.

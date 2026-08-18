@@ -1,25 +1,53 @@
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
-const presets = [
-  // SONY — ordre volontaire demandé
-  {id:'fx30', name:'Sony FX30', width:23.30, group:'SONY'},
-  {id:'fx3', name:'Sony FX3', width:35.60, group:'SONY'},
-  {id:'fx5', name:'Sony FX5', width:35.90, group:'SONY'},
-  {id:'fx6', name:'Sony FX6', width:35.60, group:'SONY'},
+const CAMERA_DB_URL="https://raw.githubusercontent.com/BrunoSetTools/BOS-CAMERA-DB/main/cameras.json";
+const CAMERA_DB_CACHE_KEY="bos-camera-db-cache-v1";
+const FALLBACK_CAMERA_DB={"schemaVersion":1,"databaseVersion":"1.0","updated":"2026-08-18","cameras":[{"id":"fx30","name":"Sony FX30","brand":"Sony","group":"SONY","sensorWidthMm":23.3,"dof":{"label":"Super 35 / APS-C","cocMm":0.019,"cropToFF":1.5}},{"id":"fx3","name":"Sony FX3","brand":"Sony","group":"SONY","sensorWidthMm":35.6,"dof":{"label":"Full Frame","cocMm":0.029,"cropToFF":1.0}},{"id":"fx5","name":"Sony FX5","brand":"Sony","group":"SONY","sensorWidthMm":35.9,"dof":{"label":"Full Frame","cocMm":0.029,"cropToFF":1.0}},{"id":"fx6","name":"Sony FX6","brand":"Sony","group":"SONY","sensorWidthMm":35.6,"dof":{"label":"Full Frame","cocMm":0.029,"cropToFF":1.0}},{"id":"vraptor","name":"RED V-RAPTOR VV","brand":"RED","group":"ARRI / RED","sensorWidthMm":40.96,"dof":{"label":"Vista Vision","cocMm":0.033,"cropToFF":0.88}},{"id":"miniLF","name":"ARRI ALEXA Mini LF","brand":"ARRI","group":"ARRI / RED","sensorWidthMm":36.7,"dof":{"label":"Large Format","cocMm":0.03,"cropToFF":0.98}},{"id":"alexa35","name":"ARRI ALEXA 35","brand":"ARRI","group":"ARRI / RED","sensorWidthMm":27.99,"dof":{"label":"Super 35","cocMm":0.023,"cropToFF":1.29}},{"id":"ff","name":"Full Frame 36 mm","brand":"Générique","group":"GÉNÉRIQUE","sensorWidthMm":36.0,"dof":{"label":"Full Frame","cocMm":0.029,"cropToFF":1.0}},{"id":"s35","name":"Super 35","brand":"Générique","group":"GÉNÉRIQUE","sensorWidthMm":24.89,"dof":{"label":"Super 35","cocMm":0.019,"cropToFF":1.5}},{"id":"apsc","name":"APS-C","brand":"Générique","group":"GÉNÉRIQUE","sensorWidthMm":23.5,"dof":{"label":"APS-C","cocMm":0.019,"cropToFF":1.53}},{"id":"mft","name":"Micro 4/3","brand":"Générique","group":"GÉNÉRIQUE","sensorWidthMm":17.3,"dof":{"label":"Micro 4/3","cocMm":0.014,"cropToFF":2.08}},{"id":"oneinch","name":"1 pouce","brand":"Générique","group":"GÉNÉRIQUE","sensorWidthMm":13.2,"dof":{"label":"1 pouce","cocMm":0.011,"cropToFF":2.73}}]};
+const FALLBACK_PRESETS=[{"id":"fx30","name":"Sony FX30","width":23.3,"group":"SONY"},{"id":"fx3","name":"Sony FX3","width":35.6,"group":"SONY"},{"id":"fx5","name":"Sony FX5","width":35.9,"group":"SONY"},{"id":"fx6","name":"Sony FX6","width":35.6,"group":"SONY"},{"id":"vraptor","name":"RED V-RAPTOR VV","width":40.96,"group":"ARRI / RED"},{"id":"miniLF","name":"ARRI ALEXA Mini LF","width":36.7,"group":"ARRI / RED"},{"id":"alexa35","name":"ARRI ALEXA 35","width":27.99,"group":"ARRI / RED"},{"id":"ff","name":"Full Frame 36 mm","width":36.0,"group":"GÉNÉRIQUE"},{"id":"s35","name":"Super 35","width":24.89,"group":"GÉNÉRIQUE"},{"id":"apsc","name":"APS-C","width":23.5,"group":"GÉNÉRIQUE"},{"id":"mft","name":"Micro 4/3","width":17.3,"group":"GÉNÉRIQUE"},{"id":"oneinch","name":"1 pouce","width":13.2,"group":"GÉNÉRIQUE"}];
+let presets=[...FALLBACK_PRESETS];
 
-  // ARRI / RED — du plus grand capteur au plus petit
-  {id:'vraptor', name:'RED V-RAPTOR VV', width:40.96, group:'ARRI / RED'},
-  {id:'miniLF', name:'ARRI ALEXA Mini LF', width:36.70, group:'ARRI / RED'},
-  {id:'alexa35', name:'ARRI ALEXA 35', width:27.99, group:'ARRI / RED'},
+function cameraDbToPresets(data){
+  if(!data || !Array.isArray(data.cameras) || !data.cameras.length) return null;
+  const list=data.cameras.map(c=>({
+    id:String(c.id||''),
+    name:String(c.name||c.id||'Caméra'),
+    width:Number(c.sensorWidthMm),
+    group:String(c.group||c.brand||'AUTRES')
+  })).filter(c=>c.id && Number.isFinite(c.width) && c.width>0);
+  return list.length?list:null;
+}
+function applyCameraDbData(data){
+  const list=cameraDbToPresets(data);
+  if(!list) return false;
+  presets=list;
+  return true;
+}
+function loadCachedCameraDb(){
+  try{
+    const cached=JSON.parse(localStorage.getItem(CAMERA_DB_CACHE_KEY)||'null');
+    if(cached) applyCameraDbData(cached);
+  }catch(_ ){}
+}
+async function refreshCameraDb(){
+  try{
+    const res=await fetch(CAMERA_DB_URL,{cache:'no-store'});
+    if(!res.ok) throw new Error('camera db '+res.status);
+    const data=await res.json();
+    if(!applyCameraDbData(data)) throw new Error('invalid camera db');
+    try{localStorage.setItem(CAMERA_DB_CACHE_KEY,JSON.stringify(data))}catch(_ ){}
 
-  // GÉNÉRIQUE
-  {id:'ff', name:'Full Frame 36 mm', width:36.00, group:'GÉNÉRIQUE'},
-  {id:'s35', name:'Super 35', width:24.89, group:'GÉNÉRIQUE'},
-  {id:'apsc', name:'APS-C', width:23.50, group:'GÉNÉRIQUE'},
-  {id:'mft', name:'Micro 4/3', width:17.30, group:'GÉNÉRIQUE'},
-  {id:'oneinch', name:'1 pouce', width:13.20, group:'GÉNÉRIQUE'}
-];
+    const currentId=state.preset?.id;
+    if(currentId!=='custom'){
+      const updated=presets.find(p=>p.id===currentId);
+      if(updated){state.preset=updated;state.sensorWidth=updated.width;}
+    }
+    const proId=state.proRefPreset?.id;
+    const proUpdated=presets.find(p=>p.id===proId);
+    if(proUpdated) state.proRefPreset=proUpdated;
+    renderPresets(); renderProPresetSelect(); renderProLenses(); renderLenses(); updateAll();
+  }catch(_ ){}
+}
 
 const lenses = [14,18,21,24,25,28,32,35,40,50,65,70,75,85,100,105,135];
 const ratios = [
@@ -28,121 +56,6 @@ const ratios = [
   {label:'4:3', value:4/3},{label:'1:1', value:1},
   {label:'4:5', value:4/5},{label:'9:16', value:9/16}
 ];
-
-// PREVIEW: body scale = full standing person's height / visible frame height.
-// Values assume normal headroom and a recomposed camera angle.
-const previewTargets = [
-  {id:'full', label:'PIED', scale:0.86},
-  {id:'american', label:'AMÉRICAIN', scale:1.26},
-  {id:'waist', label:'TAILLE', scale:1.95},
-  {id:'chest', label:'POITRINE', scale:2.86},
-  {id:'close', label:'GROS PLAN', scale:4.75}
-];
-const PREVIEW_SETTINGS_KEY='frame-preview-settings-v1';
-
-const subjectAppearances = [
-  {
-    skin:['#A77458','#85553B','#613A27'],
-    shirt:['#D7D2CE','#B7B7B5','#8D908F'],
-    pants:['#33404B','#212A31','#161C21'],
-    hairMain:'#1B1512',
-    hairAccent:'#120D0B'
-  },
-  {
-    skin:['#D6A77E','#B67D56','#905F41'],
-    shirt:['#DFD8C6','#CDBFA5','#AC9D86'],
-    pants:['#4C4F45','#373A31','#262821'],
-    hairMain:'#2F241E',
-    hairAccent:'#221913'
-  },
-  {
-    skin:['#F2D0B7','#DFA984','#C17E63'],
-    shirt:['#ECE8E2','#DAD5CF','#C2BCB4'],
-    pants:['#31373C','#23282D','#171C21'],
-    hairMain:'#4A3428',
-    hairAccent:'#34241D'
-  },
-  {
-    skin:['#6B4333','#4E2D22','#392018'],
-    shirt:['#D9D4D0','#B8B8B7','#8F9291'],
-    pants:['#263340','#19222C','#111821'],
-    hairMain:'#161110',
-    hairAccent:'#0E0A09'
-  }
-];
-
-const previewFigureMetrics = {
-  viewHeight: 900,
-  headTopY: 22,
-  eyeY: 92,
-  footY: 863,
-  shadowY: 884
-};
-previewFigureMetrics.headTopRatio = previewFigureMetrics.headTopY / previewFigureMetrics.viewHeight;
-previewFigureMetrics.eyeRatio = previewFigureMetrics.eyeY / previewFigureMetrics.viewHeight;
-previewFigureMetrics.footRatio = previewFigureMetrics.footY / previewFigureMetrics.viewHeight;
-previewFigureMetrics.bodyRatio = previewFigureMetrics.footRatio - previewFigureMetrics.headTopRatio;
-previewFigureMetrics.eyeFromTopRatio = (previewFigureMetrics.eyeRatio - previewFigureMetrics.headTopRatio) / previewFigureMetrics.bodyRatio;
-previewFigureMetrics.eyeHeightRatio = 1 - previewFigureMetrics.eyeFromTopRatio;
-
-function applyGradientStops(svg, id, colors){
-  const grad = svg.querySelector(`linearGradient#${id}`);
-  if(!grad) return;
-  const stops = grad.querySelectorAll('stop');
-  stops.forEach((stop, i) => {
-    if(colors[i]) stop.setAttribute('stop-color', colors[i]);
-  });
-}
-
-function uniquifySubjectSvgGradients(svg, subjectIndex){
-  if(!svg) return;
-
-  const ids=['skinGrad','shirtGrad','pantsGrad','softShadow'];
-  ids.forEach(baseId=>{
-    const node=svg.querySelector(`#${baseId}`);
-    if(!node) return;
-
-    const uniqueId=`${baseId}-p${subjectIndex+1}`;
-    node.setAttribute('id',uniqueId);
-
-    svg.querySelectorAll(`[fill="url(#${baseId})"]`).forEach(el=>{
-      el.setAttribute('fill',`url(#${uniqueId})`);
-    });
-    svg.querySelectorAll(`[filter="url(#${baseId})"]`).forEach(el=>{
-      el.setAttribute('filter',`url(#${uniqueId})`);
-    });
-  });
-}
-
-function applySubjectAppearance(subjectEl, variantIndex){
-  if(!subjectEl) return;
-  const svg = subjectEl.querySelector('svg');
-  if(!svg) return;
-
-  const variant = subjectAppearances[variantIndex % subjectAppearances.length];
-  const suffix=`-p${variantIndex+1}`;
-
-  applyGradientStops(svg, `skinGrad${suffix}`, variant.skin);
-  applyGradientStops(svg, `shirtGrad${suffix}`, variant.shirt);
-  applyGradientStops(svg, `pantsGrad${suffix}`, variant.pants);
-
-  const hairMain = svg.querySelector('ellipse[data-hair-main="1"]') || svg.querySelector('ellipse[fill="#2d2724"]');
-  const hairAccent = svg.querySelector('path[data-hair-accent="1"]') || svg.querySelector('path[fill="#332a27"]');
-  if(hairMain){
-    hairMain.setAttribute('data-hair-main','1');
-    hairMain.setAttribute('fill', variant.hairMain);
-  }
-  if(hairAccent){
-    hairAccent.setAttribute('data-hair-accent','1');
-    hairAccent.setAttribute('fill', variant.hairAccent);
-  }
-
-  const eyes = svg.querySelectorAll('ellipse[fill="#29211f"]');
-  eyes.forEach(el => el.setAttribute('fill', '#201917'));
-
-  subjectEl.dataset.appearance = String(variantIndex + 1);
-}
-
 
 const state = {
   stream:null,
@@ -166,25 +79,7 @@ const state = {
   maxUsableLimitLabel:null,
   orientation: innerWidth >= innerHeight ? 'landscape' : 'portrait',
   calLeft:.30,
-  calRight:.70,
-  mode:'preview',
-  subjectHeight:1.75,
-  subjectDistance:3.00,
-  subjectCount:1,
-  subjects:[
-    {id:1,name:'S1',height:1.75,x:0.00,y:3.00},
-    {id:2,name:'S2',height:1.75,x:-0.40,y:3.00},
-    {id:3,name:'S3',height:1.75,x:0.40,y:3.00},
-    {id:4,name:'S4',height:1.75,x:1.20,y:3.00}
-  ],
-  groupDistance:3.00,
-  groupSpread:0.80,
-  cameraPos:{x:0,y:0},
-  cameraHeight:1.55,
-  aperture:2.8,
-  focusDistance:3.00,
-  dofRecommendation:null,
-  topDrag:null
+  calRight:.70
 };
 
 const MAIN_SETTINGS_KEY='frame-main-settings-v1';
@@ -217,43 +112,6 @@ function saveMainCameraSetting(){
       presetId:state.preset.id,
       name:state.preset.name,
       sensorWidth:state.sensorWidth
-    }));
-  }catch{}
-}
-
-
-function loadPreviewSettings(){
-  let saved=null;
-  try{saved=JSON.parse(localStorage.getItem(PREVIEW_SETTINGS_KEY)||'null')}catch{}
-  if(saved){
-    if(saved.mode==='real' || saved.mode==='preview') state.mode=saved.mode;
-    if(Number.isFinite(saved.subjectHeight)) state.subjectHeight=Math.max(1.2,Math.min(2.2,saved.subjectHeight));
-    if(Number.isFinite(saved.subjectDistance)) state.subjectDistance=Math.max(.4,Math.min(30,saved.subjectDistance));
-    if(Number.isFinite(saved.subjectCount)) state.subjectCount=Math.max(1,Math.min(4,Math.round(saved.subjectCount)));
-    if(Number.isFinite(saved.groupDistance)) state.groupDistance=Math.max(.4,Math.min(30,saved.groupDistance));
-    if(Number.isFinite(saved.groupSpread)) state.groupSpread=Math.max(.2,Math.min(2.5,saved.groupSpread));
-    if(Array.isArray(saved.subjects)){
-      saved.subjects.slice(0,4).forEach((s,i)=>{
-        if(!state.subjects[i]) return;
-        if(Number.isFinite(s.height)) state.subjects[i].height=Math.max(1.2,Math.min(2.2,s.height));
-      });
-    }
-  }
-  state.subjects[0].height=state.subjectHeight;
-  rebuildGroupLayout();
-}
-function savePreviewSettings(){
-  try{
-    state.subjectHeight=state.subjects[0].height;
-    state.subjectDistance=state.groupDistance;
-    localStorage.setItem(PREVIEW_SETTINGS_KEY,JSON.stringify({
-      mode:state.mode,
-      subjectHeight:state.subjectHeight,
-      subjectDistance:state.subjectDistance,
-      subjectCount:state.subjectCount,
-      groupDistance:state.groupDistance,
-      groupSpread:state.groupSpread,
-      subjects:state.subjects.map(s=>({height:s.height}))
     }));
   }catch{}
 }
@@ -433,701 +291,12 @@ function isTargetUnavailable(sensorWidth,focal){
   const hf=targetHFovFor(sensorWidth,focal);
   return hf > state.maxUsableHFov + 0.05;
 }
-
-
-const apertureStops=[1.0,1.2,1.4,1.8,2.0,2.8,4.0,5.6,8,11,16,22];
-
-function activeSubjects(){
-  return state.subjects.slice(0,state.subjectCount);
-}
-function subjectDistance(subject){
-  return Math.hypot(subject.x-state.cameraPos.x,subject.y-state.cameraPos.y);
-}
-function groupCenter(subjects=activeSubjects()){
-  if(!subjects.length) return {x:0,y:3,z:.9};
-  return {
-    x:subjects.reduce((a,s)=>a+s.x,0)/subjects.length,
-    y:subjects.reduce((a,s)=>a+s.y,0)/subjects.length,
-    z:subjects.reduce((a,s)=>a+s.height*.50,0)/subjects.length
-  };
-}
-
-function groupEyeReference(subjects=activeSubjects()){
-  if(!subjects.length) return {x:0,y:3,z:1.64};
-  // Lock the eye line using the actual SVG preview figure proportions,
-  // so the eyes stay at 1/3 from the top even in very close framing.
-  return {
-    x:subjects.reduce((a,s)=>a+s.x,0)/subjects.length,
-    y:subjects.reduce((a,s)=>a+s.y,0)/subjects.length,
-    z:subjects.reduce((a,s)=>a+s.height*previewFigureMetrics.eyeHeightRatio,0)/subjects.length
-  };
-}
-function groundViewBasis(cameraPos=state.cameraPos){
-  const g=groupCenter();
-  let dx=g.x-cameraPos.x,dy=g.y-cameraPos.y;
-  let len=Math.hypot(dx,dy);
-  if(len<.001){dx=0;dy=1;len=1}
-  return {
-    forward:{x:dx/len,y:dy/len},
-    right:{x:dy/len,y:-dx/len},
-    center:g
-  };
-}
-function dot3(a,b){return a.x*b.x+a.y*b.y+a.z*b.z}
-function cross3(a,b){return {x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}}
-function norm3(v){
-  const l=Math.hypot(v.x,v.y,v.z)||1;
-  return {x:v.x/l,y:v.y/l,z:v.z/l};
-}
-function cameraBasis(){
-  const g=groupCenter();
-  const eyes=groupEyeReference();
-  const pos={x:state.cameraPos.x,y:state.cameraPos.y,z:state.cameraHeight};
-
-  // Horizontal axis always aims at the centre of the active group.
-  let dx=g.x-pos.x;
-  let dy=g.y-pos.y;
-  let horizontalDistance=Math.hypot(dx,dy);
-  if(horizontalDistance<.04){
-    dx=0;
-    dy=.20;
-    horizontalDistance=.20;
-  }
-  const ux=dx/horizontalDistance;
-  const uy=dy/horizontalDistance;
-
-  // Composition rule:
-  // eye line = 1/3 from the top of the image.
-  // In normalized camera coordinates this corresponds to y = +1/3.
-  const eyeTargetNormalized=1/3;
-  const halfVFov=rad(verticalFov())/2;
-  const desiredEyeAngleAboveAxis=Math.atan(eyeTargetNormalized*Math.tan(halfVFov));
-
-  const eyeHorizontalDistance=Math.max(
-    .04,
-    Math.hypot(eyes.x-pos.x,eyes.y-pos.y)
-  );
-  const eyeElevation=Math.atan2(eyes.z-pos.z,eyeHorizontalDistance);
-
-  // Aim the optical axis slightly below the eyes so they stay on the 1/3 line.
-  const axisElevation=eyeElevation-desiredEyeAngleAboveAxis;
-
-  const cosE=Math.cos(axisElevation);
-  const forward=norm3({
-    x:ux*cosE,
-    y:uy*cosE,
-    z:Math.sin(axisElevation)
-  });
-  const right=norm3(cross3(forward,{x:0,y:0,z:1}));
-  const up=norm3(cross3(right,forward));
-
-  return {pos,forward,right,up};
-}
-function verticalFov(){
-  const h=rad(targetHFov());
-  return deg(2*Math.atan(Math.tan(h/2)/state.ratio));
-}
-function projectWorldPoint(p,basis=cameraBasis()){
-  const d={x:p.x-basis.pos.x,y:p.y-basis.pos.y,z:p.z-basis.pos.z};
-  const depth=dot3(d,basis.forward);
-  if(depth<=.03) return null;
-  const tx=Math.tan(rad(targetHFov())/2);
-  const ty=Math.tan(rad(verticalFov())/2);
-  return {
-    depth,
-    x:dot3(d,basis.right)/(depth*tx),
-    y:dot3(d,basis.up)/(depth*ty)
-  };
-}
-function subjectProjection(subject){
-  const basis=cameraBasis();
-  const feet=projectWorldPoint({x:subject.x,y:subject.y,z:0},basis);
-  const head=projectWorldPoint({x:subject.x,y:subject.y,z:subject.height},basis);
-  const eye=projectWorldPoint({x:subject.x,y:subject.y,z:subject.height*previewFigureMetrics.eyeHeightRatio},basis);
-  const center=projectWorldPoint({x:subject.x,y:subject.y,z:subject.height*.52},basis);
-  if(!feet || !head || !eye || !center) return null;
-  return {feet,head,eye,center};
-}
-function bodyScaleForSubject(subject){
-  const p=subjectProjection(subject);
-  if(!p) return 0;
-  return Math.abs(p.feet.y-p.head.y)/2;
-}
-function previewFrameMetricsAt(distance){
-  const d=Math.max(.01,Number(distance)||.01);
-  const hfov=targetHFov();
-  const frameWidth=2*d*Math.tan(rad(hfov)/2);
-  const frameHeight=frameWidth/state.ratio;
-  return {hfov,frameWidth,frameHeight};
-}
-function closestPreviewPlan(scale){
-  if(scale < .64) return {label:'PLAN LARGE', id:'wide'};
-  if(scale > 6.2) return {label:'TRÈS GROS PLAN', id:'veryclose'};
-  let best=previewTargets[0],score=Infinity;
-  previewTargets.forEach(t=>{
-    const s=Math.abs(Math.log(Math.max(.001,scale)/t.scale));
-    if(s<score){score=s;best=t}
-  });
-  return {label:`PLAN ${best.label}`,id:best.id};
-}
-
-function placeCameraForTarget(target){
-  // Keep a simple mental model: fixed camera, group on one depth plane.
-  let lo=.35,hi=35;
-  for(let i=0;i<48;i++){
-    const d=(lo+hi)/2;
-    state.groupDistance=d;
-    rebuildGroupLayout();
-    const maxScale=Math.max(...activeSubjects().map(bodyScaleForSubject));
-    if(maxScale>target.scale) lo=d;
-    else hi=d;
-  }
-  state.groupDistance=(lo+hi)/2;
-  rebuildGroupLayout();
-  savePreviewSettings();
-  syncPreviewInputs();
-  updatePreview();
-}
-
-function renderPreviewTargets(){
-  const el=$('#previewTargetButtons');
-  if(!el) return;
-  el.innerHTML='';
-  previewTargets.forEach(target=>{
-    const b=document.createElement('button');
-    b.type='button';
-    b.className='preview-target';
-    b.textContent=target.label;
-    b.onclick=()=>placeCameraForTarget(target);
-    el.appendChild(b);
-  });
-}
-
-function moveSubjectToDistance(subject,distance){
-  const dx=subject.x-state.cameraPos.x,dy=subject.y-state.cameraPos.y;
-  let len=Math.hypot(dx,dy);
-  let ux=0,uy=1;
-  if(len>.001){ux=dx/len;uy=dy/len}
-  subject.x=state.cameraPos.x+ux*distance;
-  subject.y=state.cameraPos.y+uy*distance;
-}
-function syncPreviewInputs(){
-  const s1=state.subjects[0];
-  state.subjectHeight=s1.height;
-  state.subjectDistance=state.groupDistance;
-  const h=$('#subjectHeightInput');
-  const d=$('#subjectDistanceInput');
-  const slider=$('#subjectDistanceSlider');
-  const readout=$('#subjectDistanceReadout');
-  const spread=$('#groupSpreadSlider');
-  const spreadReadout=$('#groupSpreadReadout');
-  if(h) h.value=s1.height.toFixed(2);
-  if(d) d.value=state.groupDistance.toFixed(2);
-  if(slider){
-    slider.max=Math.max(15,Math.ceil(state.groupDistance+1));
-    slider.value=state.groupDistance;
-  }
-  if(readout) readout.textContent=state.groupDistance.toFixed(2).replace('.',',')+' m';
-  if(spread) spread.value=state.groupSpread;
-  if(spreadReadout) spreadReadout.textContent=state.groupSpread.toFixed(2).replace('.',',')+' m';
-}
-
-function preparePreviewSubjectClones(){
-  const source=$('#previewSubject');
-  if(!source) return;
-
-  let sourceSvg=source.querySelector('svg');
-  if(sourceSvg && !sourceSvg.dataset.uniqueGradients){
-    uniquifySubjectSvgGradients(sourceSvg,0);
-    sourceSvg.dataset.uniqueGradients='1';
-  }
-
-  [2,3,4].forEach(i=>{
-    const el=$(`#previewSubject${i}`);
-    if(el && !el.querySelector('svg') && sourceSvg){
-      const clone=sourceSvg.cloneNode(true);
-      clone.removeAttribute('role');
-      clone.setAttribute('aria-hidden','true');
-
-      // The source already has P1 IDs after uniquifying.
-      // Convert them back conceptually to person-specific IDs for this clone.
-      ['skinGrad','shirtGrad','pantsGrad','softShadow'].forEach(baseId=>{
-        const sourceId=`${baseId}-p1`;
-        const node=clone.querySelector(`#${sourceId}`);
-        if(node){
-          const uniqueId=`${baseId}-p${i}`;
-          node.setAttribute('id',uniqueId);
-          clone.querySelectorAll(`[fill="url(#${sourceId})"]`).forEach(x=>x.setAttribute('fill',`url(#${uniqueId})`));
-          clone.querySelectorAll(`[filter="url(#${sourceId})"]`).forEach(x=>x.setAttribute('filter',`url(#${uniqueId})`));
-        }
-      });
-
-      clone.dataset.uniqueGradients='1';
-      el.appendChild(clone);
-    }
-  });
-
-  [source,$('#previewSubject2'),$('#previewSubject3'),$('#previewSubject4')].forEach((el,i)=>{
-    if(!el) return;
-    let badge=el.querySelector('.preview-person-badge');
-    if(!badge){
-      badge=document.createElement('span');
-      badge.className='preview-person-badge';
-      badge.textContent=`P${i+1}`;
-      el.appendChild(badge);
-    }
-    applySubjectAppearance(el, i);
-  });
-}
-
-function rebuildGroupLayout(){
-  state.cameraPos={x:0,y:0};
-
-  const layouts={
-    1:[0],
-    2:[-0.5,0.5],
-    3:[-1,0,1],
-    4:[-1.5,-0.5,0.5,1.5]
-  };
-  const offsets=layouts[state.subjectCount] || layouts[1];
-
-  activeSubjects().forEach((subject,i)=>{
-    subject.x=(offsets[i] || 0)*state.groupSpread;
-    subject.y=state.groupDistance;
-  });
-
-  // Keep inactive subjects ready as well.
-  state.subjects.slice(state.subjectCount).forEach((subject,i)=>{
-    subject.x=0;
-    subject.y=state.groupDistance;
-  });
-}
-
-function setSubjectCount(count){
-  const previous=state.subjectCount;
-  state.subjectCount=Math.max(1,Math.min(4,Math.round(count)));
-  if(state.subjectCount>previous){
-    for(let i=previous;i<state.subjectCount;i++){
-      state.subjects[i].height=state.subjects[0].height;
-    }
-  }
-  rebuildGroupLayout();
-  renderSubjectCount();
-  renderExtraSubjectControls();
-  savePreviewSettings();
-  updatePreview();
-}
-function renderSubjectCount(){
-  $$('#subjectCountSwitch button').forEach(b=>{
-    b.classList.toggle('active',Number(b.dataset.count)===state.subjectCount);
-  });
-}
-function renderExtraSubjectControls(){
-  const el=$('#extraSubjectControls');
-  if(!el) return;
-  el.innerHTML='';
-  activeSubjects().slice(1).forEach((s,index)=>{
-    const row=document.createElement('div');
-    row.className='extra-subject-row';
-    row.innerHTML=`
-      <div class="extra-subject-title">
-        <strong>PERSONNE ${index+2}</strong>
-        <span>Même plan de profondeur que le groupe</span>
-      </div>
-      <label>
-        <span>Taille</span>
-        <div><input type="number" min="1.20" max="2.20" step="0.01" value="${s.height.toFixed(2)}" data-subject-height="${index+1}"><em>m</em></div>
-      </label>
-    `;
-    el.appendChild(row);
-  });
-  el.querySelectorAll('[data-subject-height]').forEach(input=>{
-    input.oninput=e=>{
-      const ix=Number(e.target.dataset.subjectHeight);
-      const v=parseFloat(e.target.value);
-      if(Number.isFinite(v)){
-        state.subjects[ix].height=Math.max(1.2,Math.min(2.2,v));
-        savePreviewSettings();
-        updatePreview();
-      }
-    };
-  });
-}
-
-function cocMm(){
-  // Classic 0.03 mm full-frame reference, scaled to sensor width.
-  return .030*(state.sensorWidth/36);
-}
-function dofBounds(focusDistance=state.focusDistance,aperture=state.aperture){
-  const f=state.focal; // mm
-  const s=Math.max(.301,focusDistance)*1000; // mm
-  const N=Math.max(.7,aperture);
-  const c=Math.max(.004,cocMm());
-  const H=(f*f)/(N*c)+f;
-  const near=(H*s)/(H+s-f);
-  const denom=H-s+f;
-  const far=denom<=0?Infinity:(H*s)/denom;
-  return {near:near/1000,far:far===Infinity?Infinity:far/1000,H:H/1000};
-}
-function dofStatus(distance,bounds=dofBounds()){
-  const inside=distance>=bounds.near && (bounds.far===Infinity || distance<=bounds.far);
-  if(!inside) return {key:'out',label:'HORS PDC'};
-  const total=bounds.far===Infinity?Math.max(1,distance-bounds.near):(bounds.far-bounds.near);
-  const margin=Math.min(distance-bounds.near,bounds.far===Infinity?Infinity:bounds.far-distance);
-  const threshold=Math.max(.06,total*.08);
-  if(margin<threshold) return {key:'edge',label:'LIMITE'};
-  return {key:'net',label:'NET'};
-}
-function groupDofRecommendation(){
-  const subjects=activeSubjects();
-  const ds=subjects.map(subjectDistance).sort((a,b)=>a-b);
-  if(!ds.length) return null;
-  if(ds.length===1) return {aperture:1.4,focus:ds[0],near:ds[0],far:ds[0]};
-
-  const minD=ds[0],maxD=ds[ds.length-1];
-  for(const N of apertureStops){
-    let best=null;
-    const lo=Math.max(.3,minD*.88);
-    const hi=Math.min(50,maxD*1.12);
-    for(let i=0;i<=220;i++){
-      const focus=lo+(hi-lo)*(i/220);
-      const b=dofBounds(focus,N);
-      const covers=ds.every(d=>d>=b.near && (b.far===Infinity || d<=b.far));
-      if(!covers) continue;
-      const front=minD-b.near;
-      const back=b.far===Infinity?front:maxD<=b.far?b.far-maxD:-999;
-      const score=Math.min(front,back);
-      if(!best || score>best.score) best={aperture:N,focus,near:b.near,far:b.far,score};
-    }
-    if(best) return best;
-  }
-  return null;
-}
-function formatDistance(v){
-  if(v===Infinity) return '∞';
-  return `${v.toFixed(2).replace('.',',')} m`;
-}
-function renderApertureChips(){
-  const el=$('#apertureChips');
-  if(!el) return;
-  el.innerHTML='';
-  apertureStops.forEach(N=>{
-    const b=document.createElement('button');
-    b.type='button';
-    b.className='aperture-chip'+(Math.abs(N-state.aperture)<.001?' active':'');
-    b.textContent=`f/${Number.isInteger(N)?N:N.toFixed(1)}`;
-    b.onclick=()=>{
-      state.aperture=N;
-      savePreviewSettings();
-      renderApertureChips();
-      updatePreview();
-    };
-    el.appendChild(b);
-  });
-}
-function renderFocusQuickButtons(){
-  const el=$('#focusQuickButtons');
-  if(!el) return;
-  el.innerHTML='';
-  activeSubjects().forEach((s,i)=>{
-    const b=document.createElement('button');
-    b.type='button';
-    b.textContent=`MAP S${i+1}`;
-    b.onclick=()=>{
-      state.focusDistance=subjectDistance(s);
-      savePreviewSettings();syncPreviewInputs();updatePreview();
-    };
-    el.appendChild(b);
-  });
-  if(state.subjectCount>1){
-    const b=document.createElement('button');
-    b.type='button';
-    b.textContent='MAP GROUPE';
-    b.onclick=()=>{
-      const rec=groupDofRecommendation();
-      state.focusDistance=rec?.focus || activeSubjects().reduce((a,s)=>a+subjectDistance(s),0)/state.subjectCount;
-      savePreviewSettings();syncPreviewInputs();updatePreview();
-    };
-    el.appendChild(b);
-  }
-}
-
-function worldToSvg(x,y){
-  return {x:x*100,y:1450-y*100};
-}
-function svgToWorld(svg,clientX,clientY){
-  const pt=svg.createSVGPoint();pt.x=clientX;pt.y=clientY;
-  const ctm=svg.getScreenCTM();
-  if(!ctm) return null;
-  const p=pt.matrixTransform(ctm.inverse());
-  return {x:p.x/100,y:(1450-p.y)/100};
-}
-function lineAcrossPlane(distance,basis,widthAtDistance){
-  const c={
-    x:state.cameraPos.x+basis.forward.x*distance,
-    y:state.cameraPos.y+basis.forward.y*distance
-  };
-  const half=widthAtDistance;
-  return [
-    {x:c.x-basis.right.x*half,y:c.y-basis.right.y*half},
-    {x:c.x+basis.right.x*half,y:c.y+basis.right.y*half}
-  ];
-}
-function pointsAttr(points){
-  return points.map(p=>{
-    const s=worldToSvg(p.x,p.y);
-    return `${s.x.toFixed(1)},${s.y.toFixed(1)}`;
-  }).join(' ');
-}
-function updateTopView(bounds){
-  const svg=$('#previewTopView');
-  if(!svg) return;
-  const basis=groundViewBasis();
-
-  // Camera
-  const cam=worldToSvg(state.cameraPos.x,state.cameraPos.y);
-  const angle=deg(Math.atan2(basis.forward.x,basis.forward.y));
-  const camEl=$('#topCamera');
-  camEl?.setAttribute('transform',`translate(${cam.x} ${cam.y}) rotate(${angle})`);
-
-  // FOV cone
-  const farDistance=15;
-  const half=farDistance*Math.tan(rad(targetHFov())/2);
-  const left={x:state.cameraPos.x+basis.forward.x*farDistance-basis.right.x*half,y:state.cameraPos.y+basis.forward.y*farDistance-basis.right.y*half};
-  const right={x:state.cameraPos.x+basis.forward.x*farDistance+basis.right.x*half,y:state.cameraPos.y+basis.forward.y*farDistance+basis.right.y*half};
-  $('#topFovCone')?.setAttribute('points',pointsAttr([state.cameraPos,left,right]));
-
-  // Subjects layer
-  const layer=$('#topSubjectsLayer');
-  if(layer){
-    layer.innerHTML='';
-    activeSubjects().forEach((s,i)=>{
-      const p=worldToSvg(s.x,s.y);
-      const status=dofStatus(subjectDistance(s),bounds);
-      const g=document.createElementNS('http://www.w3.org/2000/svg','g');
-      g.setAttribute('class',`top-subject drag-node dof-${status.key}`);
-      g.setAttribute('data-drag-kind','subject');
-      g.setAttribute('data-index',String(i));
-      g.setAttribute('transform',`translate(${p.x} ${p.y})`);
-      g.innerHTML=`<circle r="34"></circle><circle r="9" class="top-subject-center"></circle><text x="0" y="61" text-anchor="middle">S${i+1}</text>`;
-      layer.appendChild(g);
-    });
-  }
-
-  // DOF polygon in the cone.
-  const near=Math.max(.05,bounds.near);
-  const far=bounds.far===Infinity?15:Math.min(15,bounds.far);
-  const nearHalf=near*Math.tan(rad(targetHFov())/2);
-  const farHalf=far*Math.tan(rad(targetHFov())/2);
-  const nearLine=lineAcrossPlane(near,basis,nearHalf);
-  const farLine=lineAcrossPlane(far,basis,farHalf);
-  $('#topDofZone')?.setAttribute('points',pointsAttr([nearLine[0],nearLine[1],farLine[1],farLine[0]]));
-
-  const n1=worldToSvg(nearLine[0].x,nearLine[0].y),n2=worldToSvg(nearLine[1].x,nearLine[1].y);
-  const f1=worldToSvg(farLine[0].x,farLine[0].y),f2=worldToSvg(farLine[1].x,farLine[1].y);
-  const nl=$('#topNearLine'),fl=$('#topFarLine');
-  if(nl){nl.setAttribute('x1',n1.x);nl.setAttribute('y1',n1.y);nl.setAttribute('x2',n2.x);nl.setAttribute('y2',n2.y)}
-  if(fl){fl.setAttribute('x1',f1.x);fl.setAttribute('y1',f1.y);fl.setAttribute('x2',f2.x);fl.setAttribute('y2',f2.y)}
-
-  const focus=Math.max(.05,state.focusDistance);
-  const focusHalf=focus*Math.tan(rad(targetHFov())/2);
-  const focusLine=lineAcrossPlane(focus,basis,focusHalf);
-  const fp1=worldToSvg(focusLine[0].x,focusLine[0].y),fp2=worldToSvg(focusLine[1].x,focusLine[1].y);
-  const fpl=$('#topFocusLine');
-  if(fpl){fpl.setAttribute('x1',fp1.x);fpl.setAttribute('y1',fp1.y);fpl.setAttribute('x2',fp2.x);fpl.setAttribute('y2',fp2.y)}
-
-  const info=$('#topViewGroupInfo');
-  if(info){
-    const ds=activeSubjects().map(subjectDistance);
-    let text=`${state.subjectCount} sujet${state.subjectCount>1?'s':''}`;
-    if(ds.length>1){
-      const sep=Math.hypot(activeSubjects()[0].x-activeSubjects()[1].x,activeSubjects()[0].y-activeSubjects()[1].y);
-      text+=` · S1↔S2 ${sep.toFixed(2).replace('.',',')} m`;
-    }
-    info.textContent=text;
-  }
-}
-function setupTopViewDrag(){
-  const svg=$('#previewTopView');
-  if(!svg) return;
-
-  svg.addEventListener('pointerdown',e=>{
-    const node=e.target.closest?.('.drag-node');
-    if(!node) return;
-    e.preventDefault();
-    svg.setPointerCapture?.(e.pointerId);
-    state.topDrag={
-      kind:node.dataset.dragKind,
-      index:Number(node.dataset.index||0),
-      pointerId:e.pointerId
-    };
-  });
-  svg.addEventListener('pointermove',e=>{
-    if(!state.topDrag || state.topDrag.pointerId!==e.pointerId) return;
-    e.preventDefault();
-    const p=svgToWorld(svg,e.clientX,e.clientY);
-    if(!p) return;
-    p.x=Math.max(-5.5,Math.min(5.5,p.x));
-    p.y=Math.max(-.5,Math.min(14.5,p.y));
-    if(state.topDrag.kind==='camera'){
-      state.cameraPos={x:p.x,y:p.y};
-    }else{
-      const s=state.subjects[state.topDrag.index];
-      if(s){s.x=p.x;s.y=p.y}
-    }
-    savePreviewSettings();
-    syncPreviewInputs();
-    renderExtraSubjectControls();
-    updatePreview();
-  });
-  const end=e=>{
-    if(state.topDrag && (!e.pointerId || state.topDrag.pointerId===e.pointerId)){
-      state.topDrag=null;
-      savePreviewSettings();
-    }
-  };
-  svg.addEventListener('pointerup',end);
-  svg.addEventListener('pointercancel',end);
-}
-
-function ensureLightGroupLayout(){ rebuildGroupLayout(); }
-
-function setFrameMode(mode,persist=true){
-  state.mode=mode==='preview'?'preview':'real';
-  const preview=state.mode==='preview';
-  $('#realModeBtn')?.classList.toggle('active',!preview);
-  $('#previewModeBtn')?.classList.toggle('active',preview);
-  $('#previewScene')?.classList.toggle('hidden',!preview);
-  $('#previewControls')?.classList.toggle('hidden',!preview);
-  $('#video')?.classList.toggle('mode-hidden',preview);
-  $('#cameraPlaceholder')?.classList.toggle('mode-hidden',preview);
-  $('#cameraBtn')?.classList.toggle('hidden',preview);
-  $('#calBtn')?.classList.toggle('hidden',preview);
-
-  const kicker=$('#viewPanelKicker');
-  const label=$('#viewModeLabel');
-  if(kicker) kicker.textContent=preview?'PREVIEW':'VISEUR';
-  if(label) label.textContent=preview?'SIMULATION · BOS':'VUE RÉELLE · BOS';
-
-  ensureLightGroupLayout();
-  if(persist) savePreviewSettings();
-  requestAnimationFrame(()=>{
-    updateFrame();
-    if(preview) updatePreview();
-    else updateSimulation();
-  });
-}
-
-function updateDofUI(){ return; }
-
-function updatePreview(){
-  if(state.mode!=='preview') return;
-
-  const frame=$('#mainFrame');
-  const stage=$('#cameraStage');
-  if(!frame || !stage) return;
-  const stageRect=stage.getBoundingClientRect();
-  const frameRect=frame.getBoundingClientRect();
-  if(!frameRect.width || !frameRect.height) return;
-
-  preparePreviewSubjectClones();
-  const projections=activeSubjects().map(subjectProjection);
-  const scales=[];
-
-  state.subjects.forEach((subject,i)=>{
-    const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);
-    if(!el) return;
-    const active=i<state.subjectCount;
-    el.classList.toggle('hidden',!active);
-    if(!active) return;
-
-    const p=projections[i];
-    if(!p){
-      el.classList.add('behind-camera');
-      return;
-    }
-    el.classList.remove('behind-camera');
-
-    const xPx=frameRect.left-stageRect.left + frameRect.width/2 + p.center.x*frameRect.width/2;
-    const headYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.head.y*frameRect.height/2;
-    const eyeYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.eye.y*frameRect.height/2;
-    const feetYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.feet.y*frameRect.height/2;
-
-    // Keep eyes as the absolute anchor, especially in very close framings.
-    // We derive the SVG height from the projected eye-to-feet span so the
-    // internal eye position in the SVG stays exactly on the projected eye line.
-    const eyeToFeetPx=Math.abs(feetYPx-eyeYPx);
-    const svgHeightPx = eyeToFeetPx / (previewFigureMetrics.footRatio - previewFigureMetrics.eyeRatio);
-
-    // Secondary metric still used for plan naming/rough scale.
-    const bodyPx=Math.abs(feetYPx-headYPx);
-
-    const wPx = svgHeightPx * (240/900);
-    const top = eyeYPx - previewFigureMetrics.eyeRatio * svgHeightPx;
-
-    el.style.left=xPx+'px';
-    el.style.top=top+'px';
-    el.style.width=Math.max(8,wPx)+'px';
-    el.style.height=Math.max(30,svgHeightPx)+'px';
-
-    scales.push(bodyPx/frameRect.height);
-  });
-
-  const measure=$('#previewMeasure');
-  if(measure) measure.classList.toggle('hidden',state.subjectCount!==1);
-  if(state.subjectCount===1 && measure){
-    const s=state.subjects[0];
-    const p=projections[0];
-    const el=$('#previewSubject');
-    if(p && el){
-      const r=el.getBoundingClientRect();
-      measure.style.left=(r.right-stageRect.left+8)+'px';
-      measure.style.top=(r.top-stageRect.top)+'px';
-      measure.style.height=r.height+'px';
-      $('#previewMeasureText').textContent=s.height.toFixed(2).replace('.',',')+' m';
-    }
-  }
-
-  const maxScale=scales.length?Math.max(...scales):0;
-  const plan=closestPreviewPlan(maxScale);
-  const groupD=activeSubjects().reduce((a,s)=>a+subjectDistance(s),0)/state.subjectCount;
-  const metrics=previewFrameMetricsAt(groupD);
-
-  const overlayPlan=$('#previewPlanOverlay');
-  const overlayMetrics=$('#previewMetricsOverlay');
-  if(overlayPlan) overlayPlan.textContent=state.subjectCount>1?`${state.subjectCount} PERSONNES · ${plan.label}`:plan.label;
-  if(overlayMetrics){
-    overlayMetrics.textContent=`${state.preset.name.replace('Sony ','')} · ${state.focal} mm · centre groupe ${groupD.toFixed(2).replace('.',',')} m`;
-  }
-
-  const resultPlan=$('#previewPlanResult');
-  const resultSize=$('#previewFrameSizeResult');
-  if(resultPlan) resultPlan.textContent=plan.label.replace('PLAN ','');
-  if(resultSize) resultSize.textContent=`${metrics.frameWidth.toFixed(2).replace('.',',')} × ${metrics.frameHeight.toFixed(2).replace('.',',')} m`;
-
-  syncPreviewInputs();
-  renderSubjectCount();
-  renderExtraSubjectControls();
-
-  activeSubjects().forEach((subject,i)=>{
-    const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);
-    if(el){
-      el.classList.remove('dof-net','dof-edge','dof-out');
-      const badge=el.querySelector('.preview-person-badge');
-      if(badge) badge.textContent=`P${i+1}`;
-    }
-  });
-
-  $$('.preview-target').forEach((b,i)=>{
-    b.classList.toggle('active',previewTargets[i]?.id===plan.id);
-  });
-}
 function renderLenses(){
   const el=$('#lensStrip'); el.innerHTML='';
   lenses.forEach(mm=>{
     const unavailable=isTargetUnavailable(state.sensorWidth,mm);
     const b=document.createElement('button');
-    b.className='lens-pill'+(mm===state.focal?' active':'')+(unavailable?' unavailable':'');
+    b.className='lens-pill'+(Math.abs(mm-state.focal)<0.001?' active':'')+(unavailable?' unavailable':'');
     b.textContent=mm;
     if(unavailable){
       b.disabled=true;
@@ -1235,7 +404,11 @@ function updateReadout(){
   const hf=targetHFov();
   $('#cameraReadout').textContent=state.preset.name.replace('ARRI ','').replace('Sony ','').replace('RED ','');
   $('#cameraPresetText').textContent=state.preset.name;
-  $('#focalReadout').textContent=state.focal+' mm';
+  $('#focalReadout').textContent=(Number.isInteger(state.focal)?state.focal:Number(state.focal.toFixed(1)))+' mm';
+  const focalInput=$('#customFocalInput');
+  if(focalInput && document.activeElement!==focalInput){
+    focalInput.value=Number.isInteger(state.focal)?String(state.focal):String(Number(state.focal.toFixed(1)));
+  }
   $('#ratioReadout').textContent=ratioLabel(state.ratio).replace(':1','');
   $('#ratioText').textContent=ratioLabel(state.ratio);
   $('#hfovReadout').textContent=hf.toFixed(1)+'°';
@@ -1379,11 +552,7 @@ function updateSimulation(){
 }
 
 function updateAll(){
-  updateReadout();
-  updateFrame();
-  if(state.mode==='preview'){ ensureLightGroupLayout(); updatePreview(); }
-  else updateSimulation();
-  renderGuideChoices();
+  updateReadout(); updateFrame(); updateSimulation(); renderGuideChoices();
 }
 
 async function startCamera(deviceId){
@@ -1787,70 +956,72 @@ function clearWideLimit(){
 
 
 function preferredTheme(){
-  return localStorage.getItem("bruno-onset-theme") || localStorage.getItem("bruno-set-tools-theme") || "light";
+  return localStorage.getItem("bruno-set-tools-theme") || "light";
 }
 function applyTheme(theme,persist=true){
   const dark=theme==="dark";
-  document.documentElement.dataset.theme=dark?"dark":"light";
   document.body.classList.toggle("dark",dark);
   document.body.dataset.theme=dark?"dark":"light";
 
   const themeToggle=$('#themeBtn');
   const themeColor=document.getElementById("themeColor") || document.querySelector('meta[name="theme-color"]');
   if(themeToggle) themeToggle.textContent=dark?"LIGHT":"DARK";
-  if(themeColor) themeColor.setAttribute("content",dark?"#111315":"#F3F1EC");
+  if(themeColor) themeColor.setAttribute("content",dark?"#0B0C0E":"#F3F1EC");
 
-  if(persist){
-    localStorage.setItem("bruno-onset-theme",dark?"dark":"light");
-    // Transitional compatibility with older BOS/BST builds.
-    localStorage.setItem("bruno-set-tools-theme",dark?"dark":"light");
-  }
+  if(persist) localStorage.setItem("bruno-set-tools-theme",dark?"dark":"light");
 }
 function toggleTheme(){
   applyTheme(document.body.classList.contains("dark")?"light":"dark");
 }
 
+
+let deferredInstallPrompt=null;
+
+function isStandaloneApp(){
+  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isIOSDevice(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function updateInstallButton(){
+  const btn=$('#installBtn');
+  if(!btn) return;
+  if(isStandaloneApp()){
+    btn.classList.add('hidden');
+    return;
+  }
+  // On iOS, always offer our clear installation instructions.
+  // On other platforms, show when the native prompt is available; fallback after load if needed.
+  if(isIOSDevice() || deferredInstallPrompt){
+    btn.classList.remove('hidden');
+  }
+}
+async function handleInstall(){
+  if(isStandaloneApp()) return;
+  if(deferredInstallPrompt){
+    const promptEvent=deferredInstallPrompt;
+    deferredInstallPrompt=null;
+    try{
+      promptEvent.prompt();
+      await promptEvent.userChoice;
+    }catch(_){ }
+    updateInstallButton();
+    return;
+  }
+  $('#installDialog')?.showModal();
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  updateInstallButton();
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  updateInstallButton();
+});
+
 function registerEvents(){
   $('#startCameraBtn').onclick=()=>startCamera();
-  $('#realModeBtn').onclick=()=>setFrameMode('real');
-  $('#previewModeBtn').onclick=()=>setFrameMode('preview');
-
-  $('#subjectHeightInput').oninput=e=>{
-    const v=parseFloat(e.target.value);
-    if(Number.isFinite(v)){
-      state.subjects[0].height=Math.max(1.2,Math.min(2.2,v));
-      savePreviewSettings();
-      updatePreview();
-    }
-  };
-  $('#subjectDistanceInput').oninput=e=>{
-    const v=parseFloat(e.target.value);
-    if(Number.isFinite(v)){
-      state.groupDistance=Math.max(.4,Math.min(30,v));
-      rebuildGroupLayout();
-      savePreviewSettings();
-      updatePreview();
-    }
-  };
-  $('#subjectDistanceSlider').oninput=e=>{
-    const v=parseFloat(e.target.value);
-    if(Number.isFinite(v)){
-      state.groupDistance=Math.max(.4,Math.min(30,v));
-      rebuildGroupLayout();
-      savePreviewSettings();
-      updatePreview();
-    }
-  };
-  $$('#subjectCountSwitch button').forEach(b=>b.onclick=()=>setSubjectCount(Number(b.dataset.count)));
-  $('#groupSpreadSlider').oninput=e=>{
-    const v=parseFloat(e.target.value);
-    if(Number.isFinite(v)){
-      state.groupSpread=Math.max(.2,Math.min(2.5,v));
-      rebuildGroupLayout();
-      savePreviewSettings();
-      updatePreview();
-    }
-  };
   $('#cameraBtn').onclick=()=>{$('#cameraDialog').showModal();updateCalibrationStatus()};
   $('#restartCameraBtn').onclick=()=>startCamera($('#deviceSelect').value);
 
@@ -1877,7 +1048,21 @@ function registerEvents(){
   $('#clearWideLimitBtn').onclick=()=>clearWideLimit();
   $('#saveProPointBtn').onclick=()=>saveCurrentProPoint();
 
+  const customFocalInput=$('#customFocalInput');
+  const applyCustomFocal=()=>{
+    if(!customFocalInput) return;
+    const raw=String(customFocalInput.value).replace(',','.');
+    const value=Number.parseFloat(raw);
+    if(!Number.isFinite(value) || value<=0 || value>1000) return;
+    state.focal=Math.round(value*10)/10;
+    renderLenses();
+    updateAll();
+  };
+  customFocalInput?.addEventListener('input',applyCustomFocal);
+  customFocalInput?.addEventListener('change',applyCustomFocal);
+
   $('#settingsBtn').onclick=()=>$('#settingsDialog').showModal();
+  $('#installBtn').onclick=()=>handleInstall();
   $('#themeBtn').onclick=()=>toggleTheme();
   $('#cameraPresetBtn').onclick=()=>{$('#sensorWidthInput').value=state.sensorWidth.toFixed(2);$('#presetDialog').showModal()};
   $('#ratioBtn').onclick=()=>$('#ratioDialog').showModal();
@@ -1925,7 +1110,6 @@ function registerEvents(){
       updateSimulation();
       if($('#proCalDialog')?.open) prepareProScale();
       if($('#calDialog')?.open) updateCalLines();
-      if(state.mode==='preview') updatePreview();
     });
   });
 }
@@ -1937,18 +1121,14 @@ function openCalibrationChooser(){
 
 function init(){
   applyTheme(preferredTheme(),false);
+  loadCachedCameraDb();
   loadMainCameraSetting();
-  loadPreviewSettings();
   renderLenses(); renderPresets(); renderRatios(); renderGuideChoices();
   renderProPresetSelect(); renderProLenses(); renderProPoints();
-  preparePreviewSubjectClones();
-  renderPreviewTargets();
-  renderSubjectCount();
-  renderExtraSubjectControls();
-  setupCalibrationDrag(); registerEvents();
-  syncPreviewInputs();
-  setFrameMode(state.mode,false);
-  updateAll();
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  setupCalibrationDrag(); registerEvents(); updateAll();
+  updateInstallButton();
+  setTimeout(()=>{ if(!isStandaloneApp() && !deferredInstallPrompt) $('#installBtn')?.classList.remove('hidden'); },900);
+  if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  refreshCameraDb();
 }
 init();
