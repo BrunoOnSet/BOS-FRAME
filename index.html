@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BOS" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=3.21" />
+  <link rel="stylesheet" href="styles.css?v=3.22" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -45,7 +45,10 @@
       <div class="panel-head compact-head collapsible-head">
         <button type="button" class="collapse-toggle" id="frameCameraSettingsToggle"
                 aria-expanded="false" aria-controls="frameCameraSettingsContent">
-          <span class="panel-kicker">RÉGLAGES CAMÉRA</span>
+          <span class="camera-collapse-title">
+            <span class="panel-kicker">RÉGLAGES CAMÉRA</span>
+            <strong id="frameCameraSettingsSummary">Sony FX6</strong>
+          </span>
           <span class="collapse-chevron" aria-hidden="true">⌄</span>
         </button>
       </div>
@@ -157,7 +160,16 @@
         <span class="panel-kicker">CADRAGE</span>
       </div>
 
-      <div class="lens-strip" id="lensStrip"></div>
+      <div class="frame-focal-block">
+        <div class="frame-focal-head">
+          <span>FOCALE</span>
+          <small id="frameFocalCurrentValue">35 mm</small>
+        </div>
+        <div class="frame-focal-row">
+          <div class="lens-strip" id="lensStrip"></div>
+          <button class="free-value-btn" id="focalLibreBtn" type="button">LIBRE</button>
+        </div>
+      </div>
 
       <div class="main-controls ratio-only-controls">
         <button id="ratioBtn" class="control-button">
@@ -244,7 +256,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.21</span>
+        <span class="app-version">v3.22</span>
       </div>
     </footer>
   </main>
@@ -453,6 +465,20 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.21"></script>
+
+  <dialog id="focalLibreDialog" class="custom-value-dialog">
+    <form method="dialog" class="custom-value-inner" id="focalLibreForm">
+      <button type="button" id="focalLibreClose" class="close" aria-label="Fermer">×</button>
+      <div class="dialog-kicker">RÉGLAGE LIBRE</div>
+      <h2>Focale libre</h2>
+      <label class="custom-value-field">
+        <input id="focalLibreInput" type="text" inputmode="decimal" autocomplete="off" />
+        <span>mm</span>
+      </label>
+      <button class="custom-value-apply" id="focalLibreApply" type="submit">VALIDER</button>
+    </form>
+  </dialog>
+
+  <script src="app.js?v=3.22"></script>
 </body>
 </html>

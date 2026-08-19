@@ -1151,21 +1151,46 @@ function updatePreview(){
     b.classList.toggle('active',previewTargets[i]?.id===plan.id);
   });
 }
+function formatFrameFocal(value){
+  const n=Number(value);
+  if(!Number.isFinite(n)) return '—';
+  const rounded=Math.round(n*100)/100;
+  return String(rounded).replace('.',',');
+}
+
+function isPresetFocal(value){
+  const n=Number(value);
+  return lenses.some(mm=>Math.abs(mm-n)<0.0001);
+}
+
 function renderLenses(){
   const el=$('#lensStrip'); el.innerHTML='';
   lenses.forEach(mm=>{
     const unavailable=isTargetUnavailable(state.sensorWidth,mm);
+    const active=Math.abs(mm-Number(state.focal))<0.0001;
     const b=document.createElement('button');
-    b.className='lens-pill'+(mm===state.focal?' active':'')+(unavailable?' unavailable':'');
+    b.className='lens-pill'+(active?' active':'')+(unavailable?' unavailable':'');
     b.textContent=mm;
     if(unavailable){
       b.disabled=true;
       b.title='Champ trop large pour la caméra téléphone calibrée';
     }else{
-      b.onclick=()=>{state.focal=mm; renderLenses(); updateAll(); centerActiveLens();};
+      b.onclick=()=>{
+        state.focal=mm;
+        renderLenses();
+        updateAll();
+        centerActiveLens();
+      };
     }
     el.appendChild(b);
   });
+
+  const libre=$('#focalLibreBtn');
+  if(libre) libre.classList.toggle('active',!isPresetFocal(state.focal));
+
+  const current=$('#frameFocalCurrentValue');
+  if(current) current.textContent=`${formatFrameFocal(state.focal)} mm`;
+
   setTimeout(centerActiveLens,0);
 }
 function centerElementInsideStrip(strip,el,smooth=true){
@@ -1298,6 +1323,11 @@ function renderPresets(){
     sensorInfo.textContent=shownPreset
       ? `${shownPreset.width.toFixed(2).replace('.',',')} mm`
       : '—';
+  }
+
+  const summary=$('#frameCameraSettingsSummary');
+  if(summary){
+    summary.textContent=state.preset?.name || shownPreset?.name || '—';
   }
 }
 
@@ -2034,6 +2064,41 @@ function registerEvents(){
     if(next) applyCinemaPreset(next);
   });
   $('#ratioBtn').onclick=()=>$('#ratioDialog').showModal();
+
+  const focalLibreDialog=$('#focalLibreDialog');
+  const focalLibreInput=$('#focalLibreInput');
+
+  $('#focalLibreBtn').onclick=()=>{
+    focalLibreInput.value=formatFrameFocal(state.focal);
+    focalLibreDialog.showModal();
+    setTimeout(()=>{
+      focalLibreInput.focus();
+      focalLibreInput.select();
+    },40);
+  };
+
+  $('#focalLibreClose').onclick=()=>focalLibreDialog.close();
+
+  focalLibreDialog.addEventListener('click',e=>{
+    if(e.target===focalLibreDialog) focalLibreDialog.close();
+  });
+
+  $('#focalLibreForm').addEventListener('submit',e=>{
+    e.preventDefault();
+
+    const raw=String(focalLibreInput.value||'').trim().replace(',','.');
+    const value=Number(raw);
+
+    if(!(value>0)){
+      focalLibreInput.focus();
+      return;
+    }
+
+    state.focal=Math.round(value*100)/100;
+    focalLibreDialog.close();
+    renderLenses();
+    updateAll();
+  });
   $('#objectWidth').oninput=calculateCalibration;
   $('#objectDistance').oninput=calculateCalibration;
   $('#saveCalibrationBtn').onclick=()=>{

@@ -2716,3 +2716,164 @@ body.dark .brand-chips button.active{
   object-fit:contain !important;
   object-position:center top !important;
 }
+
+
+/* ============================================================
+   BOS FRAME V3.22 — DOF-style camera summary + focal LIBRE
+   ============================================================ */
+
+/* Camera stays informative even when collapsed, like DOF. */
+.camera-collapse-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  flex:1;
+}
+.camera-collapse-title strong{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:0;
+  text-transform:none;
+}
+.method-panel:not(.collapsed) .camera-collapse-title strong{
+  opacity:.7;
+}
+
+/* Focal row: presets scroll, LIBRE stays fixed at the right. */
+.frame-focal-block{
+  margin-bottom:10px;
+}
+.frame-focal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:6px;
+}
+.frame-focal-head span{
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.11em;
+}
+.frame-focal-head small{
+  color:var(--text);
+  font-size:9px;
+  font-weight:850;
+}
+.frame-focal-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:start;
+  gap:8px;
+  width:100%;
+  min-width:0;
+}
+.frame-focal-row .lens-strip{
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding-left:0;
+  padding-right:0;
+}
+.free-value-btn{
+  flex:0 0 auto;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--muted);
+  border-radius:999px;
+  padding:7px 10px;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.07em;
+  white-space:nowrap;
+  min-height:33px;
+}
+.free-value-btn.active{
+  background:var(--chip-active-bg);
+  border-color:var(--chip-active-bg);
+  color:var(--chip-active-text);
+}
+body.dark .free-value-btn.active{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
+
+/* Same compact free-value dialog as DOF. */
+.custom-value-dialog{
+  width:min(360px,calc(100vw - 28px));
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:0;
+  background:var(--panel);
+  color:var(--text);
+}
+.custom-value-dialog::backdrop{
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+}
+.custom-value-inner{
+  position:relative;
+  padding:20px;
+}
+.custom-value-inner h2{
+  margin:0 38px 15px 0;
+  font-size:21px;
+}
+.custom-value-field{
+  display:flex;
+  align-items:center;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--field-bg);
+  overflow:hidden;
+}
+.custom-value-field input{
+  min-width:0;
+  width:100%;
+  height:54px;
+  border:0!important;
+  background:transparent!important;
+  color:var(--text);
+  padding:0 12px;
+  font-size:24px;
+  font-weight:900;
+  outline:0;
+  box-shadow:none!important;
+}
+.custom-value-field span{
+  padding-right:12px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:850;
+  white-space:nowrap;
+}
+.custom-value-apply{
+  width:100%;
+  margin-top:12px;
+  border:0;
+  border-radius:13px;
+  background:var(--accent);
+  color:#fff;
+  padding:12px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.1em;
+}
+
+@media(max-width:520px){
+  .frame-focal-row{gap:6px}
+  .free-value-btn{
+    padding:6px 8px;
+    min-height:31px;
+    font-size:8px;
+  }
+}
