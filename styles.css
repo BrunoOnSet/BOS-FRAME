@@ -3467,3 +3467,154 @@ html,body,#app{
   .preview-target-head{align-items:flex-start;flex-direction:column;gap:3px}
   .preview-target-head small{text-align:left}
 }
+
+
+/* ============================================================
+   BOS FRAME V3.26 — EXACT ONSET V58 TITLES + CENTERING
+   ============================================================ */
+
+/* Valeurs finales réellement utilisées dans ONSET_V58 */
+:root{
+  --blue:#2F5B66;
+  --blue-soft:rgba(47,91,102,.14);
+}
+:root[data-theme="dark"],
+body.dark{
+  --blue:#2F5B66;
+  --blue-soft:rgba(47,91,102,.22);
+}
+
+/* Shell : copie exacte de la logique de centrage ONSET_V58 */
+html,
+body{
+  width:100% !important;
+  min-height:100% !important;
+}
+body{
+  margin:0 !important;
+  overflow-x:hidden !important;
+}
+#app{
+  width:100% !important;
+  margin:0 !important;
+}
+.app{
+  box-sizing:border-box !important;
+  width:min(760px,100%) !important;
+  max-width:760px !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  padding:14px 12px calc(32px + env(safe-area-inset-bottom)) !important;
+  transform:none !important;
+  left:auto !important;
+  right:auto !important;
+}
+
+/* Aucun breakpoint FRAME ne doit changer le centrage V58 */
+@media(max-width:520px){
+  .app{
+    width:100% !important;
+    max-width:760px !important;
+    padding-left:12px !important;
+    padding-right:12px !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+}
+@media(max-width:380px){
+  .app{
+    padding-left:12px !important;
+    padding-right:12px !important;
+  }
+}
+@media(orientation:landscape){
+  .app{
+    width:min(760px,100%) !important;
+    max-width:760px !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+}
+
+/* Tous les blocs principaux partagent exactement le même axe central */
+.top,
+.mode-switch,
+.utility-row,
+.frame-modules,
+.project-contact,
+.footer{
+  box-sizing:border-box !important;
+  width:100% !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+/* TITRES DE BULLES : valeurs finales ONSET_V58, sans adaptation */
+.module-head,
+#frameCameraSettingsPanel .collapse-toggle,
+#frameViewCard .bos-module-head{
+  width:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  padding:15px 16px !important;
+  border:0 !important;
+  background:transparent !important;
+}
+
+.module-title{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  text-align:left !important;
+  min-width:0;
+}
+
+.module-dot{
+  width:8px !important;
+  height:8px !important;
+  flex:0 0 8px !important;
+  border-radius:50% !important;
+  background:var(--blue) !important;
+}
+
+.module-title strong{
+  display:block !important;
+  color:var(--blue) !important;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
+  font-size:16px !important;
+  font-weight:700 !important;
+  line-height:normal !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+}
+
+.module-title small{
+  display:block !important;
+  color:var(--muted) !important;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
+  font-size:10px !important;
+  font-weight:400 !important;
+  line-height:normal !important;
+  letter-spacing:0 !important;
+  margin-top:2px !important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.chev,
+.collapse-chevron{
+  color:var(--muted) !important;
+  font-size:17px !important;
+}
+
+/* Sliders tactiles : la poignée reste capturée pendant le glissement */
+.extra-subject-slider input[type="range"],
+.preview-setting-row input[type="range"],
+.bos-linked-slider input[type="range"]{
+  touch-action:pan-y !important;
+  -webkit-user-select:none;
+  user-select:none;
+}
+

@@ -750,6 +750,10 @@ function renderExtraSubjectControls(){
       const v=parseFloat(e.target.value);
       if(Number.isFinite(v)){
         state.subjects[ix].height=Math.max(1.2,Math.min(2.2,v));
+        const readout=el.querySelector(`[data-subject-height-readout="${ix}"]`);
+        if(readout && !readout.querySelector('input')){
+          readout.textContent=state.subjects[ix].height.toFixed(2).replace('.',',')+' m';
+        }
         savePreviewSettings();
         syncPreviewInputs();
         updatePreview();
@@ -767,6 +771,8 @@ function renderExtraSubjectControls(){
       commit:v=>{
         const ix=Number(readout.dataset.subjectHeightReadout);
         state.subjects[ix].height=Math.max(1.2,Math.min(2.2,v));
+        const slider=el.querySelector(`[data-subject-height-slider="${ix}"]`);
+        if(slider) slider.value=state.subjects[ix].height;
         savePreviewSettings();
         syncPreviewInputs();
         updatePreview();
@@ -998,7 +1004,6 @@ function setupTopViewDrag(){
     }
     savePreviewSettings();
     syncPreviewInputs();
-    renderExtraSubjectControls();
     updatePreview();
   });
   const end=e=>{
@@ -1164,7 +1169,6 @@ function updatePreview(){
 
   syncPreviewInputs();
   renderSubjectCount();
-  renderExtraSubjectControls();
 
   activeSubjects().forEach((subject,i)=>{
     const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);
@@ -2078,7 +2082,6 @@ function registerEvents(){
     state.subjects[0].height=Math.max(1.2,Math.min(2.2,v));
     savePreviewSettings();
     syncPreviewInputs();
-    renderExtraSubjectControls();
     updatePreview();
   };
   const applyPreviewDistance=v=>{
