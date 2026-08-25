@@ -3743,3 +3743,126 @@ body{
   line-height:1.35 !important;
   max-width:100% !important;
 }
+
+
+/* ============================================================
+   BOS FRAME V3.29 — Header LIGHT V0.50 + camera height visible
+   ============================================================ */
+
+/* Header copied from LIGHT V0.50 */
+.app-shell{
+  width:min(620px,100%);
+  margin:0 auto;
+  padding:calc(22px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+}
+
+.topbar{
+  display:block !important;
+  background:var(--header-bg) !important;
+  border:1px solid var(--header-border) !important;
+  border-radius:22px !important;
+  padding:14px 16px 15px !important;
+  margin:0 0 14px !important;
+  box-shadow:none !important;
+}
+.bos-top-inner{
+  width:100%;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.bos-brand-lockup{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+.bos-header-logo{
+  display:block;
+  width:56px;
+  height:56px;
+  object-fit:contain;
+  flex:0 0 56px;
+  background:transparent;
+  border:0;
+  border-radius:0;
+}
+.bos-brand-text{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:4px;
+  min-width:0;
+}
+.bos-header-name{
+  font-family:"Montserrat",Arial,sans-serif !important;
+  font-weight:700 !important;
+  font-size:19px !important;
+  line-height:1 !important;
+  color:#2F5B66 !important;
+  letter-spacing:0 !important;
+  white-space:nowrap;
+}
+.bos-header-app{
+  margin-left:4px !important;
+  color:#17191C !important;
+  font-weight:700 !important;
+}
+.bos-header-tagline{
+  font-size:11px !important;
+  line-height:1.2 !important;
+  color:#17191C !important;
+  letter-spacing:.01em !important;
+  white-space:nowrap;
+}
+body.dark .bos-header-tagline{color:#17191C !important;}
+body.dark .bos-header-name{color:#2F5B66 !important;}
+body.dark .bos-header-app{color:#17191C !important;}
+
+.top-title h1,
+.tool-eyebrow,
+.topbar h1,
+.top .eyebrow-row,
+.top h1{
+  display:none !important;
+}
+
+.mode-btn,
+.utility-link{
+  border:1px solid var(--line) !important;
+  background:var(--panel) !important;
+  color:var(--text) !important;
+  border-radius:999px !important;
+  padding:7px 10px !important;
+  font-size:9px !important;
+  letter-spacing:.12em !important;
+  font-weight:900 !important;
+  white-space:nowrap !important;
+  min-width:auto !important;
+  height:auto !important;
+  box-shadow:none !important;
+}
+.mode-btn:hover,
+.utility-link:hover{border-color:var(--accent) !important;}
+.utility-row{
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+  margin:-1px 0 14px !important;
+  padding:0 2px !important;
+}
+
+/* Ensure old custom top styles don't interfere */
+#app > .top{
+  display:none !important;
+}
+
+/* Camera height must visibly affect the preview mannequin */
+.preview-subject{
+  overflow:visible;
+}
+.preview-person{
+  transform-origin:50% 14%;
+  will-change:transform;
+}

@@ -1069,6 +1069,14 @@ function previewEyeComposition(frameRect,stageRect,projections){
   };
 }
 
+
+function cameraHeightVisualDelta(){
+  const subjects=activeSubjects();
+  if(!subjects.length) return 0;
+  const avgEyeHeight = subjects.reduce((a,s)=>a + s.height*previewFigureMetrics.eyeHeightRatio,0) / subjects.length;
+  return Math.max(-0.9, Math.min(0.9, state.cameraHeight - avgEyeHeight));
+}
+
 function updatePreview(){
   if(state.mode!=='preview') return;
 
@@ -1083,6 +1091,7 @@ function updatePreview(){
   const projections=activeSubjects().map(subjectProjection);
   const eyeComposition=previewEyeComposition(frameRect,stageRect,projections);
   const scales=[];
+  const heightDelta=cameraHeightVisualDelta();
 
   // Position the visible 1/3 guide against the ACTUAL blue cinema frame.
   const eyeGuide=$('#previewEyeGuide');
@@ -1131,6 +1140,14 @@ function updatePreview(){
     el.style.top=top+'px';
     el.style.width=Math.max(8,wPx)+'px';
     el.style.height=Math.max(30,mannequinHeightPx)+'px';
+
+    const img=el.querySelector('.preview-person');
+    if(img){
+      const tiltDeg=Math.max(-11,Math.min(11,-heightDelta*16));
+      const translateY=Math.max(-18,Math.min(18,-heightDelta*26));
+      const scaleY=1 + Math.max(-0.05,Math.min(0.05,heightDelta*0.04));
+      img.style.transform=`translateY(${translateY.toFixed(1)}px) perspective(340px) rotateX(${tiltDeg.toFixed(2)}deg) scaleY(${scaleY.toFixed(3)})`;
+    }
 
     scales.push(bodyPx/frameRect.height);
   });

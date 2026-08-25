@@ -1,17 +1,19 @@
-# BOS FRAME V3.28 — CAMERA SUMMARY / CLEAN PREVIEW
+# BOS FRAME V3.29 — LIGHT HEADER + CAMERA HEIGHT FIX
 
 Modifications :
 
-1. Preview
-- suppression de la bulle d'information en bas à gauche
-  (plan / caméra / focale / distance)
+1. Entête
+- l'entête reprend la référence BOS_LIGHT_V0_50
+- même logo
+- même typo
+- même placement
+- même écriture
+- seul changement : LIGHT devient FRAME
 
-2. Bulle 01 RÉGLAGES CAMÉRA
-- le résumé affiche maintenant :
-  - Focale
-  - Recul
-  - Hauteur caméra
-  - Ratio
-- affichage sur 2 lignes pour plus de clarté
+2. Preview
+- correction du comportement "Hauteur caméra"
+- le réglage agit maintenant visiblement sur le mannequin en preview
+  avec une variation visuelle de point de vue (plus haut / plus bas)
 
-Aucune autre logique de cadrage n'est modifiée.
+3. Assets
+- ajout du logo header BOS issu de la référence LIGHT

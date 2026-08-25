@@ -12,24 +12,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3.28" />
+  <link rel="stylesheet" href="styles.css?v=3.29" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
-  <main class="app shell" id="app">
-    <header class="top">
-      <div class="top-inner">
-        <div>
-          <div class="eyebrow-row">
-            <a class="eyebrow eyebrow-link" href="https://www.brunoguillard.com/" target="_blank" rel="noopener noreferrer">
-              <span class="eyebrow-mark"></span>
-              <span class="eyebrow-brand">BRUNO ONSET</span>
-              <span class="eyebrow-tool">/ FRAME</span>
-            </a>
+  <main class="app shell app-shell" id="app">
+    <header class="topbar cardlike">
+      <div class="top-inner bos-top-inner">
+        <div class="top-title bos-top-title">
+          <div class="bos-brand-lockup" aria-label="Bruno OnSet">
+            <img class="bos-header-logo" src="assets/logo-bos-header.jpg" alt="Logo Bruno OnSet">
+            <div class="bos-brand-text">
+              <span class="bos-header-name">Bruno OnSet<span class="bos-header-app">- FRAME</span></span>
+              <span class="bos-header-tagline">Avec vous, sur chaque tournage.</span>
+            </div>
           </div>
-          <h1>Director's Viewfinder</h1>
         </div>
-        <button class="theme-toggle" id="themeBtn" type="button">DARK</button>
+        <div class="top-actions bos-top-actions">
+          <button class="mode-btn" id="themeBtn" type="button" aria-label="Changer de thème">DARK</button>
+        </div>
       </div>
     </header>
 
@@ -273,7 +274,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.28</span>
+        <span class="app-version">v3.29</span>
       </div>
     </footer>
   </main>
@@ -513,6 +514,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.28"></script>
+  <script src="app.js?v=3.29"></script>
 </body>
 </html>
