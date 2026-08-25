@@ -18,3 +18,8 @@ Preview
 
 V3.33
 - couleurs du fond et des bulles réalignées exactement sur la référence BOS_BRUNO_ONSET_V58 (light/dark).
+
+
+V3.34
+- hauteur caméra nettoyée : suppression de toute déformation artificielle du mannequin en preview.
+- la hauteur caméra agit désormais uniquement via la projection/cadrage, pour un rendu plus propre et plus précis.

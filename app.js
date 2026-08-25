@@ -1091,7 +1091,6 @@ function updatePreview(){
   const projections=activeSubjects().map(subjectProjection);
   const eyeComposition=previewEyeComposition(frameRect,stageRect,projections);
   const scales=[];
-  const heightDelta=cameraHeightVisualDelta();
 
   // Position the visible 1/3 guide against the ACTUAL blue cinema frame.
   const eyeGuide=$('#previewEyeGuide');
@@ -1143,10 +1142,11 @@ function updatePreview(){
 
     const img=el.querySelector('.preview-person');
     if(img){
-      const tiltDeg=Math.max(-11,Math.min(11,-heightDelta*16));
-      const translateY=Math.max(-18,Math.min(18,-heightDelta*26));
-      const scaleY=1 + Math.max(-0.05,Math.min(0.05,heightDelta*0.04));
-      img.style.transform=`translateY(${translateY.toFixed(1)}px) perspective(340px) rotateX(${tiltDeg.toFixed(2)}deg) scaleY(${scaleY.toFixed(3)})`;
+      // Camera height must stay optically clean and precise.
+      // The visual effect is already handled by the true projection
+      // (camera Z position + composition offset). We do NOT add any
+      // extra perspective skew / scale deformation on the mannequin.
+      img.style.transform='none';
     }
 
     scales.push(bodyPx/frameRect.height);
