@@ -1,4 +1,4 @@
-const CACHE='frame-bos-v3-23-onset-v58-layout';
+const CACHE='frame-bos-v3-24-onset-v58-da-fix';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','./logo-bruno-guillard.png'];
 
 self.addEventListener('install',e=>{

@@ -3267,3 +3267,131 @@ input[type="range"],
 :root[data-theme="dark"] .project-secondary-link:focus-visible{
   color:#7FA7B0;
 }
+
+
+/* ============================================================
+   BOS FRAME V3.24 — reprise fidèle de la DA ONSET V58
+   ============================================================ */
+
+/* largeur / centrage général comme V58 */
+body{
+  min-height:100vh !important;
+  overflow-y:auto !important;
+}
+html,body,#app{
+  overflow-x:hidden !important;
+}
+.app{
+  width:min(760px,100%) !important;
+  max-width:none !important;
+  min-height:100vh;
+  margin:0 auto !important;
+  padding:14px 12px calc(32px + env(safe-area-inset-bottom)) !important;
+  overflow:visible !important;
+}
+
+/* structure des modules comme dans V58 */
+.frame-modules{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:10px !important;
+  margin-top:10px !important;
+}
+
+/* bulles */
+#frameCameraSettingsPanel,
+#frameViewCard{
+  background:var(--panel) !important;
+  border:1px solid var(--line) !important;
+  border-radius:var(--radius) !important;
+  overflow:hidden !important;
+  box-shadow:var(--shadow) !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+
+/* en-têtes de bulles = exact esprit V58 */
+.module-head,
+#frameCameraSettingsPanel .collapse-toggle,
+#frameViewCard .bos-module-head{
+  width:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  padding:14px 15px !important;
+  border:0 !important;
+  background:transparent !important;
+  cursor:pointer;
+  margin:0 !important;
+}
+.module-title{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  text-align:left !important;
+}
+.module-dot{
+  width:8px !important;
+  height:8px !important;
+  border-radius:50% !important;
+  background:var(--accent) !important;
+  flex:0 0 auto !important;
+}
+.module-title strong{
+  display:block !important;
+  font-size:15px !important;
+  font-weight:700 !important;
+  color:var(--text) !important;
+  letter-spacing:0 !important;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
+}
+.module-title small{
+  display:block !important;
+  color:var(--muted) !important;
+  font-size:10px !important;
+  margin-top:2px !important;
+  font-weight:400 !important;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
+}
+.chev{
+  color:var(--muted) !important;
+  font-size:17px !important;
+  transition:.18s transform !important;
+}
+#frameCameraSettingsPanel:not(.collapsed) .chev{
+  transform:rotate(180deg);
+}
+
+/* corps des bulles */
+#frameCameraSettingsPanel .method-content,
+.frame-controls-inline{
+  border-top:1px solid var(--line) !important;
+  padding:14px !important;
+  margin:0 !important;
+}
+
+/* stage centré visuellement dans la bulle */
+#frameViewCard .camera-stage{
+  width:calc(100% - 28px) !important;
+  margin:0 14px !important;
+}
+
+/* resserrer les marges hautes pour rester centré comme V58 */
+.top{margin:0 0 12px !important;}
+.mode-switch{margin:0 0 10px !important;}
+.utility-row{margin:-2px 0 8px !important;padding:0 2px !important;}
+
+/* footer plus proche de V58 */
+.footer{
+  text-align:center !important;
+  color:var(--muted) !important;
+  font-size:10px !important;
+  padding:20px 0 4px !important;
+}
+
+@media(max-width:520px){
+  .app{
+    padding-left:9px !important;
+    padding-right:9px !important;
+  }
+}
