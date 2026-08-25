@@ -4234,3 +4234,93 @@ body.dark .bos-header-app{color:#17191C !important;}
 .preview-targets{
   display:none !important;
 }
+
+
+/* ============================================================
+   BOS FRAME V3.33 — exact colors aligned to BOS_BRUNO_ONSET_V58
+   background + bubbles only
+   ============================================================ */
+:root,
+body:not(.dark),
+html[data-theme="light"],
+body[data-theme="light"]{
+  --bg:#f3f5f7 !important;
+  --panel:#ffffff !important;
+  --panel2:#f7f8fa !important;
+  --text:#101216 !important;
+  --muted:#6d7480 !important;
+  --line:#e1e5ea !important;
+  --blue:#2f78ff !important;
+  --blue-soft:#eaf2ff !important;
+  --shadow:0 8px 30px rgba(20,30,45,.07) !important;
+  --radius:20px !important;
+  --input:#f4f6f8 !important;
+  --danger:#d84b4b !important;
+  --accent:#2f78ff !important;
+  --accent-soft:#eaf2ff !important;
+  --card-border:#e1e5ea !important;
+  --field-bg:#f4f6f8 !important;
+  --header-bg:#ffffff !important;
+  --header-border:#e1e5ea !important;
+}
+:root[data-theme="dark"],
+html[data-theme="dark"],
+body.dark,
+body[data-theme="dark"]{
+  --bg:#090b0f !important;
+  --panel:#12151a !important;
+  --panel2:#171b21 !important;
+  --text:#f6f7f9 !important;
+  --muted:#959ca8 !important;
+  --line:#282e37 !important;
+  --blue:#5b97ff !important;
+  --blue-soft:#172641 !important;
+  --shadow:none !important;
+  --radius:20px !important;
+  --input:#1a1f26 !important;
+  --danger:#ff6a6a !important;
+  --accent:#5b97ff !important;
+  --accent-soft:#172641 !important;
+  --card-border:#282e37 !important;
+  --field-bg:#1a1f26 !important;
+  --header-bg:#12151a !important;
+  --header-border:#282e37 !important;
+}
+html,body,#app,.app,.shell{
+  background:var(--bg) !important;
+  color:var(--text) !important;
+}
+/* exact bubble / card colors from reference */
+.cardlike,
+.module,
+.panel,
+.context,
+.project-contact,
+#frameCameraSettingsPanel,
+#frameViewCard,
+#app > .topbar.cardlike{
+  background:var(--panel) !important;
+  border:1px solid var(--line) !important;
+  box-shadow:var(--shadow) !important;
+}
+/* small internal surfaces */
+.resultbox,
+.control-button,
+.iconbtn,
+.icon-btn,
+.select-inline,
+.frame-camera-ratio-control .control-button,
+input,select,button.secondary,.secondary{
+  background:var(--panel2) !important;
+  border-color:var(--line) !important;
+}
+input,select{
+  background:var(--input) !important;
+  color:var(--text) !important;
+}
+.module-body,
+#frameCameraSettingsPanel .method-content,
+#frameViewCard .preview-primary-controls,
+.frame-controls-inline{
+  border-top:1px solid var(--line) !important;
+}
