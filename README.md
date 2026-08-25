@@ -19,3 +19,8 @@ Hauteur caméra :
 - la taille du sujet dépend seulement de la focale et du recul
 - le réglage Hauteur caméra ne modifie que la hauteur Z / angle de caméra
 - la ligne de sol/horizon reflète ce changement de hauteur
+
+
+V3.36
+- alignement strict des couleurs V58 : fond, bulles, lignes, bordures, couleurs de surfaces et états light/dark.
+- alignement strict des formes de bulles et couleurs des titres / sous-titres.

@@ -4703,3 +4703,144 @@ body.dark .subject-count-switch button.active{
   .extra-subject-slider>span{font-size:9px !important;letter-spacing:.08em !important}
   .free-value-readout{min-width:58px !important;padding-left:3px !important;padding-right:3px !important}
 }
+
+
+/* ============================================================
+   BOS FRAME V3.36 — EXACT V58 COLORS / LINES / BUBBLES
+   Final override copied from BOS_BRUNO_ONSET_V58 reference.
+   No interpretation. Only adapted selectors for FRAME.
+   ============================================================ */
+:root{
+  --bg:#f3f5f7 !important;
+  --panel:#fff !important;
+  --panel2:#f7f8fa !important;
+  --text:#101216 !important;
+  --muted:#6d7480 !important;
+  --line:#e1e5ea !important;
+  --blue:#2f78ff !important;
+  --blue-soft:#eaf2ff !important;
+  --shadow:0 8px 30px rgba(20,30,45,.07) !important;
+  --radius:20px !important;
+  --input:#f4f6f8 !important;
+  --danger:#d84b4b !important;
+  --accent:var(--blue) !important;
+  --accent-soft:var(--blue-soft) !important;
+  --header-bg:var(--panel) !important;
+  --header-border:var(--line) !important;
+  --card-border:var(--line) !important;
+  --field-bg:var(--input) !important;
+  --chip-bg:var(--panel2) !important;
+  --chip-text:var(--text) !important;
+  --chip-active-bg:rgba(47,120,255,.25) !important;
+  --chip-active-text:var(--text) !important;
+}
+:root[data-theme="dark"], html[data-theme="dark"], body.dark{
+  --bg:#090b0f !important;
+  --panel:#12151a !important;
+  --panel2:#171b21 !important;
+  --text:#f6f7f9 !important;
+  --muted:#959ca8 !important;
+  --line:#282e37 !important;
+  --blue:#5b97ff !important;
+  --blue-soft:#172641 !important;
+  --shadow:none !important;
+  --input:#1a1f26 !important;
+  --danger:#ff6a6a !important;
+  --accent:var(--blue) !important;
+  --accent-soft:var(--blue-soft) !important;
+  --header-bg:var(--panel) !important;
+  --header-border:var(--line) !important;
+  --card-border:var(--line) !important;
+  --field-bg:var(--input) !important;
+  --chip-bg:var(--panel2) !important;
+  --chip-text:var(--text) !important;
+  --chip-active-bg:rgba(91,151,255,.25) !important;
+  --chip-active-text:var(--text) !important;
+}
+*{box-sizing:border-box !important}
+html{background:var(--bg) !important}
+body{margin:0 !important;background:var(--bg) !important;color:var(--text) !important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;min-height:100vh !important}
+button,input,select{font:inherit !important;color:inherit !important}
+#app.app,#app.shell,#app.app-shell,.shell{width:min(760px,100%) !important;max-width:none !important;margin:0 auto !important;padding:14px 12px calc(32px + env(safe-area-inset-bottom)) !important;background:transparent !important}
+.cardlike{background:var(--panel) !important;border:1px solid var(--line) !important;box-shadow:var(--shadow) !important}
+/* Header surfaces aligned to V58 colors */
+#app > .topbar.cardlike{background:var(--panel) !important;border:1px solid var(--line) !important;box-shadow:var(--shadow) !important;border-radius:24px !important}
+.mode-btn,.utility-link,.iconbtn{border:1px solid var(--line) !important;background:var(--panel2) !important;color:var(--text) !important;box-shadow:none !important}
+/* Bubbles exact palette/shape */
+#frameCameraSettingsPanel,#frameViewCard,.module,.context,.project-contact{
+  background:var(--panel) !important;
+  border:1px solid var(--line) !important;
+  border-radius:var(--radius) !important;
+  overflow:hidden !important;
+  box-shadow:var(--shadow) !important;
+}
+.frame-modules,.modules{display:flex !important;flex-direction:column !important;gap:10px !important;margin-top:10px !important}
+/* exact internal dividing lines */
+#frameCameraSettingsPanel .method-content,
+#frameViewCard > .preview-primary-controls,
+#frameViewCard .frame-controls-inline,
+.module-body{
+  border-top:1px solid var(--line) !important;
+}
+/* Titles / bubble headers aligned to reference */
+.bos-card-heading,
+#frameCameraSettingsPanel .collapse-toggle,
+#frameViewCard .frame-static-heading{
+  width:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  padding:14px 15px !important;
+  border:0 !important;
+  background:transparent !important;
+  cursor:pointer !important;
+}
+#frameViewCard .frame-static-heading{cursor:default !important}
+.bos-card-heading .heading-copy{display:flex !important;align-items:center !important;gap:10px !important;text-align:left !important;min-width:0 !important;flex:1 !important}
+.bos-card-heading .step{
+  display:grid !important;
+  place-items:center !important;
+  width:32px !important;height:32px !important;min-width:32px !important;
+  border:1px solid var(--line) !important;
+  border-radius:10px !important;
+  background:var(--panel2) !important;
+  color:var(--blue) !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+}
+.bos-card-heading .bos-heading-title{
+  display:block !important;
+  margin:0 !important;
+  font-family:"Montserrat",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;
+  font-size:15px !important;
+  font-weight:700 !important;
+  line-height:1.1 !important;
+  letter-spacing:0 !important;
+  color:var(--text) !important;
+}
+.bos-card-heading .bos-heading-subtitle{
+  display:block !important;
+  color:var(--muted) !important;
+  font-size:10px !important;
+  margin-top:2px !important;
+  line-height:1.2 !important;
+  font-weight:400 !important;
+}
+.bos-card-heading .chevron{color:var(--muted) !important;font-size:17px !important;transition:.18s transform !important}
+#frameCameraSettingsPanel:not(.collapsed) .bos-card-heading .chevron{transform:translateY(-50%) rotate(180deg) !important;color:var(--muted) !important}
+/* line colors / small surfaces */
+input:not([type="range"]),select{width:100% !important;border:1px solid var(--line) !important;background:var(--input) !important;border-radius:13px !important;outline:none !important}
+input:not([type="range"]):focus,select:focus{border-color:var(--blue) !important;box-shadow:0 0 0 3px var(--blue-soft) !important}
+.resultbox,.control-button,.secondary,.role-pill,.preset-btn,.chips button,.subject-count-switch button,.camera-brand-chips button,.brand-chips button{border:1px solid var(--line) !important;background:var(--panel2) !important;color:var(--text) !important}
+.preset-btn.active,.chips button.active,.subject-count-switch button.active,.camera-brand-chips button.active,.brand-chips button.active{background:rgba(47,120,255,.25) !important;border-color:transparent !important;color:var(--text) !important}
+html[data-theme="dark"] .preset-btn.active, html[data-theme="dark"] .chips button.active, html[data-theme="dark"] .subject-count-switch button.active, html[data-theme="dark"] .camera-brand-chips button.active, html[data-theme="dark"] .brand-chips button.active, body.dark .preset-btn.active, body.dark .chips button.active, body.dark .subject-count-switch button.active, body.dark .camera-brand-chips button.active, body.dark .brand-chips button.active{background:rgba(91,151,255,.25) !important;border-color:transparent !important;color:var(--text) !important}
+.free-value-readout{color:var(--text) !important}
+label>span,.field-label,.bos-linked-slider>span,.bos-frame-distance-slider>span,.preview-setting-row>span,.extra-subject-slider>span{color:var(--muted) !important}
+.preview-target.active,.ratio-choice.active,.guide-chip.active,.pro-lens.active,.lens-pill.active{background:rgba(47,120,255,.25) !important;border-color:transparent !important;color:var(--text) !important}
+html[data-theme="dark"] .preview-target.active, html[data-theme="dark"] .ratio-choice.active, html[data-theme="dark"] .guide-chip.active, html[data-theme="dark"] .pro-lens.active, html[data-theme="dark"] .lens-pill.active, body.dark .preview-target.active, body.dark .ratio-choice.active, body.dark .guide-chip.active, body.dark .pro-lens.active, body.dark .lens-pill.active{background:rgba(91,151,255,.25) !important;border-color:transparent !important;color:var(--text) !important}
+/* exact preview frame neutral surfaces remain unchanged except line */
+#frameViewCard .camera-stage,.frame-preview{border-color:var(--line) !important}
+@media(max-width:520px){
+  #app.app,#app.shell,#app.app-shell,.shell{padding-left:9px !important;padding-right:9px !important}
+  .bos-card-heading,#frameCameraSettingsPanel .collapse-toggle,#frameViewCard .frame-static-heading{padding:14px 15px !important}
+}
