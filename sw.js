@@ -1,4 +1,4 @@
-const CACHE='bos-frame-v3-37-light-v0-50-da';
+const CACHE='bos-frame-v3-38-light-v0-50-clean-da';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','./logo-bruno-guillard.png'];
 
 self.addEventListener('install',e=>{

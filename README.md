@@ -1,20 +1,17 @@
-# BOS_FRAME_V3_37_LIGHT_V0_50_DA
+# BOS_FRAME_V3_38_LIGHT_V0_50_CLEAN_DA
 
-Référence DA validée : BOS_LIGHT_V0_50
+Reconstruction propre de la couche visuelle de FRAME.
 
-Objectif : conserver toutes les fonctionnalités actuelles de FRAME et harmoniser uniquement l’apparence.
+Référence DA unique : BOS_LIGHT_V0_50.
 
-Alignements réalisés :
-- header
-- typographies
-- couleurs
-- fonds
-- bulles / cartes
-- bordures
-- boutons
-- sélecteurs
-- mode clair / sombre
-- espacements et hiérarchie générale
-- choix de focale / distance / hauteur caméra en style référence (barre horizontale + valeur libre cliquable à droite)
+Ce qui a été fait :
+- ancienne feuille CSS historique remplacée (pas de nouvelle couche ajoutée)
+- une seule palette light/dark
+- un seul système header/cartes/boutons/chips/champs
+- composants numériques repris sur LIGHT V0_50 : barre horizontale + valeur libre cliquable à droite
+- fonctionnalités FRAME, projection, mannequins, calibration et logique JS conservées
 
-Convention BOS respectée : ZIP et dossier racine en BOS_FRAME_...
+Contrôle structurel :
+- 1 seul :root principal
+- 1 seul bloc body.dark
+- aucune ancienne section DA V58 / DOF / EXPO / MEDIA dans styles.css
