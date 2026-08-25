@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&amp;display=swap" rel="stylesheet"/>
-<link href="styles.css?v=3.31" rel="stylesheet"/>
+<link href="styles.css?v=3.37" rel="stylesheet"/>
 <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -44,9 +44,9 @@
 <button class="utility-link" id="settingsBtn" type="button">RÉGLAGES</button>
 </div>
 <section class="modules frame-modules">
-<section class="panel method-panel collapsed" id="frameCameraSettingsPanel">
+<section class="panel method-panel collapsed controls-card camera-card first-card collapsible-card" id="frameCameraSettingsPanel">
 <div class="panel-head compact-head bos-card-head">
-<button aria-controls="frameCameraSettingsContent" aria-expanded="false" class="collapse-toggle card-heading collapsible-heading bos-card-heading" id="frameCameraSettingsToggle" type="button"><span class="step">01</span><span class="heading-copy"><span class="bos-heading-title">Réglages Caméra</span><small class="bos-heading-subtitle camera-heading-subtitle" id="frameCameraSettingsSummary">FX6</small></span><span aria-hidden="true" class="chevron collapse-chevron">⌄</span></button>
+<button aria-controls="frameCameraSettingsContent" aria-expanded="false" class="collapse-toggle card-heading collapsible-heading bos-card-heading" id="frameCameraSettingsToggle" type="button"><span class="step">01</span><span class="heading-copy"><span class="bos-heading-title">RÉGLAGES CAMÉRA</span><small class="bos-heading-subtitle camera-heading-subtitle" id="frameCameraSettingsSummary">FX6</small></span><span aria-hidden="true" class="chevron collapse-chevron">⌄</span></button>
 </div>
 <div class="method-content" hidden="" id="frameCameraSettingsContent">
 <div class="camera-row">
@@ -68,7 +68,7 @@
 </button>
 </div></div>
 </section>
-<section class="panel camera-panel bos-module-card" id="frameViewCard">
+<section class="panel camera-panel bos-module-card controls-card collapsible-card" id="frameViewCard">
 <div class="panel-head compact-head bos-card-head"><div class="card-heading bos-card-heading frame-static-heading"><span class="step">02</span><span class="heading-copy"><span class="bos-heading-title" id="viewPanelKicker">PREVIEW</span><small class="bos-heading-subtitle">Cadrage</small></span><span aria-hidden="true" class="chevron frame-heading-spacer">⌄</span></div></div><div class="bos-linked-controls preview-primary-controls"><div class="bos-linked-slider bos-frame-distance-slider">
 <span>FOCALE</span>
 <input id="frameFocalSlider" max="200" min="9" step="1" type="range" value="35"/>
@@ -209,7 +209,7 @@
 <img alt="" class="footer-logo" src="logo-bruno-guillard.png"/>
 <span>BOS · Bruno OnSet · Bruno Guillard</span>
 </a>
-<span class="app-version">v3.36</span>
+<span class="app-version">v3.37</span>
 </div>
 </footer>
 </main>
@@ -423,6 +423,6 @@
 <button class="danger full" id="resetCalBtn" type="button">RESET CALIBRATION · ORIENTATION ACTUELLE</button>
 </form>
 </dialog>
-<script src="app.js?v=3.36"></script>
+<script src="app.js?v=3.37"></script>
 </body>
 </html>

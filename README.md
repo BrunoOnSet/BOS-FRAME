@@ -1,26 +1,20 @@
-# BOS FRAME V3.35 — DOF REF EXACT DA + CAMERA HEIGHT FIX
+# BOS_FRAME_V3_37_LIGHT_V0_50_DA
 
-Référence visuelle utilisée :
-BOS_DOF_V5_41_ONSET_V58_PROJECT_CTA
+Référence DA validée : BOS_LIGHT_V0_50
 
-DA :
-- couleurs light/dark copiées exactement
-- fond copié exactement
-- couleurs des bulles copiées exactement
-- rayon des bulles 22 px
-- bordures exactes
-- titres de bulles reconstruits avec la même structure :
-  carré 01 / 02, Montserrat, taille, graisse, couleur, sous-titre
-- header conservé selon la même DA de référence
+Objectif : conserver toutes les fonctionnalités actuelles de FRAME et harmoniser uniquement l’apparence.
 
-Hauteur caméra :
-- aucune déformation du mannequin
-- aucune simulation de recul
-- la taille du sujet dépend seulement de la focale et du recul
-- le réglage Hauteur caméra ne modifie que la hauteur Z / angle de caméra
-- la ligne de sol/horizon reflète ce changement de hauteur
+Alignements réalisés :
+- header
+- typographies
+- couleurs
+- fonds
+- bulles / cartes
+- bordures
+- boutons
+- sélecteurs
+- mode clair / sombre
+- espacements et hiérarchie générale
+- choix de focale / distance / hauteur caméra en style référence (barre horizontale + valeur libre cliquable à droite)
 
-
-V3.36
-- alignement strict des couleurs V58 : fond, bulles, lignes, bordures, couleurs de surfaces et états light/dark.
-- alignement strict des formes de bulles et couleurs des titres / sous-titres.
+Convention BOS respectée : ZIP et dossier racine en BOS_FRAME_...
