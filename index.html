@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3.24" />
+  <link rel="stylesheet" href="styles.css?v=3.25" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -167,12 +167,28 @@
       </div>
 
       <div class="frame-controls-inline">
-      <div class="bos-frame-distance-slider bos-frame-focal-slider">
-        <span>FOCALE</span>
-        <input id="frameFocalSlider" type="range" min="9" max="200" step="1" value="35">
-        <strong id="frameFocalReadout" class="free-value-readout"
-                data-free-control="focal" role="button" tabindex="0"
-                title="Cliquer pour saisir une valeur libre">35 mm</strong>
+      <div class="bos-linked-controls frame-primary-linked-controls">
+        <div class="bos-linked-slider bos-frame-distance-slider">
+          <span>FOCALE</span>
+          <input id="frameFocalSlider" type="range" min="9" max="200" step="1" value="35">
+          <strong id="frameFocalReadout" class="free-value-readout"
+                  data-free-control="focal" role="button" tabindex="0"
+                  title="Cliquer pour saisir une valeur libre">35 mm</strong>
+        </div>
+
+        <div id="framePreviewDistanceRow" class="bos-linked-slider bos-frame-distance-slider preview-only-control hidden">
+          <span>RECUL</span>
+          <input id="subjectDistanceSlider" type="range" min="0.40" max="15" step="0.05" value="3.00">
+          <strong id="subjectDistanceReadout" class="free-value-readout" role="button" tabindex="0"
+                  title="Cliquer pour saisir une valeur libre">3,00 m</strong>
+        </div>
+
+        <div id="framePreviewCameraHeightRow" class="bos-linked-slider bos-frame-distance-slider preview-only-control hidden">
+          <span>HAUTEUR CAMÉRA</span>
+          <input id="cameraHeightSlider" type="range" min="0.20" max="2.50" step="0.01" value="1.55">
+          <strong id="cameraHeightReadout" class="free-value-readout" role="button" tabindex="0"
+                  title="Cliquer pour saisir une valeur libre">1,55 m</strong>
+        </div>
       </div>
 
       <div class="main-controls ratio-only-controls bos-inline-ratio">
@@ -196,36 +212,23 @@
           </div>
         </div>
 
-        <div class="preview-fields">
-          <label class="preview-field">
+        <div class="bos-linked-controls preview-linked-controls">
+          <div class="bos-linked-slider preview-setting-row">
             <span>TAILLE PERSONNE 1</span>
-            <div>
-              <input id="subjectHeightInput" type="number" min="1.20" max="2.20" step="0.01" value="1.75">
-              <em>m</em>
-            </div>
-          </label>
-          <label class="preview-field">
-            <span>DISTANCE CAMÉRA / GROUPE</span>
-            <div>
-              <input id="subjectDistanceInput" type="number" min="0.40" max="30" step="0.05" value="3.00">
-              <em>m</em>
-            </div>
-          </label>
-        </div>
+            <input id="subjectHeightSlider" type="range" min="1.20" max="2.20" step="0.01" value="1.75">
+            <strong id="subjectHeightReadout" class="free-value-readout" role="button" tabindex="0"
+                    title="Cliquer pour saisir une valeur libre">1,75 m</strong>
+          </div>
 
-        <div class="preview-distance-slider">
-          <span>RECUL</span>
-          <input id="subjectDistanceSlider" type="range" min="0.40" max="15" step="0.05" value="3.00">
-          <strong id="subjectDistanceReadout">3,00 m</strong>
-        </div>
+          <div id="extraSubjectControls" class="extra-subject-controls"></div>
 
-        <div class="preview-distance-slider group-spacing-row">
-          <span>ÉCARTEMENT DU GROUPE</span>
-          <input id="groupSpreadSlider" type="range" min="0.20" max="2.50" step="0.05" value="0.80">
-          <strong id="groupSpreadReadout">0,80 m</strong>
+          <div class="bos-linked-slider preview-setting-row group-spacing-row">
+            <span>ÉCARTEMENT DU GROUPE</span>
+            <input id="groupSpreadSlider" type="range" min="0.20" max="2.50" step="0.05" value="0.80">
+            <strong id="groupSpreadReadout" class="free-value-readout" role="button" tabindex="0"
+                    title="Cliquer pour saisir une valeur libre">0,80 m</strong>
+          </div>
         </div>
-
-        <div id="extraSubjectControls" class="extra-subject-controls"></div>
 
         <div class="preview-target-head">
           <span>CADRE VISÉ</span>
@@ -244,14 +247,15 @@
           </div>
         </div>
 
-        <!-- hidden legacy placeholders so the old code does not break if called -->
-        <input id="focusDistanceInput" type="hidden" value="3.00">
+        <input id="subjectHeightInput" type="hidden" value="1.75">
+        <input id="subjectDistanceInput" type="hidden" value="3.00">
+        <input id="cameraHeightInput" type="hidden" value="1.55">
         <div id="apertureChips" class="hidden"></div>
         <div id="focusQuickButtons" class="hidden"></div>
         <div id="dofRecommendation" class="hidden"></div>
         <button type="button" id="applyDofRecommendationBtn" class="hidden">APPLIQUER</button>
       </div>
-      </div>
+    </div>      </div>
     </section>
 
     </section>
@@ -269,7 +273,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.24</span>
+        <span class="app-version">v3.25</span>
       </div>
     </footer>
   </main>
@@ -509,6 +513,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.24"></script>
+  <script src="app.js?v=3.25"></script>
 </body>
 </html>

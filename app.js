@@ -222,6 +222,7 @@ function loadPreviewSettings(){
     if(Number.isFinite(saved.subjectCount)) state.subjectCount=Math.max(1,Math.min(4,Math.round(saved.subjectCount)));
     if(Number.isFinite(saved.groupDistance)) state.groupDistance=Math.max(.4,Math.min(30,saved.groupDistance));
     if(Number.isFinite(saved.groupSpread)) state.groupSpread=Math.max(.2,Math.min(2.5,saved.groupSpread));
+    if(Number.isFinite(saved.cameraHeight)) state.cameraHeight=Math.max(.2,Math.min(2.5,saved.cameraHeight));
     if(Array.isArray(saved.subjects)){
       saved.subjects.slice(0,4).forEach((s,i)=>{
         if(!state.subjects[i]) return;
@@ -243,6 +244,7 @@ function savePreviewSettings(){
       subjectCount:state.subjectCount,
       groupDistance:state.groupDistance,
       groupSpread:state.groupSpread,
+      cameraHeight:state.cameraHeight,
       subjects:state.subjects.map(s=>({height:s.height}))
     }));
   }catch{}
@@ -623,19 +625,29 @@ function syncPreviewInputs(){
   state.subjectDistance=state.groupDistance;
   const h=$('#subjectHeightInput');
   const d=$('#subjectDistanceInput');
+  const ch=$('#cameraHeightInput');
+  const subjectHeightSlider=$('#subjectHeightSlider');
+  const subjectHeightReadout=$('#subjectHeightReadout');
   const slider=$('#subjectDistanceSlider');
   const readout=$('#subjectDistanceReadout');
+  const cameraHeightSlider=$('#cameraHeightSlider');
+  const cameraHeightReadout=$('#cameraHeightReadout');
   const spread=$('#groupSpreadSlider');
   const spreadReadout=$('#groupSpreadReadout');
   if(h) h.value=s1.height.toFixed(2);
   if(d) d.value=state.groupDistance.toFixed(2);
+  if(ch) ch.value=state.cameraHeight.toFixed(2);
+  if(subjectHeightSlider) subjectHeightSlider.value=s1.height;
+  if(subjectHeightReadout && !subjectHeightReadout.querySelector('input')) subjectHeightReadout.textContent=s1.height.toFixed(2).replace('.',',')+' m';
   if(slider){
     slider.max=Math.max(15,Math.ceil(state.groupDistance+1));
     slider.value=state.groupDistance;
   }
-  if(readout) readout.textContent=state.groupDistance.toFixed(2).replace('.',',')+' m';
+  if(readout && !readout.querySelector('input')) readout.textContent=state.groupDistance.toFixed(2).replace('.',',')+' m';
+  if(cameraHeightSlider) cameraHeightSlider.value=state.cameraHeight;
+  if(cameraHeightReadout && !cameraHeightReadout.querySelector('input')) cameraHeightReadout.textContent=state.cameraHeight.toFixed(2).replace('.',',')+' m';
   if(spread) spread.value=state.groupSpread;
-  if(spreadReadout) spreadReadout.textContent=state.groupSpread.toFixed(2).replace('.',',')+' m';
+  if(spreadReadout && !spreadReadout.querySelector('input')) spreadReadout.textContent=state.groupSpread.toFixed(2).replace('.',',')+' m';
 }
 
 function preparePreviewSubjectClones(){
@@ -722,30 +734,44 @@ function renderExtraSubjectControls(){
   if(!el) return;
   el.innerHTML='';
   activeSubjects().slice(1).forEach((s,index)=>{
+    const subjectIndex=index+1;
     const row=document.createElement('div');
-    row.className='extra-subject-row';
+    row.className='bos-linked-slider extra-subject-slider';
     row.innerHTML=`
-      <div class="extra-subject-title">
-        <strong>PERSONNE ${index+2}</strong>
-        <span>Même plan de profondeur que le groupe</span>
-      </div>
-      <label>
-        <span>Taille</span>
-        <div><input type="number" min="1.20" max="2.20" step="0.01" value="${s.height.toFixed(2)}" data-subject-height="${index+1}"><em>m</em></div>
-      </label>
+      <span>TAILLE PERSONNE ${subjectIndex+1}</span>
+      <input type="range" min="1.20" max="2.20" step="0.01" value="${s.height.toFixed(2)}" data-subject-height-slider="${subjectIndex}">
+      <strong class="free-value-readout" data-subject-height-readout="${subjectIndex}" role="button" tabindex="0" title="Cliquer pour saisir une valeur libre">${s.height.toFixed(2).replace('.',',')} m</strong>
     `;
     el.appendChild(row);
   });
-  el.querySelectorAll('[data-subject-height]').forEach(input=>{
+  el.querySelectorAll('[data-subject-height-slider]').forEach(input=>{
     input.oninput=e=>{
-      const ix=Number(e.target.dataset.subjectHeight);
+      const ix=Number(e.target.dataset.subjectHeightSlider);
       const v=parseFloat(e.target.value);
       if(Number.isFinite(v)){
         state.subjects[ix].height=Math.max(1.2,Math.min(2.2,v));
         savePreviewSettings();
+        syncPreviewInputs();
         updatePreview();
       }
     };
+  });
+  el.querySelectorAll('[data-subject-height-readout]').forEach(readout=>{
+    attachReadoutEditor(readout,{
+      label:`Taille personne ${Number(readout.dataset.subjectHeightReadout)+1}`,
+      min:1.2,
+      max:2.2,
+      step:'0.01',
+      getValue:()=>state.subjects[Number(readout.dataset.subjectHeightReadout)].height,
+      render:v=>`${v.toFixed(2).replace('.',',')} m`,
+      commit:v=>{
+        const ix=Number(readout.dataset.subjectHeightReadout);
+        state.subjects[ix].height=Math.max(1.2,Math.min(2.2,v));
+        savePreviewSettings();
+        syncPreviewInputs();
+        updatePreview();
+      }
+    });
   });
 }
 
@@ -994,6 +1020,8 @@ function setFrameMode(mode,persist=true){
   $('#previewModeBtn')?.classList.toggle('active',preview);
   $('#previewScene')?.classList.toggle('hidden',!preview);
   $('#previewControls')?.classList.toggle('hidden',!preview);
+  $('#framePreviewDistanceRow')?.classList.toggle('hidden',!preview);
+  $('#framePreviewCameraHeightRow')?.classList.toggle('hidden',!preview);
   $('#video')?.classList.toggle('mode-hidden',preview);
   $('#cameraPlaceholder')?.classList.toggle('mode-hidden',preview);
   $('#cameraBtn')?.classList.toggle('hidden',preview);
@@ -1217,6 +1245,61 @@ function beginFrameFocalEdit(readout){
     }
   });
   input.addEventListener('blur',()=>finish(true),{once:true});
+}
+function beginInlineNumberEdit(readout,{label,min,max,step='any',getValue,render,commit}){
+  if(!readout || readout.querySelector('input')) return;
+  const previous=readout.textContent;
+  const input=document.createElement('input');
+  input.type='number';
+  input.inputMode='decimal';
+  input.step=String(step);
+  if(Number.isFinite(min)) input.min=String(min);
+  if(Number.isFinite(max)) input.max=String(max);
+  input.className='free-value-input';
+  input.value=String(getValue());
+  input.setAttribute('aria-label',label || 'Valeur libre');
+  readout.textContent='';
+  readout.appendChild(input);
+  input.focus();
+  input.select();
+
+  let done=false;
+  const finish=(shouldCommit)=>{
+    if(done) return;
+    done=true;
+    const raw=parseFloat(String(input.value).replace(',', '.'));
+    if(shouldCommit && Number.isFinite(raw)){
+      const minV=Number.isFinite(min)?min:raw;
+      const maxV=Number.isFinite(max)?max:raw;
+      const next=Math.max(minV, Math.min(maxV, raw));
+      commit(next);
+    }else{
+      readout.textContent=previous || render(getValue());
+    }
+  };
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      finish(true);
+      input.blur();
+    }else if(e.key==='Escape'){
+      e.preventDefault();
+      finish(false);
+      input.blur();
+    }
+  });
+  input.addEventListener('blur',()=>finish(true),{once:true});
+}
+function attachReadoutEditor(readout,opts){
+  if(!readout) return;
+  const open=()=>{ if(!readout.querySelector('input')) beginInlineNumberEdit(readout,opts); };
+  readout.addEventListener('click',open);
+  readout.addEventListener('keydown',e=>{
+    if((e.key==='Enter' || e.key===' ') && !readout.querySelector('input')){
+      e.preventDefault();
+      open();
+    }
+  });
 }
 
 const LAST_FRAME_CAMERA_BY_BRAND_KEY="bos-frame-last-camera-by-brand-v1";
@@ -1990,42 +2073,53 @@ function registerEvents(){
   $('#realModeBtn').onclick=()=>setFrameMode('real');
   $('#previewModeBtn').onclick=()=>setFrameMode('preview');
 
-  $('#subjectHeightInput').oninput=e=>{
-    const v=parseFloat(e.target.value);
-    if(Number.isFinite(v)){
-      state.subjects[0].height=Math.max(1.2,Math.min(2.2,v));
-      savePreviewSettings();
-      updatePreview();
-    }
+  const applyPreviewHeight=v=>{
+    if(!Number.isFinite(v)) return;
+    state.subjects[0].height=Math.max(1.2,Math.min(2.2,v));
+    savePreviewSettings();
+    syncPreviewInputs();
+    renderExtraSubjectControls();
+    updatePreview();
   };
-  $('#subjectDistanceInput').oninput=e=>{
-    const v=parseFloat(e.target.value);
-    if(Number.isFinite(v)){
-      state.groupDistance=Math.max(.4,Math.min(30,v));
-      rebuildGroupLayout();
-      savePreviewSettings();
-      updatePreview();
-    }
+  const applyPreviewDistance=v=>{
+    if(!Number.isFinite(v)) return;
+    state.groupDistance=Math.max(.4,Math.min(30,v));
+    rebuildGroupLayout();
+    savePreviewSettings();
+    syncPreviewInputs();
+    updatePreview();
   };
-  $('#subjectDistanceSlider').oninput=e=>{
-    const v=parseFloat(e.target.value);
-    if(Number.isFinite(v)){
-      state.groupDistance=Math.max(.4,Math.min(30,v));
-      rebuildGroupLayout();
-      savePreviewSettings();
-      updatePreview();
-    }
+  const applyGroupSpread=v=>{
+    if(!Number.isFinite(v)) return;
+    state.groupSpread=Math.max(.2,Math.min(2.5,v));
+    rebuildGroupLayout();
+    savePreviewSettings();
+    syncPreviewInputs();
+    updatePreview();
   };
+  const applyCameraHeight=v=>{
+    if(!Number.isFinite(v)) return;
+    state.cameraHeight=Math.max(.2,Math.min(2.5,v));
+    savePreviewSettings();
+    syncPreviewInputs();
+    updatePreview();
+  };
+
+  $('#subjectHeightInput').oninput=e=>applyPreviewHeight(parseFloat(e.target.value));
+  $('#subjectDistanceInput').oninput=e=>applyPreviewDistance(parseFloat(e.target.value));
+  $('#cameraHeightInput').oninput=e=>applyCameraHeight(parseFloat(e.target.value));
+  $('#subjectHeightSlider').oninput=e=>applyPreviewHeight(parseFloat(e.target.value));
+  $('#subjectDistanceSlider').oninput=e=>applyPreviewDistance(parseFloat(e.target.value));
+  $('#groupSpreadSlider').oninput=e=>applyGroupSpread(parseFloat(e.target.value));
+  $('#cameraHeightSlider').oninput=e=>applyCameraHeight(parseFloat(e.target.value));
+
   $$('#subjectCountSwitch button').forEach(b=>b.onclick=()=>setSubjectCount(Number(b.dataset.count)));
-  $('#groupSpreadSlider').oninput=e=>{
-    const v=parseFloat(e.target.value);
-    if(Number.isFinite(v)){
-      state.groupSpread=Math.max(.2,Math.min(2.5,v));
-      rebuildGroupLayout();
-      savePreviewSettings();
-      updatePreview();
-    }
-  };
+
+  attachReadoutEditor($('#subjectHeightReadout'),{ label:'Taille personne 1', min:1.2, max:2.2, step:'0.01', getValue:()=>state.subjects[0].height, render:v=>`${v.toFixed(2).replace('.',',')} m`, commit:applyPreviewHeight });
+  attachReadoutEditor($('#subjectDistanceReadout'),{ label:'Recul', min:.4, max:30, step:'0.05', getValue:()=>state.groupDistance, render:v=>`${v.toFixed(2).replace('.',',')} m`, commit:applyPreviewDistance });
+  attachReadoutEditor($('#groupSpreadReadout'),{ label:'Écartement du groupe', min:.2, max:2.5, step:'0.05', getValue:()=>state.groupSpread, render:v=>`${v.toFixed(2).replace('.',',')} m`, commit:applyGroupSpread });
+  attachReadoutEditor($('#cameraHeightReadout'),{ label:'Hauteur caméra', min:.2, max:2.5, step:'0.01', getValue:()=>state.cameraHeight, render:v=>`${v.toFixed(2).replace('.',',')} m`, commit:applyCameraHeight });
+
   $('#cameraBtn').onclick=()=>{$('#cameraDialog').showModal();updateCalibrationStatus()};
   $('#restartCameraBtn').onclick=()=>startCamera($('#deviceSelect').value);
 
@@ -2063,14 +2157,11 @@ function registerEvents(){
   $('#presetBrandMode').addEventListener('click',e=>{
     const btn=e.target.closest('button[data-brand]');
     if(!btn) return;
-
     const brand=btn.dataset.brand;
     cameraPickerBrand=brand;
-
     const remembered=getLastFrameCameraForBrand(brand);
     const first=camerasForBrand(brand)[0];
     const next=presets.find(p=>p.id===(remembered||first?.id));
-
     if(next) applyCinemaPreset(next);
     else renderPresets();
   });
@@ -2116,9 +2207,9 @@ function registerEvents(){
   $('#centerToggle').onchange=e=>$('#centerCross').classList.toggle('hidden',!e.target.checked);
   $('#resetCalBtn').onclick=()=>{
     const orientationName=state.orientation==='landscape'?'paysage':'portrait';
-    const ok=window.confirm(
-      `Effacer complètement la calibration ${orientationName} pour cette caméra téléphone ?\n\nLa calibration de l’autre orientation sera conservée.`
-    );
+    const ok=window.confirm(`Effacer complètement la calibration ${orientationName} pour cette caméra téléphone ?
+
+La calibration de l’autre orientation sera conservée.`);
     if(ok){
       resetCalibration();
       $('#settingsDialog').close();
