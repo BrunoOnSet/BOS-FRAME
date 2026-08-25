@@ -4324,3 +4324,382 @@ input,select{
 .frame-controls-inline{
   border-top:1px solid var(--line) !important;
 }
+
+
+/* ============================================================
+   BOS FRAME V3.35 — DA copied from BOS_DOF_V5_41_ONSET_V58_PROJECT_CTA
+   Exact reference values. No interpreted palette.
+   ============================================================ */
+
+:root{
+  --bg:#F3F1EC !important;
+  --panel:#FFFFFF !important;
+  --panel2:#ECEBE7 !important;
+  --text:#17191C !important;
+  --muted:#6E737A !important;
+  --line:#D3D4D1 !important;
+  --accent:#2F5B66 !important;
+  --accent-soft:rgba(47,91,102,.14) !important;
+
+  --header-bg:#EBE7DE !important;
+  --header-border:#D3CDC2 !important;
+  --field-bg:#FAFAF8 !important;
+  --card-border:#D7D9D6 !important;
+  --hero-bg:#FFFFFF !important;
+  --hero-border:#D7D9D6 !important;
+  --hero-text:#111315 !important;
+  --hero-muted:#4D535A !important;
+  --technical:#7C8186 !important;
+  --chip-text:#586068 !important;
+  --chip-active-bg:#92B8C0 !important;
+  --chip-active-text:#182126 !important;
+  --chip-bg:#E7E7E3 !important;
+}
+
+body.dark{
+  --bg:#0B0C0E !important;
+  --panel:#15171A !important;
+  --panel2:#1C1F23 !important;
+  --text:#F3F3F0 !important;
+  --muted:#94989F !important;
+  --line:#30343A !important;
+  --accent:#2F5B66 !important;
+  --accent-soft:rgba(47,91,102,.22) !important;
+
+  --header-bg:#111418 !important;
+  --header-border:#25292E !important;
+  --field-bg:#0F1113 !important;
+  --card-border:#25292E !important;
+  --hero-bg:#F3F3F0 !important;
+  --hero-border:#D6D8DB !important;
+  --hero-text:#111315 !important;
+  --hero-muted:#3F4650 !important;
+  --technical:#666B72 !important;
+  --chip-text:#D4D6D8 !important;
+  --chip-active-bg:#2F5B66 !important;
+  --chip-active-text:#F3F3F0 !important;
+  --chip-bg:#1C1F23 !important;
+}
+
+html,body{
+  margin:0 !important;
+  background:var(--bg) !important;
+  color:var(--text) !important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Roboto","Segoe UI",sans-serif !important;
+}
+body{min-height:100vh !important}
+
+#app.app,
+#app.shell,
+#app.app-shell{
+  width:100% !important;
+  max-width:620px !important;
+  margin:0 auto !important;
+  padding:calc(22px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) !important;
+  background:transparent !important;
+  box-sizing:border-box !important;
+}
+
+/* Exact reference header */
+#app > .topbar.cardlike{
+  position:static !important;
+  width:100% !important;
+  max-width:none !important;
+  height:auto !important;
+  min-height:0 !important;
+  margin:0 0 14px !important;
+  padding:14px 16px 15px !important;
+  background:var(--header-bg) !important;
+  border:1px solid var(--header-border) !important;
+  border-radius:22px !important;
+  box-shadow:none !important;
+  overflow:visible !important;
+}
+.bos-top-inner{
+  width:100% !important;
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:space-between !important;
+  gap:14px !important;
+}
+.bos-brand-lockup{display:flex !important;align-items:center !important;gap:12px !important;min-width:0 !important}
+.bos-header-logo{
+  display:block !important;
+  width:56px !important;
+  height:56px !important;
+  object-fit:contain !important;
+  flex:0 0 56px !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+}
+.bos-brand-text{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:4px !important;min-width:0 !important}
+.bos-header-name{
+  display:flex !important;align-items:baseline !important;gap:0 !important;flex-wrap:wrap !important;
+  font-family:"Montserrat",Arial,sans-serif !important;
+  font-weight:700 !important;font-size:19px !important;line-height:1 !important;
+  color:#2F5B66 !important;letter-spacing:0 !important;white-space:nowrap !important;
+}
+.bos-header-app{margin-left:4px !important;color:#17191C !important;font-weight:700 !important}
+.bos-header-tagline{
+  font-family:"Montserrat",Arial,sans-serif !important;
+  font-weight:400 !important;font-size:11px !important;line-height:1.2 !important;
+  color:#17191C !important;letter-spacing:0 !important;white-space:nowrap !important;
+}
+body.dark .bos-header-name{color:#2F5B66 !important}
+body.dark .bos-header-app,
+body.dark .bos-header-tagline{color:#17191C !important}
+
+.mode-btn,
+.utility-link{
+  border:1px solid var(--line) !important;
+  background:var(--panel) !important;
+  color:var(--text) !important;
+  border-radius:999px !important;
+  padding:7px 10px !important;
+  min-height:auto !important;
+  font-size:9px !important;
+  letter-spacing:.12em !important;
+  font-weight:900 !important;
+  white-space:nowrap !important;
+  box-shadow:none !important;
+}
+
+/* Exact reference bubbles */
+#frameCameraSettingsPanel,
+#frameViewCard{
+  position:relative !important;
+  background:var(--panel) !important;
+  border:1px solid var(--card-border) !important;
+  border-radius:22px !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+.frame-modules{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:10px !important;
+  margin-top:10px !important;
+}
+
+/* Exact reference card heading */
+.bos-card-head{
+  display:block !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+.bos-card-heading{
+  position:relative !important;
+  width:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:11px !important;
+  margin:0 !important;
+  padding:15px 42px 14px 16px !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  color:inherit !important;
+  text-align:left !important;
+  cursor:pointer !important;
+  box-sizing:border-box !important;
+}
+.frame-static-heading{cursor:default !important}
+.bos-card-heading .step{
+  display:grid !important;
+  place-items:center !important;
+  width:32px !important;
+  height:32px !important;
+  min-width:32px !important;
+  border:1px solid rgba(47,91,102,.38) !important;
+  border-radius:10px !important;
+  background:var(--accent-soft) !important;
+  color:var(--accent) !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+}
+.bos-card-heading .heading-copy{display:block !important;min-width:0 !important}
+.bos-card-heading .bos-heading-title{
+  display:block !important;
+  margin:0 !important;
+  color:#2F5B66 !important;
+  font-family:"Montserrat",Arial,sans-serif !important;
+  font-size:16px !important;
+  line-height:1.1 !important;
+  font-weight:700 !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+}
+body.dark .bos-card-heading .bos-heading-title{color:#2F5B66 !important}
+.bos-card-heading .bos-heading-subtitle{
+  display:block !important;
+  margin-top:2px !important;
+  color:var(--muted) !important;
+  font-size:10px !important;
+  font-weight:400 !important;
+  line-height:normal !important;
+  letter-spacing:0 !important;
+}
+.bos-card-heading .camera-heading-subtitle{
+  max-width:100% !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+.bos-card-heading .chevron{
+  position:absolute !important;
+  right:15px !important;
+  top:50% !important;
+  display:block !important;
+  width:auto !important;
+  height:auto !important;
+  color:var(--accent) !important;
+  font-size:18px !important;
+  line-height:1 !important;
+  transform:translateY(-50%) !important;
+  transition:transform .2s ease !important;
+}
+#frameCameraSettingsPanel:not(.collapsed) .bos-card-heading .chevron{
+  color:var(--accent) !important;
+  transform:translateY(-50%) rotate(180deg) !important;
+}
+.frame-heading-spacer{visibility:hidden !important}
+
+/* Exact reference inner body surfaces */
+#frameCameraSettingsPanel .method-content{
+  margin:0 !important;
+  padding:14px 15px 16px !important;
+  border-top:1px solid var(--card-border) !important;
+}
+#frameViewCard > .preview-primary-controls{
+  margin:0 !important;
+  padding:14px 15px 16px !important;
+  border-top:1px solid var(--card-border) !important;
+  border-bottom:0 !important;
+}
+#frameViewCard .frame-controls-inline{
+  margin:0 !important;
+  padding:14px 15px 16px !important;
+  border-top:1px solid var(--card-border) !important;
+}
+
+/* Exact reference sliders/readouts */
+.bos-linked-slider,
+.bos-frame-distance-slider,
+.preview-setting-row,
+.extra-subject-slider{
+  display:grid !important;
+  grid-template-columns:auto minmax(0,1fr) auto !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding:0 2px !important;
+  min-width:0 !important;
+}
+.bos-linked-slider>span,
+.bos-frame-distance-slider>span,
+.preview-setting-row>span,
+.extra-subject-slider>span{
+  margin:0 !important;
+  color:var(--muted) !important;
+  font-size:10px !important;
+  font-weight:900 !important;
+  letter-spacing:.12em !important;
+  white-space:nowrap !important;
+}
+.bos-linked-slider input[type="range"],
+.bos-frame-distance-slider input[type="range"],
+.preview-setting-row input[type="range"],
+.extra-subject-slider input[type="range"]{
+  box-sizing:border-box !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:32px !important;
+  height:32px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  accent-color:var(--accent) !important;
+}
+.free-value-readout{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  min-width:66px !important;
+  min-height:28px !important;
+  margin:0 !important;
+  padding:2px 5px !important;
+  border:0 !important;
+  border-radius:8px !important;
+  background:transparent !important;
+  color:var(--text) !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+  text-align:right !important;
+  white-space:nowrap !important;
+  cursor:text !important;
+}
+.free-value-readout:hover,
+.free-value-readout:focus-visible{
+  background:var(--accent-soft) !important;
+  outline:1px solid var(--accent) !important;
+  outline-offset:1px !important;
+}
+
+/* Reference input / chip surfaces */
+input:not([type="range"]),
+select{
+  border:1px solid var(--line) !important;
+  background:var(--field-bg) !important;
+  color:var(--text) !important;
+}
+.chips button,
+.subject-count-switch button,
+.control-button{
+  border-color:var(--line) !important;
+  background:var(--chip-bg) !important;
+  color:var(--chip-text) !important;
+}
+.chips button.active,
+.subject-count-switch button.active{
+  background:var(--chip-active-bg) !important;
+  color:var(--chip-active-text) !important;
+  border-color:var(--chip-active-bg) !important;
+}
+body.dark .chips button.active,
+body.dark .subject-count-switch button.active{
+  background:var(--accent) !important;
+  color:#fff !important;
+  border-color:var(--accent) !important;
+}
+
+@media(max-width:520px){
+  #app.app,
+  #app.shell,
+  #app.app-shell{
+    padding-left:9px !important;
+    padding-right:9px !important;
+  }
+  .bos-brand-lockup{gap:9px !important}
+  .bos-header-logo{width:46px !important;height:46px !important;flex-basis:46px !important}
+  .bos-header-name{font-size:15px !important}
+  .bos-brand-text{gap:2px !important}
+  .bos-header-tagline{font-size:9px !important}
+  .bos-card-heading{padding:15px 42px 14px 16px !important}
+  .bos-linked-slider,
+  .bos-frame-distance-slider,
+  .preview-setting-row,
+  .extra-subject-slider{gap:8px !important}
+  .bos-linked-slider>span,
+  .bos-frame-distance-slider>span,
+  .preview-setting-row>span,
+  .extra-subject-slider>span{font-size:9px !important;letter-spacing:.08em !important}
+  .free-value-readout{min-width:58px !important;padding-left:3px !important;padding-right:3px !important}
+}

@@ -1034,7 +1034,7 @@ function setFrameMode(mode,persist=true){
 
   const kicker=$('#viewPanelKicker');
   const label=$('#viewModeLabel');
-  if(kicker) kicker.textContent=preview?'02 PREVIEW':'02 VISEUR';
+  if(kicker) kicker.textContent=preview?'PREVIEW':'VISEUR';
   if(label) label.textContent=preview?'SIMULATION · BOS':'VUE RÉELLE · BOS';
 
   ensureLightGroupLayout();
@@ -1077,6 +1077,13 @@ function cameraHeightVisualDelta(){
   return Math.max(-0.9, Math.min(0.9, state.cameraHeight - avgEyeHeight));
 }
 
+function stablePreviewMannequinHeightPx(subject,frameRect){
+  const d=Math.max(.04,subjectDistance(subject));
+  const metrics=previewFrameMetricsAt(d);
+  const projectedBodyPx=(subject.height/Math.max(.001,metrics.frameHeight))*frameRect.height;
+  return projectedBodyPx/previewFigureMetrics.bodyRatio;
+}
+
 function updatePreview(){
   if(state.mode!=='preview') return;
 
@@ -1101,6 +1108,16 @@ function updatePreview(){
     eyeGuide.style.width=`${frameRect.width}px`;
   }
 
+  const groundLine=$('#previewGroundLine');
+  if(groundLine){
+    const basis=cameraBasis();
+    const axisElevation=Math.asin(Math.max(-1,Math.min(1,basis.forward.z)));
+    const horizonNormY=Math.tan(-axisElevation)/Math.tan(rad(verticalFov())/2);
+    const horizonY=(frameRect.top-stageRect.top)+(frameRect.height/2)-(horizonNormY*frameRect.height/2)+eyeComposition.offsetY;
+    const clamped=Math.max(frameRect.top-stageRect.top,Math.min(frameRect.bottom-stageRect.top,horizonY));
+    groundLine.style.top=`${clamped}px`;
+  }
+
   state.subjects.forEach((subject,i)=>{
     const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);
     if(!el) return;
@@ -1123,14 +1140,11 @@ function updatePreview(){
     const eyeYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.eye.y*frameRect.height/2 + eyeComposition.offsetY;
     const feetYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.feet.y*frameRect.height/2 + eyeComposition.offsetY;
 
-    // Keep eyes as the absolute anchor, especially in very close framings.
-    // We derive the image height from the projected eye-to-feet span so the
-    // mannequin's REAL eye pixels stay exactly on the projected eye line.
-    const eyeToFeetPx=Math.abs(feetYPx-eyeYPx);
-    const mannequinHeightPx = eyeToFeetPx / (previewFigureMetrics.footRatio - previewFigureMetrics.eyeRatio);
-
-    // Secondary metric still used for plan naming/rough scale.
-    const bodyPx=Math.abs(feetYPx-headYPx);
+    // Height-camera rule:
+    // the camera moves ONLY on Z. It must never simulate a dolly-back.
+    // Subject apparent size is therefore locked to FOCAL + RECUL.
+    const mannequinHeightPx=stablePreviewMannequinHeightPx(subject,frameRect);
+    const bodyPx=mannequinHeightPx*previewFigureMetrics.bodyRatio;
 
     const wPx = mannequinHeightPx * (previewFigureMetrics.viewWidth/previewFigureMetrics.viewHeight);
     const top = eyeYPx - previewFigureMetrics.eyeRatio * mannequinHeightPx;
@@ -1141,13 +1155,7 @@ function updatePreview(){
     el.style.height=Math.max(30,mannequinHeightPx)+'px';
 
     const img=el.querySelector('.preview-person');
-    if(img){
-      // Camera height must stay optically clean and precise.
-      // The visual effect is already handled by the true projection
-      // (camera Z position + composition offset). We do NOT add any
-      // extra perspective skew / scale deformation on the mannequin.
-      img.style.transform='none';
-    }
+    if(img) img.style.transform='none';
 
     scales.push(bodyPx/frameRect.height);
   });

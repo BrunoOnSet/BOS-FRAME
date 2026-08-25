@@ -1,25 +1,21 @@
-# BOS FRAME V3.32 — CONTROLS REORDER
+# BOS FRAME V3.35 — DOF REF EXACT DA + CAMERA HEIGHT FIX
 
-01 RÉGLAGES CAMÉRA
-- choix caméra
-- RATIO juste en dessous
+Référence visuelle utilisée :
+BOS_DOF_V5_41_ONSET_V58_PROJECT_CTA
 
-02 PREVIEW / VISEUR
-- FOCALE
-- RECUL (Preview)
-- HAUTEUR CAMÉRA (Preview)
-placés avant le cadre de prévisualisation
+DA :
+- couleurs light/dark copiées exactement
+- fond copié exactement
+- couleurs des bulles copiées exactement
+- rayon des bulles 22 px
+- bordures exactes
+- titres de bulles reconstruits avec la même structure :
+  carré 01 / 02, Montserrat, taille, graisse, couleur, sous-titre
+- header conservé selon la même DA de référence
 
-Preview
-- suppression complète du choix de type de plan :
-  Gros plan / Poitrine / Taille / Américain / Pied
-- conservation du nombre de personnes, tailles, écartement et résultats
-
-
-V3.33
-- couleurs du fond et des bulles réalignées exactement sur la référence BOS_BRUNO_ONSET_V58 (light/dark).
-
-
-V3.34
-- hauteur caméra nettoyée : suppression de toute déformation artificielle du mannequin en preview.
-- la hauteur caméra agit désormais uniquement via la projection/cadrage, pour un rendu plus propre et plus précis.
+Hauteur caméra :
+- aucune déformation du mannequin
+- aucune simulation de recul
+- la taille du sujet dépend seulement de la focale et du recul
+- le réglage Hauteur caméra ne modifie que la hauteur Z / angle de caméra
+- la ligne de sol/horizon reflète ce changement de hauteur
