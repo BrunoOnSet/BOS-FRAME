@@ -1425,13 +1425,7 @@ function renderPresets(){
       : '—';
   }
 
-  const summary=$('#frameCameraSettingsSummary');
-  if(summary){
-    const activePreset=state.preset || shownPreset;
-    summary.textContent=activePreset
-      ? `${activePreset.name} · ${Number(activePreset.width).toFixed(2).replace('.',',')} mm`
-      : '—';
-  }
+  updateFrameCameraSettingsSummary();
 }
 
 function renderRatios(){
@@ -1483,6 +1477,18 @@ function renderGuides(){
     d.innerHTML=`<span>${label}</span>`; layer.appendChild(d);
   });
 }
+function updateFrameCameraSettingsSummary(){
+  const summary=$('#frameCameraSettingsSummary');
+  if(!summary) return;
+
+  const focal=`Focale ${formatFrameFocal(state.focal)} mm`;
+  const recul=`Recul ${Number(state.groupDistance).toFixed(2).replace('.',',')} m`;
+  const cameraHeight=`Hauteur caméra ${Number(state.cameraHeight).toFixed(2).replace('.',',')} m`;
+  const ratio=`Ratio ${ratioLabel(state.ratio).replace(':1','')}`;
+
+  summary.innerHTML = `${focal} · ${recul}<br>${cameraHeight} · ${ratio}`;
+}
+
 function updateReadout(){
   const hf=targetHFov();
   $('#cameraReadout').textContent=state.preset.name.replace('ARRI ','').replace('Sony ','').replace('RED ','');
@@ -1632,6 +1638,7 @@ function updateSimulation(){
 
 function updateAll(){
   updateReadout();
+  updateFrameCameraSettingsSummary();
   updateFrame();
   if(state.mode==='preview'){ ensureLightGroupLayout(); updatePreview(); }
   else updateSimulation();

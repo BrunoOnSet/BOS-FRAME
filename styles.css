@@ -3723,3 +3723,23 @@ body{
   margin-right:0 !important;
   transform:none !important;
 }
+
+
+/* ============================================================
+   BOS FRAME V3.28 — Clean preview + camera summary
+   ============================================================ */
+
+/* On retire la bulle d'info bas-gauche dans la preview */
+.preview-info-overlay{
+  display:none !important;
+}
+
+/* Le résumé de la bulle 01 doit pouvoir afficher 2 lignes claires */
+#frameCameraSettingsSummary{
+  display:block !important;
+  white-space:normal !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+  line-height:1.35 !important;
+  max-width:100% !important;
+}

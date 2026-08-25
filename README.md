@@ -1,15 +1,17 @@
-# BOS FRAME V3.27 — ONSET V58 EXACT CENTER
+# BOS FRAME V3.28 — CAMERA SUMMARY / CLEAN PREVIEW
 
-Correction ciblée du centrage global.
+Modifications :
 
-La règle finale réellement active dans ONSET_V58 est :
-- max-width : 620px
-- margin : 0 auto
-- padding horizontal : 16px
-- padding horizontal 12px sous 380px
+1. Preview
+- suppression de la bulle d'information en bas à gauche
+  (plan / caméra / focale / distance)
 
-FRAME utilisait encore une largeur de 760px issue d'une règle antérieure
-de la référence, ce qui expliquait la différence visuelle dans une fenêtre
-de navigateur desktop.
+2. Bulle 01 RÉGLAGES CAMÉRA
+- le résumé affiche maintenant :
+  - Focale
+  - Recul
+  - Hauteur caméra
+  - Ratio
+- affichage sur 2 lignes pour plus de clarté
 
-Aucune autre fonctionnalité n'est modifiée.
+Aucune autre logique de cadrage n'est modifiée.
