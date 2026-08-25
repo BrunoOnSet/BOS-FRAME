@@ -1001,7 +1001,7 @@ function setFrameMode(mode,persist=true){
 
   const kicker=$('#viewPanelKicker');
   const label=$('#viewModeLabel');
-  if(kicker) kicker.textContent=preview?'PREVIEW':'VISEUR';
+  if(kicker) kicker.textContent=preview?'02 PREVIEW':'02 VISEUR';
   if(label) label.textContent=preview?'SIMULATION · BOS':'VUE RÉELLE · BOS';
 
   ensureLightGroupLayout();
@@ -1157,55 +1157,68 @@ function formatFrameFocal(value){
   const rounded=Math.round(n*100)/100;
   return String(rounded).replace('.',',');
 }
-
-function isPresetFocal(value){
-  const n=Number(value);
-  return lenses.some(mm=>Math.abs(mm-n)<0.0001);
+function frameFocalReadoutText(value){
+  return `${formatFrameFocal(value)} mm`;
 }
-
+function setFrameFocal(value,free=false){
+  let v=Math.max(9,Math.min(200,Number(String(value).replace(',','.'))||35));
+  v=free ? Math.round(v*100)/100 : Math.round(v);
+  state.focal=v;
+  renderLenses();
+  updateAll();
+}
 function renderLenses(){
-  const el=$('#lensStrip'); el.innerHTML='';
-  lenses.forEach(mm=>{
-    const unavailable=isTargetUnavailable(state.sensorWidth,mm);
-    const active=Math.abs(mm-Number(state.focal))<0.0001;
-    const b=document.createElement('button');
-    b.className='lens-pill'+(active?' active':'')+(unavailable?' unavailable':'');
-    b.textContent=mm;
-    if(unavailable){
-      b.disabled=true;
-      b.title='Champ trop large pour la caméra téléphone calibrée';
-    }else{
-      b.onclick=()=>{
-        state.focal=mm;
-        renderLenses();
-        updateAll();
-        centerActiveLens();
-      };
+  const slider=$('#frameFocalSlider');
+  const readout=$('#frameFocalReadout');
+  if(slider){
+    slider.min='9';
+    slider.max='200';
+    slider.step='1';
+    slider.value=String(Math.max(9,Math.min(200,Number(state.focal)||35)));
+  }
+  if(readout && !readout.querySelector('input')){
+    readout.textContent=frameFocalReadoutText(state.focal);
+  }
+}
+function beginFrameFocalEdit(readout){
+  if(!readout || readout.querySelector('input')) return;
+  const previous=readout.textContent;
+  const input=document.createElement('input');
+  input.type='number';
+  input.inputMode='decimal';
+  input.step='any';
+  input.min='9';
+  input.max='200';
+  input.className='free-value-input';
+  input.value=String(Number(state.focal)||35);
+  input.setAttribute('aria-label','Focale libre');
+  readout.textContent='';
+  readout.appendChild(input);
+  input.focus();
+  input.select();
+
+  let done=false;
+  const finish=(commit)=>{
+    if(done) return;
+    done=true;
+    const value=input.value;
+    if(commit && value!=='') setFrameFocal(value,true);
+    else readout.textContent=previous;
+  };
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      finish(true);
+      input.blur();
+    }else if(e.key==='Escape'){
+      e.preventDefault();
+      finish(false);
+      input.blur();
     }
-    el.appendChild(b);
   });
-
-  const libre=$('#focalLibreBtn');
-  if(libre) libre.classList.toggle('active',!isPresetFocal(state.focal));
-
-  const current=$('#frameFocalCurrentValue');
-  if(current) current.textContent=`${formatFrameFocal(state.focal)} mm`;
-
-  setTimeout(centerActiveLens,0);
+  input.addEventListener('blur',()=>finish(true),{once:true});
 }
-function centerElementInsideStrip(strip,el,smooth=true){
-  if(!strip || !el) return;
-  const target=el.offsetLeft - (strip.clientWidth-el.offsetWidth)/2;
-  strip.scrollTo({
-    left:Math.max(0,target),
-    behavior:smooth?'smooth':'auto'
-  });
-}
-function centerActiveLens(){
-  const strip=$('#lensStrip');
-  const a=$('#lensStrip .lens-pill.active');
-  centerElementInsideStrip(strip,a,true);
-}
+
 const LAST_FRAME_CAMERA_BY_BRAND_KEY="bos-frame-last-camera-by-brand-v1";
 let cameraPickerBrand=null;
 
@@ -1327,7 +1340,10 @@ function renderPresets(){
 
   const summary=$('#frameCameraSettingsSummary');
   if(summary){
-    summary.textContent=state.preset?.name || shownPreset?.name || '—';
+    const activePreset=state.preset || shownPreset;
+    summary.textContent=activePreset
+      ? `${activePreset.name} · ${Number(activePreset.width).toFixed(2).replace('.',',')} mm`
+      : '—';
   }
 }
 
@@ -2065,40 +2081,32 @@ function registerEvents(){
   });
   $('#ratioBtn').onclick=()=>$('#ratioDialog').showModal();
 
-  const focalLibreDialog=$('#focalLibreDialog');
-  const focalLibreInput=$('#focalLibreInput');
+  const frameFocalSlider=$('#frameFocalSlider');
+  const frameFocalReadout=$('#frameFocalReadout');
+  if(frameFocalSlider){
+    frameFocalSlider.oninput=e=>setFrameFocal(e.target.value,false);
+  }
+  if(frameFocalReadout){
+    frameFocalReadout.addEventListener('click',()=>beginFrameFocalEdit(frameFocalReadout));
+    frameFocalReadout.addEventListener('keydown',e=>{
+      if((e.key==='Enter' || e.key===' ') && !frameFocalReadout.querySelector('input')){
+        e.preventDefault();
+        beginFrameFocalEdit(frameFocalReadout);
+      }
+    });
+  }
 
-  $('#focalLibreBtn').onclick=()=>{
-    focalLibreInput.value=formatFrameFocal(state.focal);
-    focalLibreDialog.showModal();
-    setTimeout(()=>{
-      focalLibreInput.focus();
-      focalLibreInput.select();
-    },40);
-  };
+  const projectDialog=$('#projectDialog');
+  const projectContactBtn=$('#projectContactBtn');
+  if(projectContactBtn && projectDialog){
+    projectContactBtn.addEventListener('click',()=>projectDialog.showModal());
+  }
+  if(projectDialog){
+    projectDialog.addEventListener('click',e=>{
+      if(e.target===projectDialog) projectDialog.close();
+    });
+  }
 
-  $('#focalLibreClose').onclick=()=>focalLibreDialog.close();
-
-  focalLibreDialog.addEventListener('click',e=>{
-    if(e.target===focalLibreDialog) focalLibreDialog.close();
-  });
-
-  $('#focalLibreForm').addEventListener('submit',e=>{
-    e.preventDefault();
-
-    const raw=String(focalLibreInput.value||'').trim().replace(',','.');
-    const value=Number(raw);
-
-    if(!(value>0)){
-      focalLibreInput.focus();
-      return;
-    }
-
-    state.focal=Math.round(value*100)/100;
-    focalLibreDialog.close();
-    renderLenses();
-    updateAll();
-  });
   $('#objectWidth').oninput=calculateCalibration;
   $('#objectDistance').oninput=calculateCalibration;
   $('#saveCalibrationBtn').onclick=()=>{

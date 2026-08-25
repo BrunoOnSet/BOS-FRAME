@@ -9,7 +9,10 @@
   <meta name="apple-mobile-web-app-title" content="FRAME - BOS" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="stylesheet" href="styles.css?v=3.22" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=3.23" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -42,14 +45,17 @@
     </div>
 
     <section class="panel method-panel collapsed" id="frameCameraSettingsPanel">
-      <div class="panel-head compact-head collapsible-head">
-        <button type="button" class="collapse-toggle" id="frameCameraSettingsToggle"
+      <div class="panel-head compact-head collapsible-head bos-module-head">
+        <button type="button" class="collapse-toggle module-head" id="frameCameraSettingsToggle"
                 aria-expanded="false" aria-controls="frameCameraSettingsContent">
-          <span class="camera-collapse-title">
-            <span class="panel-kicker">RÉGLAGES CAMÉRA</span>
-            <strong id="frameCameraSettingsSummary">Sony FX6</strong>
+          <span class="module-title">
+            <i class="module-dot"></i>
+            <span>
+              <strong>01 RÉGLAGES CAMÉRA</strong>
+              <small id="frameCameraSettingsSummary">Sony FX6 · 35,60 mm</small>
+            </span>
           </span>
-          <span class="collapse-chevron" aria-hidden="true">⌄</span>
+          <span class="chev collapse-chevron" aria-hidden="true">⌄</span>
         </button>
       </div>
 
@@ -70,10 +76,15 @@
       </div>
     </section>
 
-    <section class="panel camera-panel">
-      <div class="panel-head frame-panel-head">
-        <span class="panel-kicker" id="viewPanelKicker">VISEUR</span>
-        <span class="camera-live-label" id="viewModeLabel">VUE RÉELLE · BOS</span>
+    <section class="panel camera-panel bos-module-card" id="frameViewCard">
+      <div class="panel-head frame-panel-head bos-module-head">
+        <span class="module-title">
+          <i class="module-dot"></i>
+          <span>
+            <strong id="viewPanelKicker">02 PREVIEW</strong>
+            <small>Cadrage</small>
+          </span>
+        </span>
       </div>
 
       <div class="camera-stage" id="cameraStage">
@@ -153,25 +164,17 @@
           </div>
         </div>
       </div>
-    </section>
 
-    <section class="panel frame-controls-panel">
-      <div class="panel-head controls-head">
-        <span class="panel-kicker">CADRAGE</span>
+      <div class="frame-controls-inline">
+      <div class="bos-frame-distance-slider bos-frame-focal-slider">
+        <span>FOCALE</span>
+        <input id="frameFocalSlider" type="range" min="9" max="200" step="1" value="35">
+        <strong id="frameFocalReadout" class="free-value-readout"
+                data-free-control="focal" role="button" tabindex="0"
+                title="Cliquer pour saisir une valeur libre">35 mm</strong>
       </div>
 
-      <div class="frame-focal-block">
-        <div class="frame-focal-head">
-          <span>FOCALE</span>
-          <small id="frameFocalCurrentValue">35 mm</small>
-        </div>
-        <div class="frame-focal-row">
-          <div class="lens-strip" id="lensStrip"></div>
-          <button class="free-value-btn" id="focalLibreBtn" type="button">LIBRE</button>
-        </div>
-      </div>
-
-      <div class="main-controls ratio-only-controls">
+      <div class="main-controls ratio-only-controls bos-inline-ratio">
         <button id="ratioBtn" class="control-button">
           <span>RATIO</span>
           <strong id="ratioText">16:9</strong>
@@ -246,8 +249,15 @@
         <div id="focusQuickButtons" class="hidden"></div>
         <div id="dofRecommendation" class="hidden"></div>
         <button type="button" id="applyDofRecommendationBtn" class="hidden">APPLIQUER</button>
-      </div>      </div>
+      </div>
+      </div>
     </section>
+
+    <section aria-label="Contact professionnel" class="project-contact">
+<button class="project-contact-btn" id="projectContactBtn" type="button">
+        Besoin d’un regard sur votre projet ? <span aria-hidden="true">→</span>
+</button>
+</section>
 
     <footer>
       <div class="technical-footer">Cadre · focale · format · champ horizontal</div>
@@ -256,10 +266,41 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.22</span>
+        <span class="app-version">v3.23</span>
       </div>
     </footer>
   </main>
+
+  <dialog class="sheet project-sheet" id="projectDialog">
+<form class="sheet-inner project-sheet-inner" method="dialog">
+<div class="project-sheet-head">
+<div>
+<span class="project-kicker">BRUNO ONSET</span>
+</div>
+<button aria-label="Fermer" class="project-close" value="close">×</button>
+</div>
+<div class="project-profile">
+<strong>Bruno Guillard</strong>
+<span>Réalisateur · Directeur de la photographie · Consultant image</span>
+</div>
+<div aria-label="Prestations" class="project-services">
+<span>Réalisation</span>
+<span>Direction de la photographie</span>
+<span>Conseil / préparation image</span>
+</div>
+<p class="project-note">
+        Échangeons autour de votre projet, de sa mise en scène, de ses intentions d’image et de son dispositif de tournage.
+      </p>
+<div class="project-actions">
+<a class="project-email-btn" href="mailto:brunoguillardcontact@gmail.com?subject=Projet%20de%20tournage%20%E2%80%94%20Bruno%20OnSet&amp;body=Bonjour%20Bruno%2C%0A%0AJe%20vous%20contacte%20depuis%20Bruno%20OnSet.%0A%0A">Écrire à Bruno <span aria-hidden="true">→</span></a>
+<div class="project-secondary-links">
+<a class="project-secondary-link" href="https://wa.me/33679979111?text=Bonjour%20Bruno%2C%0A%0AJe%20vous%20contacte%20depuis%20Bruno%20OnSet.%0A%0A" rel="noopener noreferrer" target="_blank">WhatsApp</a>
+<span aria-hidden="true">·</span>
+<a class="project-secondary-link" href="https://brunoguillard.com" rel="noopener noreferrer" target="_blank">BrunoGuillard.com</a>
+</div>
+</div>
+</form>
+</dialog>
 
   <dialog id="cameraDialog" class="sheet">
     <form method="dialog">
@@ -465,20 +506,6 @@
     </form>
   </dialog>
 
-
-  <dialog id="focalLibreDialog" class="custom-value-dialog">
-    <form method="dialog" class="custom-value-inner" id="focalLibreForm">
-      <button type="button" id="focalLibreClose" class="close" aria-label="Fermer">×</button>
-      <div class="dialog-kicker">RÉGLAGE LIBRE</div>
-      <h2>Focale libre</h2>
-      <label class="custom-value-field">
-        <input id="focalLibreInput" type="text" inputmode="decimal" autocomplete="off" />
-        <span>mm</span>
-      </label>
-      <button class="custom-value-apply" id="focalLibreApply" type="submit">VALIDER</button>
-    </form>
-  </dialog>
-
-  <script src="app.js?v=3.22"></script>
+  <script src="app.js?v=3.23"></script>
 </body>
 </html>

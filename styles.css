@@ -2877,3 +2877,393 @@ body.dark .free-value-btn.active{
     font-size:8px;
   }
 }
+
+
+/* ============================================================
+   BOS FRAME V3.23 — ONSET V58
+   ============================================================ */
+:root{
+  --blue:#2F5B66;
+  --blue-soft:rgba(47,91,102,.14);
+}
+
+/* Titres de bulles : mêmes proportions / disposition / couleurs que ONSET V58 */
+.module-head{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:15px 16px;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+}
+.module-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+}
+.module-dot{
+  width:8px;
+  height:8px;
+  flex:0 0 auto;
+  border-radius:50%;
+  background:#2F5B66;
+}
+.module-title strong{
+  display:block;
+  color:#2F5B66 !important;
+  font-size:16px;
+  font-weight:900;
+}
+.module-title small{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  margin-top:2px;
+  font-weight:700;
+}
+.chev{
+  color:var(--muted);
+  font-size:17px;
+  transition:.18s transform;
+}
+
+/* 01 RÉGLAGES CAMÉRA */
+#frameCameraSettingsPanel{
+  padding:0 !important;
+  overflow:hidden;
+}
+#frameCameraSettingsPanel .bos-module-head{
+  margin:0 !important;
+}
+#frameCameraSettingsPanel .collapse-toggle{
+  padding:15px 16px !important;
+}
+#frameCameraSettingsPanel:not(.collapsed) .chev{
+  transform:rotate(180deg);
+}
+#frameCameraSettingsPanel .method-content{
+  margin:0 !important;
+  padding:14px 16px 16px;
+  border-top:1px solid var(--card-border);
+}
+
+/* 02 VISEUR / PREVIEW + Cadrage dans la même bulle */
+#frameViewCard{
+  padding:0 !important;
+  overflow:hidden;
+}
+#frameViewCard .bos-module-head{
+  margin:0 !important;
+  padding:15px 16px;
+}
+#frameViewCard .camera-stage{
+  width:calc(100% - 28px);
+  margin:0 14px;
+}
+.frame-controls-inline{
+  margin-top:14px;
+  padding:14px 16px 16px;
+  border-top:1px solid var(--card-border);
+}
+
+/* Focale ONSET V58 : barre + valeur libre cliquable */
+.bos-frame-distance-slider{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  margin-top:0;
+  padding:0 2px;
+}
+.bos-frame-distance-slider>span{
+  margin:0;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.bos-frame-distance-slider input{
+  width:100%;
+  accent-color:#2F5B66;
+}
+.bos-frame-distance-slider strong{
+  min-width:60px;
+  color:var(--text);
+  font-size:11px;
+  text-align:right;
+}
+input[type="range"],
+.bos-frame-distance-slider input[type="range"]{
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:32px;
+  margin:0;
+  padding:0!important;
+  border:0!important;
+  border-radius:0;
+  background:transparent!important;
+  box-shadow:none!important;
+  accent-color:#2F5B66;
+}
+.free-value-readout{
+  cursor:text;
+  display:inline-flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:5px;
+  min-width:52px;
+  border-radius:8px;
+  padding:2px 5px;
+  transition:background .15s ease,outline-color .15s ease;
+}
+.free-value-readout:hover,
+.free-value-readout:focus-visible{
+  background:var(--accent-soft);
+  outline:1px solid var(--accent);
+  outline-offset:1px;
+}
+.free-value-input{
+  width:76px!important;
+  min-height:30px!important;
+  height:30px!important;
+  padding:3px 7px!important;
+  border-radius:8px!important;
+  font-size:14px!important;
+  font-weight:850!important;
+  text-align:right;
+  background:var(--field-bg)!important;
+  border:1px solid var(--accent)!important;
+  box-shadow:0 0 0 2px var(--accent-soft)!important;
+}
+.bos-inline-ratio{margin-top:10px}
+@media(max-width:560px){
+  .bos-frame-distance-slider{gap:8px}
+  .bos-frame-distance-slider strong{min-width:54px}
+}
+
+/* La fenêtre projet doit rester centrée comme dans ONSET V58,
+   et non devenir une bottom-sheet FRAME. */
+.project-sheet{
+  position:fixed !important;
+  inset:0 !important;
+  transform:none !important;
+  margin:auto !important;
+  height:max-content;
+  max-height:min(90dvh,760px);
+  overflow:auto;
+  border:0 !important;
+  padding:0 !important;
+  border-radius:22px !important;
+  background:var(--panel) !important;
+  color:var(--text) !important;
+  box-shadow:0 25px 90px rgba(0,0,0,.35) !important;
+}
+.project-sheet::backdrop{
+  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(3px);
+}
+.project-sheet .project-sheet-inner{padding:22px !important}
+@media(max-width:520px){
+  .project-sheet .project-sheet-inner{padding:18px !important}
+}
+
+
+/* V49 — CTA professionnel */
+.project-contact{
+  display:flex;
+  justify-content:center;
+  padding:34px 0 6px;
+}
+.project-contact-btn{
+  border:0;
+  background:transparent;
+  color:#2F5B66;
+  padding:8px 2px;
+  font-family:"Montserrat",Arial,sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.01em;
+  cursor:pointer;
+}
+.project-contact-btn span{
+  display:inline-block;
+  margin-left:5px;
+  transition:transform .16s ease;
+}
+.project-contact-btn:hover span{transform:translateX(3px)}
+.project-contact-btn:focus-visible{
+  outline:2px solid #2F5B66;
+  outline-offset:5px;
+  border-radius:4px;
+}
+.project-sheet{width:min(470px,calc(100% - 24px))}
+.project-sheet-inner{padding:22px}
+.project-sheet-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.project-kicker{
+  display:block;
+  color:#2F5B66;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.16em;
+  margin-bottom:7px;
+}
+.project-sheet-head h2{
+  margin:0;
+  color:var(--text);
+  font-size:20px;
+  line-height:1.15;
+  letter-spacing:-.02em;
+}
+.project-close{
+  flex:0 0 38px;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--text);
+  font-size:23px;
+  line-height:1;
+  cursor:pointer;
+}
+.project-profile{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  margin-top:24px;
+}
+.project-profile strong{
+  font-size:14px;
+  color:var(--text);
+}
+.project-profile span{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.4;
+}
+.project-services{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:18px;
+}
+.project-services span{
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:7px 10px;
+  color:var(--text);
+  background:var(--panel2);
+  font-size:10px;
+  font-weight:700;
+}
+.project-note{
+  margin:18px 0 0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.55;
+}
+:root[data-theme="dark"] .project-contact-btn{color:#7FA7B0}
+@media(max-width:520px){
+  .project-contact{padding-top:28px}
+  .project-contact-btn{font-size:11px}
+  .project-sheet-inner{padding:18px}
+}
+
+
+/* V50 — lien site discret dans la carte projet */
+.project-site-link{
+  display:inline-block;
+  margin-top:16px;
+  color:var(--muted);
+  text-decoration:none;
+  font-family:"Montserrat",Arial,sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.01em;
+}
+.project-site-link:hover,
+.project-site-link:focus-visible{
+  color:#2F5B66;
+  text-decoration:underline;
+}
+
+.bos-wave-help.no-stops{color:var(--muted);font-weight:800;}
+
+
+/* V54 — action e-mail principale dans la carte projet */
+.project-actions{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:12px;
+  margin-top:18px;
+}
+.project-email-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-height:40px;
+  padding:0 15px;
+  border:1px solid #2F5B66;
+  border-radius:999px;
+  background:#2F5B66;
+  color:#fff;
+  text-decoration:none;
+  font-family:"Montserrat",Arial,sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.01em;
+}
+.project-email-btn span{
+  transition:transform .16s ease;
+}
+.project-email-btn:hover span{transform:translateX(3px)}
+.project-email-btn:focus-visible{
+  outline:2px solid #2F5B66;
+  outline-offset:3px;
+}
+.project-actions .project-site-link{
+  margin-top:0;
+}
+:root[data-theme="dark"] .project-email-btn{
+  background:#7FA7B0;
+  border-color:#7FA7B0;
+  color:#101315;
+}
+
+
+/* V56 — WhatsApp secondaire, sans traitement visuel "support" */
+.project-secondary-links{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+  color:var(--muted);
+  font-family:"Montserrat",Arial,sans-serif;
+  font-size:11px;
+  line-height:1.35;
+}
+.project-secondary-link{
+  color:var(--muted);
+  text-decoration:none;
+  font-weight:700;
+  letter-spacing:.01em;
+}
+.project-secondary-link:hover,
+.project-secondary-link:focus-visible{
+  color:#2F5B66;
+  text-decoration:underline;
+}
+:root[data-theme="dark"] .project-secondary-link:hover,
+:root[data-theme="dark"] .project-secondary-link:focus-visible{
+  color:#7FA7B0;
+}
