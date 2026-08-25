@@ -91,6 +91,13 @@ body.dark .bos-header-app,body.dark .bos-header-tagline{color:#17191C}
 .frame-camera-ratio-control .control-button{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);background:var(--field-bg);border-radius:14px;padding:11px 12px;text-align:left}
 .control-button span{color:var(--text);font-size:10px;letter-spacing:.12em;font-weight:850}
 .control-button strong{font-size:12px;color:var(--text)}
+.camera-guide-block{margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border);display:flex;flex-direction:column;gap:12px}
+.inline-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--text);font-size:10px;letter-spacing:.12em;font-weight:850}
+.inline-toggle-row input{width:18px;height:18px;accent-color:var(--accent)}
+.camera-guides-inline{display:flex;flex-direction:column;gap:8px}
+.camera-guides-inline .method-label{margin:0}
+.inline-guide-choices{display:flex;flex-wrap:wrap;gap:7px}
+#centerCross{display:none!important}
 
 /* NUMERIC CONTROLS — copied from LIGHT V0.50 numeric-control-row */
 .bos-linked-controls{display:flex;flex-direction:column;gap:12px}
@@ -139,8 +146,8 @@ body.dark .bos-header-app,body.dark .bos-header-tagline{color:#17191C}
 .preview-result-card{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--field-bg);overflow:hidden}.preview-result-card>div{padding:10px 12px}.preview-result-card>div+div{border-left:1px solid var(--line)}.preview-result-card span{display:block;color:var(--muted);font-size:8px;letter-spacing:.11em;font-weight:850}.preview-result-card strong{display:block;margin-top:3px;color:var(--text);font-size:11.5px}
 
 /* Footer / project CTA */
-.project-contact{margin-top:16px;background:transparent;border:0}.project-contact-btn{border:0;background:transparent;color:#2F5B66;padding:8px 2px;font-family:"Montserrat",Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.01em}.project-contact-btn span{display:inline-block;margin-left:5px;transition:transform .16s ease}.project-contact-btn:hover span{transform:translateX(3px)}
-footer{color:var(--technical);font-size:9px;padding:16px 2px 0}.technical-footer{color:var(--technical);font-size:9px}.signature{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}.footer-brand-link{display:flex;align-items:center;gap:7px;color:var(--technical);text-decoration:none}.footer-logo{width:22px;height:22px;object-fit:contain}.app-version{white-space:nowrap}
+.project-contact{margin-top:16px;background:transparent;border:0;display:flex;justify-content:center}.project-contact-btn{border:0;background:transparent;color:#2F5B66;padding:8px 2px;font-family:"Montserrat",Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.01em;text-align:center}.project-contact-btn span{display:inline-block;margin-left:5px;transition:transform .16s ease}.project-contact-btn:hover span{transform:translateX(3px)}
+footer{color:var(--technical);font-size:9px;padding:16px 0 0;display:flex;flex-direction:column;align-items:center;text-align:center}.technical-footer{color:var(--technical);font-size:9px;text-align:center}.signature{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin-top:10px;width:100%}.footer-brand-link{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--technical);text-decoration:none}.footer-logo{width:22px;height:22px;object-fit:contain}.app-version{white-space:nowrap;text-align:center}
 
 /* Generic sheets / settings — same palette, functions preserved */
 .sheet{border:1px solid var(--line);padding:0;background:var(--panel);color:var(--text);border-radius:22px 22px 0 0;width:min(540px,100%);max-width:100%;position:fixed;inset:auto 0 0 50%;transform:translateX(-50%);margin:0;max-height:84dvh;overflow:auto;box-shadow:0 -20px 80px rgba(0,0,0,.24)}

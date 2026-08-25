@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&amp;display=swap" rel="stylesheet"/>
-<link href="styles.css?v=3.38" rel="stylesheet"/>
+<link href="styles.css?v=3.40" rel="stylesheet"/>
 <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -66,6 +66,16 @@
 <span>RATIO</span>
 <strong id="ratioText">16:9</strong>
 </button>
+</div>
+<div class="camera-guide-block">
+<label class="inline-toggle-row" for="inlineThirdsToggle">
+<span>GRILLE DES TIERS</span>
+<input id="inlineThirdsToggle" type="checkbox"/>
+</label>
+<div class="camera-guides-inline">
+<span class="method-label">FRAME GUIDE</span>
+<div class="guide-choices inline-guide-choices" id="inlineGuideChoices"></div>
+</div>
 </div></div>
 </section>
 <section class="panel camera-panel bos-module-card controls-card collapsible-card" id="frameViewCard">
@@ -79,7 +89,7 @@
 <strong class="free-value-readout" id="subjectDistanceReadout" role="button" tabindex="0" title="Cliquer pour saisir une valeur libre">3,00 m</strong>
 </div><div class="bos-linked-slider bos-frame-distance-slider preview-only-control hidden" id="framePreviewCameraHeightRow">
 <span>HAUTEUR CAMÉRA</span>
-<input id="cameraHeightSlider" max="2.50" min="0.20" step="0.01" type="range" value="1.55"/>
+<input id="cameraHeightSlider" max="2.50" min="0.50" step="0.01" type="range" value="1.55"/>
 <strong class="free-value-readout" id="cameraHeightReadout" role="button" tabindex="0" title="Cliquer pour saisir une valeur libre">1,55 m</strong>
 </div></div>
 <div class="camera-stage" id="cameraStage">
@@ -126,7 +136,6 @@
 <div class="thirds hidden" id="thirds">
 <i class="v v1"></i><i class="v v2"></i><i class="h h1"></i><i class="h h2"></i>
 </div>
-<div class="center-cross" id="centerCross"><i></i><b></b></div>
 <div id="guideLayer"></div>
 </div>
 </div>
@@ -209,7 +218,7 @@
 <img alt="" class="footer-logo" src="logo-bruno-guillard.png"/>
 <span>BOS · Bruno OnSet · Bruno Guillard</span>
 </a>
-<span class="app-version">v3.38</span>
+<span class="app-version">v3.40</span>
 </div>
 </footer>
 </main>
@@ -414,7 +423,6 @@
 <form method="dialog">
 <header><h2>Affichage</h2><button class="close" value="cancel">×</button></header>
 <label class="toggle-row"><span>Grille des tiers</span><input id="thirdsToggle" type="checkbox"/></label>
-<label class="toggle-row"><span>Repère central</span><input checked="" id="centerToggle" type="checkbox"/></label>
 <hr/>
 <h3>Frame guides</h3>
 <p class="muted">Superpose les formats de livraison dans ton cadre principal.</p>
@@ -423,6 +431,6 @@
 <button class="danger full" id="resetCalBtn" type="button">RESET CALIBRATION · ORIENTATION ACTUELLE</button>
 </form>
 </dialog>
-<script src="app.js?v=3.38"></script>
+<script src="app.js?v=3.39"></script>
 </body>
 </html>

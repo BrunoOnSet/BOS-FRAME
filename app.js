@@ -222,7 +222,7 @@ function loadPreviewSettings(){
     if(Number.isFinite(saved.subjectCount)) state.subjectCount=Math.max(1,Math.min(4,Math.round(saved.subjectCount)));
     if(Number.isFinite(saved.groupDistance)) state.groupDistance=Math.max(.4,Math.min(30,saved.groupDistance));
     if(Number.isFinite(saved.groupSpread)) state.groupSpread=Math.max(.2,Math.min(2.5,saved.groupSpread));
-    if(Number.isFinite(saved.cameraHeight)) state.cameraHeight=Math.max(.2,Math.min(2.5,saved.cameraHeight));
+    if(Number.isFinite(saved.cameraHeight)) state.cameraHeight=Math.max(.5,Math.min(2.5,saved.cameraHeight));
     if(Array.isArray(saved.subjects)){
       saved.subjects.slice(0,4).forEach((s,i)=>{
         if(!state.subjects[i]) return;
@@ -488,21 +488,32 @@ function cameraBasis(){
   const ux=dx/horizontalDistance;
   const uy=dy/horizontalDistance;
 
-  // Composition rule:
-  // eye line = 1/3 from the top of the image.
-  // In normalized camera coordinates this corresponds to y = +1/3.
+  // Exact principle used by the validated reference:
+  // at the REFERENCE camera height (1.55 m), eyes are composed at 1/3.
+  // After that, changing camera height moves only camera Z.
+  // The optical-axis elevation is NOT recomputed to compensate.
+  const compositionReferenceH=1.55;
   const eyeTargetNormalized=1/3;
   const halfVFov=rad(verticalFov())/2;
-  const desiredEyeAngleAboveAxis=Math.atan(eyeTargetNormalized*Math.tan(halfVFov));
+  const desiredEyeAngleAboveAxis=Math.atan(
+    eyeTargetNormalized*Math.tan(halfVFov)
+  );
 
   const eyeHorizontalDistance=Math.max(
     .04,
-    Math.hypot(eyes.x-pos.x,eyes.y-pos.y)
+    Math.hypot(
+      eyes.x-state.cameraPos.x,
+      eyes.y-state.cameraPos.y
+    )
   );
-  const eyeElevation=Math.atan2(eyes.z-pos.z,eyeHorizontalDistance);
 
-  // Aim the optical axis slightly below the eyes so they stay on the 1/3 line.
-  const axisElevation=eyeElevation-desiredEyeAngleAboveAxis;
+  const referenceEyeElevation=Math.atan2(
+    eyes.z-compositionReferenceH,
+    eyeHorizontalDistance
+  );
+
+  const axisElevation=
+    referenceEyeElevation-desiredEyeAngleAboveAxis;
 
   const cosE=Math.cos(axisElevation);
   const forward=norm3({
@@ -513,7 +524,7 @@ function cameraBasis(){
   const right=norm3(cross3(forward,{x:0,y:0,z:1}));
   const up=norm3(cross3(right,forward));
 
-  return {pos,forward,right,up};
+  return {pos,forward,right,up,axisElevation};
 }
 function verticalFov(){
   const h=rad(targetHFov());
@@ -1054,18 +1065,11 @@ function previewEyeComposition(frameRect,stageRect,projections){
     return {offsetY:0,desiredEyeY:null};
   }
 
-  // Absolute composition rule:
-  // 1/3 of the image is above the eye line, 2/3 below.
-  const desiredEyeY=(frameRect.top-stageRect.top)+(frameRect.height/3);
-
-  const currentEyes=valid.map(p=>
-    (frameRect.top-stageRect.top)+(frameRect.height/2)-(p.eye.y*frameRect.height/2)
-  );
-  const currentAverage=currentEyes.reduce((a,v)=>a+v,0)/currentEyes.length;
-
+  // The 1/3 line is now only the composition reference.
+  // It must NOT automatically recenter the subjects when camera height changes.
   return {
-    offsetY:desiredEyeY-currentAverage,
-    desiredEyeY
+    offsetY:0,
+    desiredEyeY:(frameRect.top-stageRect.top)+(frameRect.height/3)
   };
 }
 
@@ -1140,13 +1144,19 @@ function updatePreview(){
     const eyeYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.eye.y*frameRect.height/2 + eyeComposition.offsetY;
     const feetYPx=frameRect.top-stageRect.top + frameRect.height/2 - p.feet.y*frameRect.height/2 + eyeComposition.offsetY;
 
-    // Height-camera rule:
-    // the camera moves ONLY on Z. It must never simulate a dolly-back.
-    // Subject apparent size is therefore locked to FOCAL + RECUL.
-    const mannequinHeightPx=stablePreviewMannequinHeightPx(subject,frameRect);
-    const bodyPx=mannequinHeightPx*previewFigureMetrics.bodyRatio;
+    // Same projection principle as the validated reference:
+    // camera height changes perspective/vertical position naturally,
+    // but the mannequin image keeps its exact aspect ratio.
+    const eyeToFeetPx=Math.abs(feetYPx-eyeYPx);
+    const mannequinHeightPx=
+      eyeToFeetPx/
+      (previewFigureMetrics.footRatio-previewFigureMetrics.eyeRatio);
 
-    const wPx = mannequinHeightPx * (previewFigureMetrics.viewWidth/previewFigureMetrics.viewHeight);
+    const bodyPx=Math.abs(feetYPx-headYPx);
+
+    const wPx=
+      mannequinHeightPx*
+      (previewFigureMetrics.viewWidth/previewFigureMetrics.viewHeight);
     const top = eyeYPx - previewFigureMetrics.eyeRatio * mannequinHeightPx;
 
     el.style.left=xPx+'px';
@@ -1464,17 +1474,27 @@ function renderRatios(){
   });
 }
 function ratioLabel(v){ return ratios.find(r=>Math.abs(r.value-v)<.001)?.label || v.toFixed(2)+':1'; }
+function setThirdsVisible(visible){
+  $('#thirds')?.classList.toggle('hidden',!visible);
+  const modalToggle=$('#thirdsToggle');
+  const inlineToggle=$('#inlineThirdsToggle');
+  if(modalToggle) modalToggle.checked=visible;
+  if(inlineToggle) inlineToggle.checked=visible;
+}
 function renderGuideChoices(){
-  const el=$('#guideChoices'); el.innerHTML='';
+  const containers=[$('#guideChoices'),$('#inlineGuideChoices')].filter(Boolean);
+  containers.forEach(el=>el.innerHTML='');
   ratios.filter(r=>r.value!==state.ratio).forEach(r=>{
-    const b=document.createElement('button'); b.type='button';
-    b.className='guide-chip'+(state.guides.has(r.label)?' active':'');
-    b.textContent=r.label;
-    b.onclick=()=>{
-      state.guides.has(r.label)?state.guides.delete(r.label):state.guides.add(r.label);
-      renderGuideChoices(); renderGuides();
-    };
-    el.appendChild(b);
+    containers.forEach(el=>{
+      const b=document.createElement('button'); b.type='button';
+      b.className='guide-chip'+(state.guides.has(r.label)?' active':'');
+      b.textContent=r.label;
+      b.onclick=()=>{
+        state.guides.has(r.label)?state.guides.delete(r.label):state.guides.add(r.label);
+        renderGuideChoices(); renderGuides();
+      };
+      el.appendChild(b);
+    });
   });
 }
 function frameDimensions(ratio, maxW, maxH){
@@ -2128,7 +2148,7 @@ function registerEvents(){
   };
   const applyCameraHeight=v=>{
     if(!Number.isFinite(v)) return;
-    state.cameraHeight=Math.max(.2,Math.min(2.5,v));
+    state.cameraHeight=Math.max(.5,Math.min(2.5,v));
     savePreviewSettings();
     syncPreviewInputs();
     updatePreview();
@@ -2147,7 +2167,7 @@ function registerEvents(){
   attachReadoutEditor($('#subjectHeightReadout'),{ label:'Taille personne 1', min:1.2, max:2.2, step:'0.01', getValue:()=>state.subjects[0].height, render:v=>`${v.toFixed(2).replace('.',',')} m`, commit:applyPreviewHeight });
   attachReadoutEditor($('#subjectDistanceReadout'),{ label:'Recul', min:.4, max:30, step:'0.05', getValue:()=>state.groupDistance, render:v=>`${v.toFixed(2).replace('.',',')} m`, commit:applyPreviewDistance });
   attachReadoutEditor($('#groupSpreadReadout'),{ label:'Écartement du groupe', min:.2, max:2.5, step:'0.05', getValue:()=>state.groupSpread, render:v=>`${v.toFixed(2).replace('.',',')} m`, commit:applyGroupSpread });
-  attachReadoutEditor($('#cameraHeightReadout'),{ label:'Hauteur caméra', min:.2, max:2.5, step:'0.01', getValue:()=>state.cameraHeight, render:v=>`${v.toFixed(2).replace('.',',')} m`, commit:applyCameraHeight });
+  attachReadoutEditor($('#cameraHeightReadout'),{ label:'Hauteur caméra', min:.5, max:2.5, step:'0.01', getValue:()=>state.cameraHeight, render:v=>`${v.toFixed(2).replace('.',',')} m`, commit:applyCameraHeight });
 
   $('#cameraBtn').onclick=()=>{$('#cameraDialog').showModal();updateCalibrationStatus()};
   $('#restartCameraBtn').onclick=()=>startCamera($('#deviceSelect').value);
@@ -2232,9 +2252,9 @@ function registerEvents(){
   $('#saveCalibrationBtn').onclick=()=>{
     const f=calculateCalibration(); if(f){saveCalibration(f);$('#calDialog').close()}
   };
-  $('#thirdsToggle').onchange=e=>$('#thirds').classList.toggle('hidden',!e.target.checked);
-  $('#centerToggle').onchange=e=>$('#centerCross').classList.toggle('hidden',!e.target.checked);
-  $('#resetCalBtn').onclick=()=>{
+  $('#thirdsToggle').onchange=e=>setThirdsVisible(e.target.checked);
+  $('#inlineThirdsToggle')?.addEventListener('change',e=>setThirdsVisible(e.target.checked));
+    $('#resetCalBtn').onclick=()=>{
     const orientationName=state.orientation==='landscape'?'paysage':'portrait';
     const ok=window.confirm(`Effacer complètement la calibration ${orientationName} pour cette caméra téléphone ?
 
@@ -2245,6 +2265,7 @@ La calibration de l’autre orientation sera conservée.`);
     }
   };
   $('#resetCurrentCalibrationBtn').onclick=()=>confirmResetCurrentCalibration();
+  setThirdsVisible(!$('#thirds')?.classList.contains('hidden'));
 
   addEventListener('resize',()=>{
     const next=innerWidth>=innerHeight?'landscape':'portrait';
