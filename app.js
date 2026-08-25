@@ -1112,15 +1112,6 @@ function updatePreview(){
     eyeGuide.style.width=`${frameRect.width}px`;
   }
 
-  const groundLine=$('#previewGroundLine');
-  if(groundLine){
-    const basis=cameraBasis();
-    const axisElevation=Math.asin(Math.max(-1,Math.min(1,basis.forward.z)));
-    const horizonNormY=Math.tan(-axisElevation)/Math.tan(rad(verticalFov())/2);
-    const horizonY=(frameRect.top-stageRect.top)+(frameRect.height/2)-(horizonNormY*frameRect.height/2)+eyeComposition.offsetY;
-    const clamped=Math.max(frameRect.top-stageRect.top,Math.min(frameRect.bottom-stageRect.top,horizonY));
-    groundLine.style.top=`${clamped}px`;
-  }
 
   state.subjects.forEach((subject,i)=>{
     const el=i===0?$('#previewSubject'):$(`#previewSubject${i+1}`);

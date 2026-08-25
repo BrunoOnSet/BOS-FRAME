@@ -180,3 +180,38 @@ footer{color:var(--technical);font-size:9px;padding:16px 0 0;display:flex;flex-d
 }
 
 .center-cross{display:none!important}
+
+
+/* V3.42 — sous-titre FRAME GUIDE */
+.frame-guide-subtitle{
+  display:block;
+  margin:-3px 0 1px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.35;
+  font-weight:400;
+  letter-spacing:0;
+}
+
+
+/* ============================================================
+   BOS FRAME V3.43 — Frame Guide visibility / eye line cleanup
+   ============================================================ */
+
+/* Frame Guide: stronger, black, slightly thicker */
+.guide-frame{
+  border:2px solid #000 !important;
+}
+.guide-frame span{
+  background:#000 !important;
+  color:#fff !important;
+}
+
+/* Only the dotted eye line remains in Preview */
+.preview-ground-line{
+  display:none !important;
+}
+.preview-eye-guide{
+  border-top:1px dashed rgba(46,127,142,.50) !important;
+  background:transparent !important;
+}
