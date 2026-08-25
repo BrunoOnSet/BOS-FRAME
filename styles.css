@@ -4197,3 +4197,40 @@ body.dark .bos-header-app{color:#17191C !important;}
   float:none !important;
   clear:both !important;
 }
+
+
+/* ============================================================
+   BOS FRAME V3.32 — réorganisation des contrôles
+   ============================================================ */
+
+/* RATIO dans 01 RÉGLAGES CAMÉRA, juste après le choix caméra */
+#frameCameraSettingsContent .frame-camera-ratio-control{
+  margin-top:14px !important;
+  padding-top:14px !important;
+  border-top:1px solid var(--line) !important;
+}
+#frameCameraSettingsContent .frame-camera-ratio-control .control-button{
+  width:100% !important;
+  margin:0 !important;
+}
+
+/* FOCALE / RECUL / HAUTEUR CAMÉRA dans 02, avant le cadre */
+#frameViewCard > .preview-primary-controls{
+  display:grid !important;
+  gap:10px !important;
+  margin:0 !important;
+  padding:14px !important;
+  border-top:1px solid var(--line) !important;
+  border-bottom:1px solid var(--line) !important;
+}
+
+/* Le cadre suit directement ces trois réglages */
+#frameViewCard > .preview-primary-controls + .camera-stage{
+  margin-top:0 !important;
+}
+
+/* Le choix Gros plan / Poitrine / Taille / Américain / Pied est supprimé */
+#previewTargetButtons,
+.preview-targets{
+  display:none !important;
+}
