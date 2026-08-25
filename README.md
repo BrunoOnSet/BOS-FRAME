@@ -1,6 +1,15 @@
-# BOS FRAME V3.30
+# BOS FRAME V3.31 — LIGHT HEADER LAYOUT FIX
 
-- Bulle 01 réglages caméra corrigée
-- Sous-titre = caméra sélectionnée uniquement
-- Focale / Recul / Hauteur caméra déplacés dans la bulle 01
-- Bulles réharmonisées sur la référence ONSET_V58 (forme arrondie)
+Correction ciblée de l'entête.
+
+Cause :
+d'anciennes règles FRAME forçaient encore l'entête à 280 px de large
+et 54 px de haut, malgré l'intégration de l'entête LIGHT_V0_50.
+
+V3.31 :
+- largeur entête : 100 % du conteneur
+- hauteur : automatique
+- position : flux normal, au-dessus des modes
+- logo / typo / texte / bouton DARK conservés comme LIGHT_V0_50
+- responsive LIGHT conservé
+- aucune modification des fonctions FRAME ni de la bulle 01
