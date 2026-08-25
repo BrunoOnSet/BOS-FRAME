@@ -2195,7 +2195,7 @@ function registerEvents(){
   $('#clearWideLimitBtn').onclick=()=>clearWideLimit();
   $('#saveProPointBtn').onclick=()=>saveCurrentProPoint();
 
-  $('#settingsBtn').onclick=()=>$('#settingsDialog').showModal();
+  $('#settingsBtn')?.addEventListener('click',()=>$('#settingsDialog').showModal());
   $('#themeBtn').onclick=()=>toggleTheme();
 
   $('#frameCameraSettingsToggle').onclick=()=>{

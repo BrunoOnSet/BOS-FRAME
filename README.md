@@ -1,8 +1,10 @@
-# BOS_FRAME_V3_40_GUIDES_FOOTER_CENTER
+# BOS_FRAME_V3_41_FOOTER_GUIDES_CLEAN
 
-Base: V3.39
-- bas de page recentré
-- repère central retiré
-- grille des tiers déplacée sous Ratio
-- frame guides déplacés sous Ratio
-- bouton Réglages du haut conservé
+Base : V3.40
+
+Modifications :
+- suppression de la phrase de bas de page « Cadre · focale · format · champ horizontal » ;
+- suppression de la bulle RÉGLAGES en haut ;
+- suppression du repère central ;
+- grille des tiers et frame guide conservés juste sous Ratio dans la bulle caméra ;
+- cache SW incrémenté.

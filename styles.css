@@ -178,3 +178,5 @@ footer{color:var(--technical);font-size:9px;padding:16px 0 0;display:flex;flex-d
 @media(orientation:landscape){
   .pro-controls{left:50%;right:auto;width:min(670px,calc(100% - 24px));transform:translateX(-50%)}.pro-frame{top:50%}.pro-instructions{display:none}.readout{top:10px}
 }
+
+.center-cross{display:none!important}
