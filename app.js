@@ -1497,13 +1497,7 @@ function renderGuides(){
 function updateFrameCameraSettingsSummary(){
   const summary=$('#frameCameraSettingsSummary');
   if(!summary) return;
-
-  const focal=`Focale ${formatFrameFocal(state.focal)} mm`;
-  const recul=`Recul ${Number(state.groupDistance).toFixed(2).replace('.',',')} m`;
-  const cameraHeight=`Hauteur caméra ${Number(state.cameraHeight).toFixed(2).replace('.',',')} m`;
-  const ratio=`Ratio ${ratioLabel(state.ratio).replace(':1','')}`;
-
-  summary.innerHTML = `${focal} · ${recul}<br>${cameraHeight} · ${ratio}`;
+  summary.textContent=(state.preset?.name || state.cameraModel || '—');
 }
 
 function updateReadout(){

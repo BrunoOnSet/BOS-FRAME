@@ -1,19 +1,6 @@
-# BOS FRAME V3.29 — LIGHT HEADER + CAMERA HEIGHT FIX
+# BOS FRAME V3.30
 
-Modifications :
-
-1. Entête
-- l'entête reprend la référence BOS_LIGHT_V0_50
-- même logo
-- même typo
-- même placement
-- même écriture
-- seul changement : LIGHT devient FRAME
-
-2. Preview
-- correction du comportement "Hauteur caméra"
-- le réglage agit maintenant visiblement sur le mannequin en preview
-  avec une variation visuelle de point de vue (plus haut / plus bas)
-
-3. Assets
-- ajout du logo header BOS issu de la référence LIGHT
+- Bulle 01 réglages caméra corrigée
+- Sous-titre = caméra sélectionnée uniquement
+- Focale / Recul / Hauteur caméra déplacés dans la bulle 01
+- Bulles réharmonisées sur la référence ONSET_V58 (forme arrondie)

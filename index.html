@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3.29" />
+  <link rel="stylesheet" href="styles.css?v=3.30" />
   <title>BRUNO ONSET / FRAME</title>
 </head>
 <body>
@@ -54,7 +54,7 @@
             <i class="module-dot"></i>
             <span>
               <strong>01 RÉGLAGES CAMÉRA</strong>
-              <small id="frameCameraSettingsSummary">Focale 35 mm · Recul 3,00 m<br>Hauteur caméra 1,55 m · Ratio 16:9</small>
+              <small id="frameCameraSettingsSummary">FX6</small>
             </span>
           </span>
           <span class="chev collapse-chevron" aria-hidden="true">⌄</span>
@@ -73,6 +73,30 @@
           <div class="camera-inline-sensor">
             <span>CAPTEUR UTILISÉ</span>
             <strong id="presetSensorInfo">—</strong>
+          </div>
+        </div>
+
+        <div class="bos-linked-controls frame-camera-settings-linked-controls">
+          <div class="bos-linked-slider bos-frame-distance-slider">
+            <span>FOCALE</span>
+            <input id="frameFocalSlider" type="range" min="9" max="200" step="1" value="35">
+            <strong id="frameFocalReadout" class="free-value-readout"
+                    data-free-control="focal" role="button" tabindex="0"
+                    title="Cliquer pour saisir une valeur libre">35 mm</strong>
+          </div>
+
+          <div id="framePreviewDistanceRow" class="bos-linked-slider bos-frame-distance-slider preview-only-control hidden">
+            <span>RECUL</span>
+            <input id="subjectDistanceSlider" type="range" min="0.40" max="15" step="0.05" value="3.00">
+            <strong id="subjectDistanceReadout" class="free-value-readout" role="button" tabindex="0"
+                    title="Cliquer pour saisir une valeur libre">3,00 m</strong>
+          </div>
+
+          <div id="framePreviewCameraHeightRow" class="bos-linked-slider bos-frame-distance-slider preview-only-control hidden">
+            <span>HAUTEUR CAMÉRA</span>
+            <input id="cameraHeightSlider" type="range" min="0.20" max="2.50" step="0.01" value="1.55">
+            <strong id="cameraHeightReadout" class="free-value-readout" role="button" tabindex="0"
+                    title="Cliquer pour saisir une valeur libre">1,55 m</strong>
           </div>
         </div>
       </div>
@@ -168,29 +192,6 @@
       </div>
 
       <div class="frame-controls-inline">
-      <div class="bos-linked-controls frame-primary-linked-controls">
-        <div class="bos-linked-slider bos-frame-distance-slider">
-          <span>FOCALE</span>
-          <input id="frameFocalSlider" type="range" min="9" max="200" step="1" value="35">
-          <strong id="frameFocalReadout" class="free-value-readout"
-                  data-free-control="focal" role="button" tabindex="0"
-                  title="Cliquer pour saisir une valeur libre">35 mm</strong>
-        </div>
-
-        <div id="framePreviewDistanceRow" class="bos-linked-slider bos-frame-distance-slider preview-only-control hidden">
-          <span>RECUL</span>
-          <input id="subjectDistanceSlider" type="range" min="0.40" max="15" step="0.05" value="3.00">
-          <strong id="subjectDistanceReadout" class="free-value-readout" role="button" tabindex="0"
-                  title="Cliquer pour saisir une valeur libre">3,00 m</strong>
-        </div>
-
-        <div id="framePreviewCameraHeightRow" class="bos-linked-slider bos-frame-distance-slider preview-only-control hidden">
-          <span>HAUTEUR CAMÉRA</span>
-          <input id="cameraHeightSlider" type="range" min="0.20" max="2.50" step="0.01" value="1.55">
-          <strong id="cameraHeightReadout" class="free-value-readout" role="button" tabindex="0"
-                  title="Cliquer pour saisir une valeur libre">1,55 m</strong>
-        </div>
-      </div>
 
       <div class="main-controls ratio-only-controls bos-inline-ratio">
         <button id="ratioBtn" class="control-button">
@@ -274,7 +275,7 @@
           <img class="footer-logo" src="logo-bruno-guillard.png" alt="" />
           <span>BOS · Bruno OnSet · Bruno Guillard</span>
         </a>
-        <span class="app-version">v3.29</span>
+        <span class="app-version">v3.30</span>
       </div>
     </footer>
   </main>
@@ -514,6 +515,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=3.29"></script>
+  <script src="app.js?v=3.30"></script>
 </body>
 </html>

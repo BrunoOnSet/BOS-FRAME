@@ -3866,3 +3866,118 @@ body.dark .bos-header-app{color:#17191C !important;}
   transform-origin:50% 14%;
   will-change:transform;
 }
+
+
+/* V3.30 — camera bubble exact rounded style from ONSET_V58 */
+
+:root{
+  --bos-v58-radius:20px;
+}
+
+/* exact rounded module style */
+#frameCameraSettingsPanel,
+#frameViewCard{
+  background:var(--panel) !important;
+  border:1px solid var(--line) !important;
+  border-radius:var(--bos-v58-radius) !important;
+  overflow:hidden !important;
+  box-shadow:var(--shadow) !important;
+}
+#frameCameraSettingsPanel .panel-head,
+#frameViewCard .panel-head{
+  margin:0 !important;
+  padding:0 !important;
+  background:transparent !important;
+  border:0 !important;
+}
+#frameCameraSettingsToggle,
+#frameViewCard .frame-panel-head{
+  width:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  padding:14px 15px !important;
+  border:0 !important;
+  background:transparent !important;
+  cursor:pointer !important;
+}
+#frameViewCard .frame-panel-head{cursor:default !important;}
+#frameCameraSettingsPanel .module-title,
+#frameViewCard .module-title{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  text-align:left !important;
+}
+#frameCameraSettingsPanel .module-dot,
+#frameViewCard .module-dot{
+  width:8px !important;
+  height:8px !important;
+  border-radius:50% !important;
+  background:var(--accent) !important;
+  flex:0 0 8px !important;
+}
+#frameCameraSettingsPanel .module-title strong,
+#frameViewCard .module-title strong{
+  font-size:15px !important;
+  font-weight:700 !important;
+  color:#2F5B66 !important;
+  letter-spacing:0 !important;
+  line-height:1.1 !important;
+  font-family:"Montserrat",Arial,sans-serif !important;
+}
+#frameCameraSettingsPanel .module-title small,
+#frameViewCard .module-title small{
+  display:block !important;
+  color:var(--muted) !important;
+  font-size:10px !important;
+  margin-top:2px !important;
+  line-height:1.35 !important;
+}
+#frameCameraSettingsPanel .chev,
+#frameViewCard .chev{
+  color:var(--muted) !important;
+  font-size:17px !important;
+  transition:.18s transform !important;
+}
+#frameCameraSettingsPanel.collapsed .chev{transform:none !important;}
+#frameCameraSettingsPanel:not(.collapsed) .chev{transform:rotate(180deg) !important;}
+#frameCameraSettingsContent{
+  border-top:1px solid var(--line) !important;
+  padding:14px !important;
+}
+#frameViewCard > .frame-controls-inline,
+#frameViewCard > .camera-stage,
+#frameViewCard > .preview-controls,
+#frameViewCard > .method-content,
+#frameViewCard > .panel-body{
+  border-top:0 !important;
+}
+#frameViewCard .frame-controls-inline{
+  border-top:1px solid var(--line) !important;
+  padding:14px !important;
+}
+
+/* inside camera settings bubble */
+.frame-camera-settings-linked-controls{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:12px !important;
+  margin-top:14px !important;
+}
+.frame-camera-settings-linked-controls .bos-linked-slider{
+  margin:0 !important;
+}
+
+/* remove old rectangular panel language */
+#frameCameraSettingsPanel.panel,
+#frameViewCard.panel{
+  padding:0 !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* keep ratio area below preview, but without focal/recul/hauteur */
+.frame-controls-inline{
+  padding-top:14px !important;
+}
