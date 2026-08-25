@@ -1,4 +1,4 @@
-const CACHE='frame-bos-v3-26-onset-v58-exact-titles-center-sliders';
+const CACHE='frame-bos-v3-27-onset-v58-exact-center';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','./logo-bruno-guillard.png'];
 
 self.addEventListener('install',e=>{
